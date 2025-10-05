@@ -82,12 +82,7 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() =>
-                  signOut({
-                    callbackUrl:
-                      process.env.NEXTAUTH_URL || "http://localhost:3000",
-                  })
-                }
+                onClick={() => signOut()}
                 className="rounded-2xl">
                 <LogOut className="h-4 w-4 mr-2" />
                 Wyloguj
@@ -140,12 +135,7 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        signOut({
-                          callbackUrl:
-                            process.env.NEXTAUTH_URL || "http://localhost:3000",
-                        })
-                      }
+                      onClick={() => signOut()}
                       className="w-full rounded-2xl">
                       <LogOut className="h-4 w-4 mr-2" />
                       Wyloguj
