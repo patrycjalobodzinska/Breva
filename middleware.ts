@@ -10,7 +10,10 @@ export default withAuth(
     if (req.nextUrl.pathname.startsWith("/admin")) {
       if (!isAdmin) {
         return NextResponse.redirect(
-          new URL("/logowanie", "process.env.NEXTAUTH_URL || "http://localhost:3000"")
+          new URL(
+            "/logowanie",
+            process.env.NEXTAUTH_URL || "http://localhost:3000"
+          )
         );
       }
     }
@@ -18,7 +21,10 @@ export default withAuth(
     if (req.nextUrl.pathname.startsWith("/panel")) {
       if (!isUser) {
         return NextResponse.redirect(
-          new URL("/logowanie", "process.env.NEXTAUTH_URL || "http://localhost:3000"")
+          new URL(
+            "/logowanie",
+            process.env.NEXTAUTH_URL || "http://localhost:3000"
+          )
         );
       }
     }

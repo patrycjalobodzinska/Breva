@@ -5,7 +5,15 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Heart, Upload, BarChart3, Settings, LogOut, User, Menu } from "lucide-react";
+import {
+  Heart,
+  Upload,
+  BarChart3,
+  Settings,
+  LogOut,
+  User,
+  Menu,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Sheet,
@@ -75,7 +83,10 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  signOut({ callbackUrl: "process.env.NEXTAUTH_URL || "http://localhost:3000"" })
+                  signOut({
+                    callbackUrl:
+                      process.env.NEXTAUTH_URL || "http://localhost:3000",
+                  })
                 }
                 className="rounded-2xl">
                 <LogOut className="h-4 w-4 mr-2" />
@@ -95,12 +106,14 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                   <SheetHeader>
                     <SheetTitle className="text-left">Menu</SheetTitle>
                   </SheetHeader>
-                  
+
                   {/* User Info */}
                   <div className="flex items-center space-x-2 text-sm text-text-muted py-4 border-b">
                     <User className="h-4 w-4" />
                     <span>
-                      {session?.user?.name || session?.user?.email || "Użytkownik"}
+                      {session?.user?.name ||
+                        session?.user?.email ||
+                        "Użytkownik"}
                     </span>
                   </div>
 
@@ -114,7 +127,9 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                           href={item.href}
                           className="flex items-center space-x-3 px-3 py-2 rounded-xl hover:bg-primary/10 transition-colors">
                           <Icon className="h-5 w-5 text-text-muted" />
-                          <span className="text-sm font-medium">{item.name}</span>
+                          <span className="text-sm font-medium">
+                            {item.name}
+                          </span>
                         </Link>
                       );
                     })}
@@ -126,7 +141,10 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        signOut({ callbackUrl: "process.env.NEXTAUTH_URL || "http://localhost:3000"" })
+                        signOut({
+                          callbackUrl:
+                            process.env.NEXTAUTH_URL || "http://localhost:3000",
+                        })
                       }
                       className="w-full rounded-2xl">
                       <LogOut className="h-4 w-4 mr-2" />
