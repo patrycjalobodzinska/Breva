@@ -76,7 +76,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  signOut({ callbackUrl: "http://localhost:3000/" })
+                  signOut({ callbackUrl: "process.env.NEXTAUTH_URL || "http://localhost:3000"" })
                 }
                 className="rounded-2xl">
                 <LogOut className="h-4 w-4 mr-2" />

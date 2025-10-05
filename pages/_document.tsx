@@ -27,7 +27,7 @@ export default function Document() {
           content="Precyzyjna analiza objętości piersi z pomocą sztucznej inteligencji"
         />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://breva.com" />
+        <meta property="og:url" content="https://breva.vercel.app" />
         <meta property="og:image" content="/og-image.png" />
 
         <meta name="twitter:card" content="summary_large_image" />

@@ -45,7 +45,7 @@ cp .env.example .env.local
 DATABASE_URL="postgresql://username:password@localhost:5432/breva"
 NEXTAUTH_SECRET="your-secret-key-here"
 NEXTAUTH_URL="http://localhost:3000"
-ADMIN_EMAIL="admin@breva.com"
+ADMIN_EMAIL="admin@breva.vercel.app"
 ADMIN_PASSWORD="admin123"
 PY_BACKEND_URL="http://localhost:8000"
 ```
