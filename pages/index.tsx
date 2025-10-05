@@ -1,0 +1,217 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Heart, Upload, BarChart3, Shield, Users, Zap } from "lucide-react";
+import { HeroSection } from "@/components/sections/HeroSection";
+import { PWAInstallButton } from "@/components/PWAInstallButton";
+
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2">
+      {/* Header */}
+      <header className="w-full z-20 sticky top-0  bg-white/80 backdrop-blur-sm shadow-sm px-4 py-6">
+        <nav className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Heart className="h-8 w-8 text-primary" />
+            <span className="text-2xl font-bold text-text-primary">BREVA</span>
+          </div>
+          <div className="flex items-center space-x-4">
+            <Link href="/logowanie">
+              <Button variant="outline" className="rounded-2xl">
+                Zaloguj się
+              </Button>
+            </Link>
+            <PWAInstallButton
+              variant="outline"
+              className="rounded-2xl"
+              children="Pobierz aplikację"
+            />
+            <Link href="/rejestracja">
+              <Button variant={"default"}>Rozpocznij</Button>
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      {/* Hero Section with 3D Model */}
+      <HeroSection />
+
+      {/* Features Section */}
+      <section className="container mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold text-text-primary mb-4">
+            Dlaczego BREVA?
+          </h2>
+          <p className="text-xl text-text-muted max-w-2xl mx-auto">
+            Najnowocześniejsza technologia do precyzyjnej analizy asymetrii
+            piersi
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4">
+                <Upload className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Łatwe przesyłanie</CardTitle>
+              <CardDescription>
+                Wsparcie dla wideo, zdjęć i plików LiDAR w różnych formatach
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4">
+                <Zap className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Szybka analiza AI</CardTitle>
+              <CardDescription>
+                Zaawansowane algorytmy uczenia maszynowego dla precyzyjnych
+                wyników
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+            <CardHeader className="text-center">
+              <div className="mx-auto w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4">
+                <BarChart3 className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle className="text-xl">Szczegółowe raporty</CardTitle>
+              <CardDescription>
+                Kompleksowe analizy z wykresami i porównaniami manualnymi
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-white/50 py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-text-primary mb-4">
+              Jak to działa?
+            </h2>
+            <p className="text-xl text-text-muted max-w-2xl mx-auto">
+              Prosty proces w trzech krokach
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="text-center">
+              <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">
+                1
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Prześlij plik</h3>
+              <p className="text-text-muted">
+                Załaduj wideo, zdjęcie lub plik LiDAR z pomiaru piersi
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">
+                2
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Analiza AI</h3>
+              <p className="text-text-muted">
+                Nasze algorytmy analizują objętość i asymetrię piersi
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">
+                3
+              </div>
+              <h3 className="text-xl font-semibold mb-4">Otrzymaj wyniki</h3>
+              <p className="text-text-muted">
+                Precyzyjne pomiary z wykresami i rekomendacjami
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Plans Section */}
+
+      {/* FAQ Section */}
+      <section className=" py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-text-primary mb-4">
+              Najczęściej zadawane pytania
+            </h2>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-6">
+            <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Jakie formaty plików są obsługiwane?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-text-muted">
+                  Obsługujemy wideo (MP4, MOV), zdjęcia (JPG, PNG, HEIC) oraz
+                  pliki LiDAR (PLY, LAS).
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Jak dokładne są pomiary AI?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-text-muted">
+                  Nasze algorytmy osiągają dokładność powyżej 95% w porównaniu z
+                  pomiarami manualnymi.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">
+                  Czy moje dane są bezpieczne?
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-text-muted">
+                  Tak, wszystkie dane są szyfrowane i przechowywane zgodnie z
+                  najwyższymi standardami bezpieczeństwa.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-text-primary text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Heart className="h-6 w-6" />
+              <span className="text-xl font-bold">BREVA</span>
+            </div>
+            <p className="text-sm opacity-80">
+              © {new Date().getFullYear()} BREVA. Wszystkie prawa zastrzeżone.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

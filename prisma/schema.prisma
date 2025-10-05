@@ -1,0 +1,46 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String   // bcrypt
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  measurements Measurement[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Measurement {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  name          String   // default = file name
+  note          String?  // optional
+  source        Source   // AI or MANUAL
+  leftVolumeMl  Float
+  rightVolumeMl Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  baselineId    String?  // reference to an AI measurement
+  baseline      Measurement? @relation("Baseline", fields: [baselineId], references: [id])
+  manualItems   Measurement[] @relation("Baseline")
+}
+
+enum Source {
+  AI
+  MANUAL
+}

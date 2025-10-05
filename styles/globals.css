@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+:root {
+  /* BREVA Brand Colors */
+  --primary: #ed6d6d;
+  --primary-dark: #d85a5a;
+  --accent-1: #fdf2f2;
+  --accent-2: #fce8e8;
+  --accent-3: #f9e6e6;
+  --accent-4: #fbeef2;
+
+  /* Text Colors */
+  --text-primary: #1d1b1e;
+  --text-muted: #6a6a6a;
+
+  /* Status Colors */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --destructive: #dc2626;
+
+  /* Background */
+  --background: #ffffff;
+  --foreground: var(--text-primary);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-accent-1: var(--accent-1);
+  --color-accent-2: var(--accent-2);
+  --color-accent-3: var(--accent-3);
+  --color-accent-4: var(--accent-4);
+  --color-text-primary: var(--text-primary);
+  --color-text-muted: var(--text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-destructive: var(--destructive);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+/* Custom utility classes */
+.rounded-2xl {
+  border-radius: 1rem;
+}
+
+/* Badge variants */
+.badge-success {
+  background-color: var(--success);
+  color: white;
+}
+
+.badge-warning {
+  background-color: var(--warning);
+  color: white;
+}
+
+.badge-destructive {
+  background-color: var(--destructive);
+  color: white;
+}
+
+/* Hover states */
+.hover\:bg-primary\/10:hover {
+  background-color: rgba(237, 109, 109, 0.1);
+}
+
+.hover\:bg-primary-dark:hover {
+  background-color: var(--primary-dark);
+}
+
+/* Focus states for accessibility */
+.focus\:ring-primary:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
