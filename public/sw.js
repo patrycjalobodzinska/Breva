@@ -10,9 +10,6 @@ const urlsToCache = [
   "/mobile/panel/ustawienia",
   "/manifest.json",
   "/favicon.ico",
-  "/apple-touch-icon.png",
-  "/favicon-32x32.png",
-  "/favicon-16x16.png",
 ];
 
 // Install event - cache resources
@@ -65,8 +62,8 @@ self.addEventListener("push", (event) => {
     const data = event.data.json();
     const options = {
       body: data.body,
-      icon: "/apple-touch-icon.png",
-      badge: "/favicon-32x32.png",
+      icon: "/favicon.ico",
+      badge: "/favicon.ico",
       vibrate: [100, 50, 100],
       data: {
         dateOfArrival: Date.now(),
@@ -76,12 +73,12 @@ self.addEventListener("push", (event) => {
         {
           action: "explore",
           title: "Otwórz BREVA",
-          icon: "/favicon-32x32.png",
+          icon: "/favicon.ico",
         },
         {
           action: "close",
           title: "Zamknij",
-          icon: "/favicon-32x32.png",
+          icon: "/favicon.ico",
         },
       ],
     };
