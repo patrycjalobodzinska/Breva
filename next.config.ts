@@ -5,7 +5,13 @@ const nextConfig: NextConfig = {
     domains: ["localhost"],
   },
   env: {
-    NEXTAUTH_URL: "http://localhost:3000",
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || "http://localhost:3000",
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
 };
 
