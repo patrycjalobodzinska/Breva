@@ -1,0 +1,10 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "npm install && npx prisma generate",
+  "framework": "nextjs",
+  "functions": {
+    "pages/api/**/*.ts": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
