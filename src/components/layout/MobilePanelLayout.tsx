@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Heart, Upload, BarChart3, Settings, User } from "lucide-react";
 import { useEffect } from "react";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 const navigation = [
   { name: "Pomiary", href: "/mobile/panel/pomiary", icon: BarChart3 },
@@ -91,7 +90,6 @@ export default function MobilePanelLayout({
           </div>
         </nav>
 
-        <PWAInstallPrompt />
       </div>
     </div>
   );
