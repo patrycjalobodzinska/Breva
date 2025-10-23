@@ -29,7 +29,7 @@ export default function MobilePanelDashboard() {
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
-      router.push("/logowanie");
+      router.push("/mobile");
     }
   }, [session, status, router]);
 
