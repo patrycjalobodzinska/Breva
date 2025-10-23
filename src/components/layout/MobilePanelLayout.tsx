@@ -55,13 +55,6 @@ export default function MobilePanelLayout({
               <Heart className="h-7 w-7 text-primary" />
               <span className="text-xl font-bold text-text-primary">BREVA</span>
             </div>
-
-            <div className="flex items-center space-x-2 text-sm text-text-muted">
-              <User className="h-4 w-4" />
-              <span>
-                {session?.user?.name || session?.user?.email || "Użytkownik"}
-              </span>
-            </div>
           </div>
         </header>
 

@@ -27,7 +27,7 @@ export default function Home() {
                 Zaloguj się
               </Button>
             </Link>
-          
+
             <Link href="/rejestracja">
               <Button variant={"default"}>Rozpocznij</Button>
             </Link>
