@@ -125,11 +125,11 @@ export default function MobilePanelDashboard() {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-text-primary">
+            {/* <h2 className="text-lg font-semibold text-text-primary">
               Szybkie akcje
-            </h2>
+            </h2> */}
 
-            <Link href="/mobile/panel/przesylanie">
+            {/* <Link href="/mobile/panel/przesylanie">
               <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-4">
@@ -196,7 +196,7 @@ export default function MobilePanelDashboard() {
                   </div>
                 </CardContent>
               </Card>
-            </Link>
+            </Link> */}
           </div>
 
           <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-6">

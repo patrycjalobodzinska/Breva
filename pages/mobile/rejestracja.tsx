@@ -57,7 +57,7 @@ export default function MobileRegisterPage() {
       if (response.ok) {
         setSuccess(true);
         toast.success("Konto zostało utworzone pomyślnie!");
-        
+
         // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
@@ -107,7 +107,8 @@ export default function MobileRegisterPage() {
               Konto utworzone!
             </h1>
             <p className="text-text-muted mb-6">
-              Twoje konto zostało pomyślnie utworzone. Logujemy Cię automatycznie...
+              Twoje konto zostało pomyślnie utworzone. Logujemy Cię
+              automatycznie...
             </p>
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>

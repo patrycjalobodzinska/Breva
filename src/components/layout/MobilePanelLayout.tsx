@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Heart, Upload, BarChart3, Settings, User } from "lucide-react";
 import { useEffect } from "react";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+// import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 
 const navigation = [
   { name: "Pomiary", href: "/mobile/panel/pomiary", icon: BarChart3 },
@@ -47,8 +47,8 @@ export default function MobilePanelLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br max-h-screen from-accent-1 to-accent-2">
-      <div className="flex flex-col h-screen">
+    <div className="mobile-layout min-h-screen bg-gradient-to-br max-h-screen from-accent-1 to-accent-2 overflow-x-hidden">
+      <div className="flex flex-col h-screen overflow-x-hidden">
         <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-primary/20 sticky top-0 z-50">
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center space-x-3">
@@ -65,8 +65,8 @@ export default function MobilePanelLayout({
           </div>
         </header>
 
-        <main className="flex-1  h-full overflow-y-auto ">
-          <div className="p-4">{children}</div>
+        <main className="flex-1 h-full overflow-y-auto overflow-x-hidden">
+          <div className="p-4 w-full max-w-full">{children}</div>
         </main>
 
         <nav className="bg-white/90 backdrop-blur-sm border-t border-primary/20 sticky bottom-0 z-50">
@@ -91,7 +91,7 @@ export default function MobilePanelLayout({
           </div>
         </nav>
 
-        <PWAInstallPrompt />
+        {/* <PWAInstallPrompt /> */}
       </div>
     </div>
   );

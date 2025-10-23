@@ -55,7 +55,7 @@ export default function RegisterPage() {
       if (response.ok) {
         setSuccess(true);
         toast.success("Konto zostało utworzone pomyślnie!");
-        
+
         // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
@@ -108,7 +108,8 @@ export default function RegisterPage() {
               Konto utworzone!
             </CardTitle>
             <CardDescription>
-              Twoje konto zostało pomyślnie utworzone. Logujemy Cię automatycznie...
+              Twoje konto zostało pomyślnie utworzone. Logujemy Cię
+              automatycznie...
             </CardDescription>
           </CardHeader>
         </Card>

@@ -44,6 +44,23 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scrolling on all elements */
+* {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Ensure mobile layout doesn't allow horizontal scroll */
+.mobile-layout {
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* Custom utility classes */
