@@ -25,28 +25,7 @@ import {
   getAsymmetryPercentage,
   getBadgeVariant,
 } from "@/utils/measurements";
-
-interface Measurement {
-  id: string;
-  name: string;
-  note?: string;
-  source: "AI" | "MANUAL";
-  leftVolumeMl: number;
-  rightVolumeMl: number;
-  createdAt: string;
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-  };
-  manualItems?: {
-    id: string;
-    name: string;
-    leftVolumeMl: number;
-    rightVolumeMl: number;
-    createdAt: string;
-  }[];
-}
+import { Measurement } from "@/types";
 
 export default function MobileMeasurementDetailPage() {
   const { data: session } = useSession();

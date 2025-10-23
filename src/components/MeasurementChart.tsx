@@ -66,8 +66,8 @@ export const MeasurementChart = ({
             margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
             barCategoryGap="20%">
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="name" 
+            <XAxis
+              dataKey="name"
               tick={{ fontSize: 12 }}
               angle={-45}
               textAnchor="end"
