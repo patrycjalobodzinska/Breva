@@ -8,7 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Heart, ArrowRight, Eye, EyeOff, CheckCircle, User, Lock } from "lucide-react";
+import {
+  Heart,
+  ArrowRight,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  User,
+  Lock,
+} from "lucide-react";
 import { toast } from "sonner";
 import { MobileHeroSection } from "@/components/sections/MobileHeroSection";
 
@@ -23,13 +31,13 @@ export default function MobileApp() {
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Login form data
   const [loginData, setLoginData] = useState({
     email: "",
     password: "",
   });
-  
+
   // Register form data
   const [registerData, setRegisterData] = useState({
     name: "",
@@ -113,7 +121,7 @@ export default function MobileApp() {
       if (response.ok) {
         setSuccess(true);
         toast.success("Konto zostało utworzone pomyślnie!");
-        
+
         // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
@@ -161,7 +169,8 @@ export default function MobileApp() {
               Konto utworzone!
             </h1>
             <p className="text-text-muted mb-6">
-              Twoje konto zostało pomyślnie utworzone. Logujemy Cię automatycznie...
+              Twoje konto zostało pomyślnie utworzone. Logujemy Cię
+              automatycznie...
             </p>
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>
@@ -173,7 +182,7 @@ export default function MobileApp() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2">
       {currentView === "home" && <MobileHeroSection />}
-      
+
       {currentView === "home" && (
         <div className="px-6 pb-8">
           <div className="space-y-4">
@@ -184,7 +193,7 @@ export default function MobileApp() {
               Rozpocznij analizę
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            
+
             <Button
               onClick={() => setCurrentView("login")}
               variant="outline"
@@ -349,7 +358,10 @@ export default function MobileApp() {
                     type="email"
                     value={registerData.email}
                     onChange={(e) =>
-                      setRegisterData({ ...registerData, email: e.target.value })
+                      setRegisterData({
+                        ...registerData,
+                        email: e.target.value,
+                      })
                     }
                     placeholder="twoj@email.com"
                     className="rounded-xl"
@@ -365,7 +377,10 @@ export default function MobileApp() {
                       type={showPassword ? "text" : "password"}
                       value={registerData.password}
                       onChange={(e) =>
-                        setRegisterData({ ...registerData, password: e.target.value })
+                        setRegisterData({
+                          ...registerData,
+                          password: e.target.value,
+                        })
                       }
                       placeholder="Minimum 6 znaków"
                       className="rounded-xl pr-10"
@@ -385,7 +400,9 @@ export default function MobileApp() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="register-confirm-password">Potwierdź hasło</Label>
+                  <Label htmlFor="register-confirm-password">
+                    Potwierdź hasło
+                  </Label>
                   <div className="relative">
                     <Input
                       id="register-confirm-password"
@@ -403,7 +420,9 @@ export default function MobileApp() {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted">
                       {showConfirmPassword ? (
                         <EyeOff className="h-4 w-4" />
