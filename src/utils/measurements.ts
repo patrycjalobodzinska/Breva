@@ -14,15 +14,29 @@ export const getAccuracyPercentage = (ai: number, manual: number): string => {
 export const prepareChartData = (measurement: Measurement): ChartData[] => {
   if (!measurement) return [];
 
-  const data: ChartData[] = [
-    {
+  const data: ChartData[] = [];
+
+  // Jeśli to pomiar AI, dodaj go jako "AI"
+  if (measurement.source === "AI") {
+    data.push({
       name: "AI",
       left: measurement.leftVolumeMl,
       right: measurement.rightVolumeMl,
       date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
-    },
-  ];
+    });
+  }
 
+  // Jeśli to pomiar ręczny, dodaj go jako "Ręczny"
+  if (measurement.source === "MANUAL") {
+    data.push({
+      name: "Ręczny",
+      left: measurement.leftVolumeMl,
+      right: measurement.rightVolumeMl,
+      date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
+    });
+  }
+
+  // Dodaj dodatkowe pomiary ręczne jeśli istnieją
   if (measurement.manualItems) {
     measurement.manualItems.forEach((item) => {
       data.push({
@@ -33,6 +47,7 @@ export const prepareChartData = (measurement: Measurement): ChartData[] => {
       });
     });
   }
+
   return data;
 };
 
