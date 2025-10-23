@@ -225,7 +225,8 @@ export default function MobileSettingsPage() {
           <CardContent>
             <div className="space-y-3">
               <p className="text-sm text-text-muted">
-                Ta akcja jest nieodwracalna. Wszystkie Twoje pomiary, pliki i dane zostaną trwale usunięte.
+                Ta akcja jest nieodwracalna. Wszystkie Twoje pomiary, pliki i
+                dane zostaną trwale usunięte.
               </p>
               <Button
                 onClick={() => setShowDeleteModal(true)}

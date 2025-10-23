@@ -15,7 +15,10 @@ interface DeleteAccountModalProps {
   onClose: () => void;
 }
 
-export const DeleteAccountModal = ({ isOpen, onClose }: DeleteAccountModalProps) => {
+export const DeleteAccountModal = ({
+  isOpen,
+  onClose,
+}: DeleteAccountModalProps) => {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -52,10 +55,10 @@ export const DeleteAccountModal = ({ isOpen, onClose }: DeleteAccountModalProps)
 
       if (response.ok) {
         toast.success("Konto zostało usunięte pomyślnie");
-        
+
         // Wyloguj użytkownika
         await signOut({ redirect: false });
-        
+
         // Przekieruj na stronę główną
         router.push("/");
       } else {
@@ -84,10 +87,11 @@ export const DeleteAccountModal = ({ isOpen, onClose }: DeleteAccountModalProps)
             Usuń konto
           </CardTitle>
           <p className="text-sm text-text-muted mt-2">
-            Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale usunięte.
+            Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną trwale
+            usunięte.
           </p>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
@@ -97,7 +101,8 @@ export const DeleteAccountModal = ({ isOpen, onClose }: DeleteAccountModalProps)
 
           <div className="space-y-2">
             <Label htmlFor="confirmation">
-              Wpisz <span className="font-bold text-red-600">USUŃ KONTO</span> aby potwierdzić:
+              Wpisz <span className="font-bold text-red-600">USUŃ KONTO</span>{" "}
+              aby potwierdzić:
             </Label>
             <Input
               id="confirmation"
@@ -130,7 +135,9 @@ export const DeleteAccountModal = ({ isOpen, onClose }: DeleteAccountModalProps)
             </Button>
             <Button
               onClick={handleDelete}
-              disabled={isLoading || confirmationText !== requiredText || !password}
+              disabled={
+                isLoading || confirmationText !== requiredText || !password
+              }
               className="flex-1 rounded-xl py-3 bg-red-600 hover:bg-red-700 text-white">
               {isLoading ? (
                 <>

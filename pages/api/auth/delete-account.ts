@@ -62,15 +62,15 @@ export default async function handler(
       });
     });
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       message: "Account deleted successfully",
-      success: true 
+      success: true,
     });
   } catch (error) {
     console.error("Error deleting account:", error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: "Internal server error",
-      success: false 
+      success: false,
     });
   } finally {
     await prisma.$disconnect();

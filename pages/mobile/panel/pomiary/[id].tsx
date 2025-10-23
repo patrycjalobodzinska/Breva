@@ -15,9 +15,16 @@ import {
   ArrowLeft,
   Download,
   Share,
+  Target,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MeasurementChart } from "@/components/MeasurementChart";
+import { AccuracyDisplay } from "@/components/AccuracyDisplay";
+import {
+  prepareChartData,
+  getAsymmetryPercentage,
+  getBadgeVariant,
+} from "@/utils/measurements";
 
 interface Measurement {
   id: string;
@@ -173,31 +180,11 @@ export default function MobileMeasurementDetailPage() {
     return { diff, percentage };
   };
 
-  const getChartData = () => {
-    if (!measurement) return [];
-
-    const data = [
-      {
-        name: measurement.name,
-        left: measurement.leftVolumeMl,
-        right: measurement.rightVolumeMl,
-        date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
-      },
-    ];
-
-    if (measurement.manualItems && measurement.manualItems.length > 0) {
-      measurement.manualItems.forEach((manual) => {
-        data.push({
-          name: manual.name,
-          left: manual.leftVolumeMl,
-          right: manual.rightVolumeMl,
-          date: new Date(manual.createdAt).toLocaleDateString("pl-PL"),
-        });
-      });
-    }
-
-    return data;
-  };
+  const hasManualMeasurement =
+    measurement?.manualItems && measurement.manualItems.length > 0;
+  const manualMeasurement = hasManualMeasurement
+    ? measurement.manualItems![0]
+    : null;
 
   if (isLoading) {
     return (
@@ -242,8 +229,6 @@ export default function MobileMeasurementDetailPage() {
     measurement.rightVolumeMl
   );
 
-  const chartData = getChartData();
-
   return (
     <MobilePanelLayout>
       <div className="space-y-4">
@@ -276,93 +261,96 @@ export default function MobileMeasurementDetailPage() {
           </div>
         </div>
 
-        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-lg">{measurement.name}</CardTitle>
-                {measurement.note && (
-                  <p className="text-sm text-text-muted mt-1">
-                    {measurement.note}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center text-sm text-text-muted">
-              <Calendar className="h-4 w-4 mr-2" />
-              {formatDate(measurement.createdAt)}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-text-primary">
-                  {measurement.leftVolumeMl.toFixed(1)}ml
-                </div>
-                <div className="text-sm text-text-muted">Lewa pierś</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-text-primary">
-                  {measurement.rightVolumeMl.toFixed(1)}ml
-                </div>
-                <div className="text-sm text-text-muted">Prawa pierś</div>
-              </div>
-            </div>
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold text-text-primary">
+              {measurement.name}
+            </h1>
+          </div>
+        </div>
 
-            <div className="bg-primary/10 rounded-xl p-4">
-              <div className="text-center">
-                <div className="text-lg font-semibold text-primary mb-1">
-                  Różnica objętości
-                </div>
-                <div className="text-2xl font-bold text-text-primary">
-                  {diff.toFixed(1)}ml ({percentage}%)
-                </div>
-                <div className="text-sm text-text-muted">
-                  {diff < 50 ? "Minimalna różnica" : "Wymaga uwagi"}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {chartData.length > 1 && (
-          <MeasurementChart
-            data={chartData}
-            title="Historia pomiarów"
-            description="Porównanie pomiarów AI i ręcznych"
-          />
+        {/* AI Results */}
+        {measurement.source === "AI" && (
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center space-x-2 text-sm">
+                  <Target className="h-4 w-4 text-primary" />
+                  <span>Lewa pierś (AI)</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-text-primary">
+                  {measurement.leftVolumeMl} ml
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center space-x-2 text-sm">
+                  <Target className="h-4 w-4 text-primary" />
+                  <span>Prawa pierś (AI)</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold text-text-primary">
+                  {measurement.rightVolumeMl} ml
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
-        {measurement.manualItems && measurement.manualItems.length > 0 && (
-          <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg">Pomiary ręczne</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {measurement.manualItems.map((manual) => (
-                  <div
-                    key={manual.id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
-                    <div>
-                      <div className="font-medium text-text-primary">
-                        {manual.name}
-                      </div>
-                      <div className="text-sm text-text-muted">
-                        {formatDate(manual.createdAt)}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-text-primary">
-                        {manual.leftVolumeMl.toFixed(1)}ml /{" "}
-                        {manual.rightVolumeMl.toFixed(1)}ml
-                      </div>
-                    </div>
+        {/* Manual Measurements */}
+        {hasManualMeasurement && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-text-primary">
+              Pomiar ręczny
+            </h2>
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
+                    <p className="text-xl font-semibold text-text-primary">
+                      {manualMeasurement?.leftVolumeMl} ml
+                    </p>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <div>
+                    <p className="text-text-muted text-sm">
+                      Prawa pierś (ml)
+                    </p>
+                    <p className="text-xl font-semibold text-text-primary">
+                      {manualMeasurement?.rightVolumeMl} ml
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {measurement.source === "AI" && hasManualMeasurement && (
+              <AccuracyDisplay measurement={measurement} />
+            )}
+          </div>
+        )}
+
+        {/* Chart */}
+        <MeasurementChart
+          data={prepareChartData(measurement)}
+          title="Porównanie AI vs Pomiary ręczne"
+          description="Wykres porównujący wyniki AI z pomiarami ręcznymi"
+        />
+
+        {/* Note */}
+        {measurement.note && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold text-text-primary">Notatka</h2>
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-4">
+                <p className="text-text-muted">{measurement.note}</p>
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         <div className="flex space-x-3">
