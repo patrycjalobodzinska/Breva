@@ -27,34 +27,9 @@ export const MeasurementChart = ({
   title,
   description,
 }: MeasurementChartProps) => {
-  console.log(data);
+  console.log("Chart data:", data);
 
-  if (data?.length > 1) {
-    const leftValues = data.map((item) => item.left);
-    const rightValues = data.map((item) => item.right);
-
-    const leftAverage =
-      leftValues.reduce((sum, val) => sum + val, 0) / leftValues.length;
-    const rightAverage =
-      rightValues.reduce((sum, val) => sum + val, 0) / rightValues.length;
-
-    const barData = [
-      {
-        side: "Lewa",
-        average: leftAverage,
-        min: Math.min(...leftValues),
-        max: Math.max(...leftValues),
-        count: leftValues.length,
-      },
-      {
-        side: "Prawa",
-        average: rightAverage,
-        min: Math.min(...rightValues),
-        max: Math.max(...rightValues),
-        count: rightValues.length,
-      },
-    ];
-
+  if (!data || data.length === 0) {
     return (
       <Card className="rounded-2xl bg-white">
         <CardHeader>
@@ -62,45 +37,73 @@ export const MeasurementChart = ({
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={barData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-              barCategoryGap="20%">
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="side" tick={{ fontSize: 12 }} />
-              <YAxis
-                label={{
-                  value: "Objętość (ml)",
-                  angle: -90,
-                  position: "insideLeft",
-                }}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip
-                formatter={(value, name) => [
-                  `${Number(value).toFixed(1)} ml`,
-                  name === "min" ? "Pomiar ręczny" : "Pomiar AI",
-                ]}
-                labelFormatter={(label) => `Strona: ${label}`}
-              />
-
-              <Bar
-                dataKey="min"
-                fill="#ff9999"
-                name="min"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="max"
-                fill="#ff6666"
-                name="max"
-                radius={[0, 0, 4, 4]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="text-center py-8 text-text-muted">
+            Brak danych do wyświetlenia
+          </div>
         </CardContent>
       </Card>
     );
-  } else return null;
+  }
+
+  // Przygotuj dane dla wykresu
+  const chartData = data.map((item, index) => ({
+    name: item.name,
+    left: item.left,
+    right: item.right,
+    date: item.date,
+  }));
+
+  return (
+    <Card className="rounded-2xl bg-white">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <BarChart
+            data={chartData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+            barCategoryGap="20%">
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="name" 
+              tick={{ fontSize: 12 }}
+              angle={-45}
+              textAnchor="end"
+              height={60}
+            />
+            <YAxis
+              label={{
+                value: "Objętość (ml)",
+                angle: -90,
+                position: "insideLeft",
+              }}
+              tick={{ fontSize: 12 }}
+            />
+            <Tooltip
+              formatter={(value, name) => [
+                `${Number(value).toFixed(1)} ml`,
+                name === "left" ? "Lewa pierś" : "Prawa pierś",
+              ]}
+              labelFormatter={(label) => `Pomiar: ${label}`}
+            />
+
+            <Bar
+              dataKey="left"
+              fill="#ff9999"
+              name="left"
+              radius={[4, 4, 0, 0]}
+            />
+            <Bar
+              dataKey="right"
+              fill="#ff6666"
+              name="right"
+              radius={[0, 0, 4, 4]}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
 };

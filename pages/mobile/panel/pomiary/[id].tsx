@@ -318,9 +318,7 @@ export default function MobileMeasurementDetailPage() {
                     </p>
                   </div>
                   <div>
-                    <p className="text-text-muted text-sm">
-                      Prawa pierś (ml)
-                    </p>
+                    <p className="text-text-muted text-sm">Prawa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
                       {manualMeasurement?.rightVolumeMl} ml
                     </p>
