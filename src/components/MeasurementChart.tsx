@@ -52,7 +52,7 @@ export const MeasurementChart = ({
     right: item.right,
     date: item.date,
   }));
-
+  console.log("Chart data:", chartData);
   return (
     <Card className="rounded-2xl bg-white">
       <CardHeader>
@@ -60,11 +60,12 @@ export const MeasurementChart = ({
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={chartData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-            barCategoryGap="20%">
+        <div className="w-full h-80 bg-gray-50 rounded-xl p-4">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+              barCategoryGap="20%">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="name"
@@ -101,8 +102,9 @@ export const MeasurementChart = ({
               name="right"
               radius={[0, 0, 4, 4]}
             />
-          </BarChart>
-        </ResponsiveContainer>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   );

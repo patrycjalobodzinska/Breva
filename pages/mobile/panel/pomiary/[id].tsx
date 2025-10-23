@@ -312,11 +312,17 @@ export default function MobileMeasurementDetailPage() {
         )}
 
         {/* Chart */}
-        <MeasurementChart
-          data={prepareChartData(measurement)}
-          title="Porównanie AI vs Pomiary ręczne"
-          description="Wykres porównujący wyniki AI z pomiarami ręcznymi"
-        />
+        {(() => {
+          const chartData = prepareChartData(measurement);
+          console.log("Chart data in mobile:", chartData);
+          return (
+            <MeasurementChart
+              data={chartData}
+              title="Porównanie AI vs Pomiary ręczne"
+              description="Wykres porównujący wyniki AI z pomiarami ręcznymi"
+            />
+          );
+        })()}
 
         {/* Note */}
         {measurement.note && (

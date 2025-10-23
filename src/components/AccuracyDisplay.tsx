@@ -35,7 +35,7 @@ export const AccuracyDisplay = ({ measurement }: AccuracyDisplayProps) => {
         Dokładność pomiaru
       </h2>
       <Card className="rounded-2xl p-6 bg-white/80">
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-6">
           <div>
             <p className="text-text-muted text-sm">Lewa pierś</p>
             <div className="rounded-full text-xl font-semibold ">
