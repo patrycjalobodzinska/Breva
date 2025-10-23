@@ -11,11 +11,6 @@ import {
   Download,
 } from "lucide-react";
 import { MobileHeroSection } from "@/components/sections/MobileHeroSection";
-import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
-import {
-  PWAInstallButton,
-  PWAStatusIndicator,
-} from "@/components/PWAInstallButton";
 
 export default function MobileHome() {
   return (
@@ -80,29 +75,6 @@ export default function MobileHome() {
               </div>
             </div>
 
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Heart className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-text-primary">
-                    Dostępność PWA
-                  </h3>
-                  <p className="text-text-muted">
-                    Korzystaj z aplikacji jak z natywnej, instalując ją na swoim
-                    urządzeniu mobilnym.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <PWAInstallButton
-                  variant="outline"
-                  size="sm"
-                  className="w-full rounded-xl"
-                />
-              </div>
-            </div>
           </div>
         </section>
 
@@ -182,11 +154,6 @@ export default function MobileHome() {
               </Button>
             </Link>
 
-            <PWAInstallButton
-              variant="outline"
-              size="lg"
-              className="w-full rounded-2xl border-primary text-primary hover:bg-primary/10 py-4 text-lg"
-            />
 
             <Link href="/mobile/logowanie">
               <Button
@@ -206,7 +173,6 @@ export default function MobileHome() {
               <span className="text-xl font-bold text-text-primary">BREVA</span>
             </div>
 
-            <PWAStatusIndicator />
             <div className="text-sm text-text-muted mb-4">
               <p>Precyzyjna analiza piersi z pomocą AI</p>
               <p className="mt-1">
@@ -237,7 +203,6 @@ export default function MobileHome() {
           </div>
         </footer>
 
-        <PWAInstallPrompt />
       </div>
     </>
   );

@@ -10,7 +10,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Heart, Upload, BarChart3, Shield, Users, Zap } from "lucide-react";
 import { HeroSection } from "@/components/sections/HeroSection";
-import { PWAInstallButton } from "@/components/PWAInstallButton";
 
 export default function Home() {
   return (
@@ -28,11 +27,7 @@ export default function Home() {
                 Zaloguj się
               </Button>
             </Link>
-            <PWAInstallButton
-              variant="outline"
-              className="rounded-2xl"
-              children="Pobierz aplikację"
-            />
+          
             <Link href="/rejestracja">
               <Button variant={"default"}>Rozpocznij</Button>
             </Link>

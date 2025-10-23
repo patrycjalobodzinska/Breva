@@ -90,13 +90,6 @@ export const MobileHeroSection = () => {
             </div>
             <div className="flex-1">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
-                <Download className="h-6 w-6 text-primary" />
-              </div>
-              <div className="text-sm font-medium text-text-primary">PWA</div>
-              <div className="text-xs text-text-muted">Aplikacja</div>
-            </div>
-            <div className="flex-1">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-2">
                 <Heart className="h-6 w-6 text-primary" />
               </div>
               <div className="text-sm font-medium text-text-primary">
