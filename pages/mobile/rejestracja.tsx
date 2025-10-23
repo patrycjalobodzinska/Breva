@@ -55,6 +55,10 @@ export default function MobileRegisterPage() {
       });
 
       if (response.ok) {
+        setSuccess(true);
+        toast.success("Konto zostało utworzone pomyślnie!");
+        
+        // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
             email: formData.email,
@@ -63,16 +67,19 @@ export default function MobileRegisterPage() {
           });
 
           if (result?.ok) {
-            toast.success("Konto zostało utworzone");
-            router.push("/mobile/panel");
+            // Logowanie się powiodło - przekieruj do panelu
+            setTimeout(() => {
+              router.push("/mobile/panel");
+            }, 1500);
           } else {
-            setSuccess(true);
+            // Logowanie się nie powiodło - przekieruj do strony logowania
             setTimeout(() => {
               router.push("/mobile/logowanie");
             }, 2000);
           }
         } catch (loginError) {
-          setSuccess(true);
+          console.error("Błąd podczas automatycznego logowania:", loginError);
+          // W przypadku błędu, przekieruj do strony logowania
           setTimeout(() => {
             router.push("/mobile/logowanie");
           }, 2000);
@@ -100,8 +107,7 @@ export default function MobileRegisterPage() {
               Konto utworzone!
             </h1>
             <p className="text-text-muted mb-6">
-              Twoje konto zostało pomyślnie utworzone. Przekierowujemy Cię do
-              logowania...
+              Twoje konto zostało pomyślnie utworzone. Logujemy Cię automatycznie...
             </p>
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>

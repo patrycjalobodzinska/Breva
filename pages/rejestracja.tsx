@@ -53,6 +53,10 @@ export default function RegisterPage() {
       });
 
       if (response.ok) {
+        setSuccess(true);
+        toast.success("Konto zostało utworzone pomyślnie!");
+        
+        // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
             email: formData.email,
@@ -61,16 +65,19 @@ export default function RegisterPage() {
           });
 
           if (result?.ok) {
-            toast.success("Konto zostało utworzone");
-            router.push("/panel");
+            // Logowanie się powiodło - przekieruj do panelu
+            setTimeout(() => {
+              router.push("/panel");
+            }, 1500);
           } else {
-            setSuccess(true);
+            // Logowanie się nie powiodło - przekieruj do strony logowania
             setTimeout(() => {
               router.push("/logowanie");
             }, 2000);
           }
         } catch (loginError) {
-          setSuccess(true);
+          console.error("Błąd podczas automatycznego logowania:", loginError);
+          // W przypadku błędu, przekieruj do strony logowania
           setTimeout(() => {
             router.push("/logowanie");
           }, 2000);
@@ -101,8 +108,7 @@ export default function RegisterPage() {
               Konto utworzone!
             </CardTitle>
             <CardDescription>
-              Twoje konto zostało pomyślnie utworzone. Przekierowujemy Cię do
-              panelu użytkownika...
+              Twoje konto zostało pomyślnie utworzone. Logujemy Cię automatycznie...
             </CardDescription>
           </CardHeader>
         </Card>
