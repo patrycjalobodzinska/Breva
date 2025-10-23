@@ -33,7 +33,7 @@ export const Scene3DMobile = ({
 
         <WomanModel
           scale={5}
-          position={[0, -7, 0]}
+          position={[0, -7.5, 0]}
           rotation={[0, 0, 0]}
           wireframeParts={wireframeParts}
         />

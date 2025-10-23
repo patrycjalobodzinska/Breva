@@ -12,13 +12,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Lock, Bell, Shield, LogOut } from "lucide-react";
+import { User, Lock, Bell, Shield, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { DeleteAccountModal } from "@/components/mobile/DeleteAccountModal";
 
 export default function MobileSettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [formData, setFormData] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -205,7 +207,42 @@ export default function MobileSettingsPage() {
             </Button>
           </CardContent>
         </Card>
+
+        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg border-red-200">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <div className="text-lg text-red-600">Usuń konto</div>
+                <CardDescription>
+                  Trwale usuń swoje konto i wszystkie dane
+                </CardDescription>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <p className="text-sm text-text-muted">
+                Ta akcja jest nieodwracalna. Wszystkie Twoje pomiary, pliki i dane zostaną trwale usunięte.
+              </p>
+              <Button
+                onClick={() => setShowDeleteModal(true)}
+                variant="outline"
+                className="w-full rounded-xl text-red-600 border-red-200 hover:bg-red-50">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Usuń konto
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
+
+      <DeleteAccountModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </MobilePanelLayout>
   );
 }

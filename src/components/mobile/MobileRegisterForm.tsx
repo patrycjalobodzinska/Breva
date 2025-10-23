@@ -14,7 +14,9 @@ interface MobileRegisterFormProps {
   onSwitchToLogin: () => void;
 }
 
-export const MobileRegisterForm = ({ onSwitchToLogin }: MobileRegisterFormProps) => {
+export const MobileRegisterForm = ({
+  onSwitchToLogin,
+}: MobileRegisterFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -103,7 +105,7 @@ export const MobileRegisterForm = ({ onSwitchToLogin }: MobileRegisterFormProps)
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex flex-col">
+      <div className="min-h-screen z-10 bg-gradient-to-br from-accent-1 to-accent-2 flex flex-col">
         <div className="flex-1 flex flex-col justify-center px-6 py-8">
           <div className="text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -124,8 +126,8 @@ export const MobileRegisterForm = ({ onSwitchToLogin }: MobileRegisterFormProps)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex flex-col">
-      <div className="flex-1 flex flex-col justify-center px-6 py-8">
+    <div className="min-h-screen z-10 flex flex-col">
+      <div className="flex-1 flex flex-col px-6 py-16">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-6">
             <Heart className="h-12 w-12 text-primary" />
@@ -136,10 +138,7 @@ export const MobileRegisterForm = ({ onSwitchToLogin }: MobileRegisterFormProps)
           <p className="text-text-muted">Utwórz konto i rozpocznij analizę</p>
         </div>
 
-        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center">Rejestracja</CardTitle>
-          </CardHeader>
+        <Card className="rounded-2xl border-0 bg-white/40 backdrop-blur-sm pt-4">
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
@@ -224,9 +223,7 @@ export const MobileRegisterForm = ({ onSwitchToLogin }: MobileRegisterFormProps)
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted">
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />

@@ -1,15 +1,3 @@
-import Link from "next/link";
-import Head from "next/head";
-import { Button } from "@/components/ui/button";
-import {
-  Heart,
-  ArrowRight,
-  Sparkles,
-  Shield,
-  Users,
-  Zap,
-  Download,
-} from "lucide-react";
 import { MobileHeroSection } from "@/components/sections/MobileHeroSection";
 
 export default function MobileHome() {

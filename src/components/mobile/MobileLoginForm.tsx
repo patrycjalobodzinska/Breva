@@ -14,7 +14,9 @@ interface MobileLoginFormProps {
   onSwitchToRegister: () => void;
 }
 
-export const MobileLoginForm = ({ onSwitchToRegister }: MobileLoginFormProps) => {
+export const MobileLoginForm = ({
+  onSwitchToRegister,
+}: MobileLoginFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -50,8 +52,8 @@ export const MobileLoginForm = ({ onSwitchToRegister }: MobileLoginFormProps) =>
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex flex-col">
-      <div className="flex-1 flex flex-col justify-center px-6 py-8">
+    <div className="min-h-screen z-10  flex flex-col">
+      <div className="flex-1 flex flex-col  px-6 py-16">
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-6">
             <Heart className="h-12 w-12 text-primary" />
@@ -62,10 +64,7 @@ export const MobileLoginForm = ({ onSwitchToRegister }: MobileLoginFormProps) =>
           <p className="text-text-muted">Zaloguj się do swojego konta</p>
         </div>
 
-        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-center">Logowanie</CardTitle>
-          </CardHeader>
+        <Card className="rounded-2xl pt-4 bg-white/40 backdrop-blur-sm border-0 shadow-lg">
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
