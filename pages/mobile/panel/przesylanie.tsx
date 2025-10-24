@@ -15,6 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { WebViewBridge } from "@/components/WebViewBridge";
 
 export default function MobileUploadPage() {
   const { data: session } = useSession();
@@ -22,6 +23,7 @@ export default function MobileUploadPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [lidarData, setLidarData] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: "",
     note: "",
@@ -51,11 +53,23 @@ export default function MobileUploadPage() {
     }
   };
 
+  const handleLiDARData = (data: any) => {
+    setLidarData(data);
+    setSelectedFile(null); // Wyczyść wybrany plik
+    if (!formData.name) {
+      setFormData((prev) => ({
+        ...prev,
+        name: `Skan LiDAR ${new Date().toLocaleDateString()}`,
+      }));
+    }
+    toast.success("Dane LiDAR zostały pobrane!");
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedFile) {
-      toast.error("Wybierz plik do przesłania");
+    if (!selectedFile && !lidarData) {
+      toast.error("Wykonaj skan LiDAR lub wybierz plik");
       return;
     }
 
@@ -69,7 +83,20 @@ export default function MobileUploadPage() {
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("file", selectedFile);
+      
+      if (lidarData) {
+        // Dla LiDAR, tworzymy plik z danych
+        const lidarFile = new File([lidarData.uri], `lidar_scan_${Date.now()}.mp4`, {
+          type: "video/mp4"
+        });
+        formDataToSend.append("file", lidarFile);
+        formDataToSend.append("lidarData", JSON.stringify(lidarData));
+        formDataToSend.append("uploadMethod", "lidar");
+      } else if (selectedFile) {
+        formDataToSend.append("file", selectedFile);
+        formDataToSend.append("uploadMethod", "file");
+      }
+      
       formDataToSend.append("name", formData.name);
       if (formData.note) {
         formDataToSend.append("note", formData.note);
@@ -119,7 +146,7 @@ export default function MobileUploadPage() {
         <div>
           <h1 className="text-lg font-bold text-text-primary ">Nowy pomiar</h1>
           <p className="text-text-muted text-sm">
-            Prześlij zdjęcie do analizy AI
+            Wykonaj skan LiDAR dla najwyższej dokładności
           </p>
         </div>
 
@@ -130,60 +157,39 @@ export default function MobileUploadPage() {
             {" "}
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="text-lg">Wybierz zdjęcie</CardTitle>
+                <CardTitle className="text-lg">Skan LiDAR</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-primary/30 rounded-2xl p-3 text-center">
-                  {selectedFile ? (
-                    <div className="space-y-3">
-                      <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                        <FileImage className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <p className="font-medium line-clamp-2 text-sm text-text-primary">
-                          {selectedFile.name}
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedFile(null)}
-                        className="rounded-xl">
-                        Usuń plik
-                      </Button>
+                {lidarData ? (
+                  <div className="space-y-3">
+                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <Label
-                        htmlFor="file-upload"
-                        className="z-20 cursor-pointer">
-                        {" "}
-                        <div className="w-10 h-10 md:w-16 md:h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
-                          <Upload className="md:h-8 md:w-8 w-6 h-6 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-base text-text-primary">
-                            Dodaj plik
-                          </p>
-                          <p className="text-xs text-text-muted">
-                            JPG, PNG, PLY, LAS, MOV, MP4
-                          </p>
-                        </div>
-                        <input
-                          id="file-upload"
-                          type="file"
-                          accept="video/mp4,video/quicktime,image/jpeg,image/png,image/heic,application/octet-stream"
-                          onChange={handleFileSelect}
-                          className="hidden"
-                        />
-                      </Label>
+                    <div>
+                      <p className="font-medium line-clamp-2 text-sm text-text-primary">
+                        Skan LiDAR zakończony
+                      </p>
+                      <p className="text-xs text-text-muted">
+                        Czas: {lidarData.duration}s
+                      </p>
                     </div>
-                  )}
-                </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setLidarData(null);
+                        setSelectedFile(null);
+                      }}
+                      className="rounded-xl">
+                      Nowy skan
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <WebViewBridge onLiDARData={handleLiDARData} />
+                  </div>
+                )}
 
                 {isUploading && (
                   <div className="space-y-2">
@@ -260,7 +266,7 @@ export default function MobileUploadPage() {
             </Button>
             <Button
               type="submit"
-              disabled={!selectedFile || isUploading}
+              disabled={(!selectedFile && !lidarData) || isUploading}
               className="flex-1 rounded-xl">
               {isUploading ? (
                 <>
