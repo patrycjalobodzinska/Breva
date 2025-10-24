@@ -39,26 +39,25 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
       try {
         // Sprawdź czy dane to string JSON
         if (typeof event.data !== "string") {
-          console.log("Otrzymano nie-JSON dane:", event.data);
           return;
         }
 
-        // const message = JSON.parse(event.data);
+        const message = JSON.parse(event.data);
 
-        // switch (message.type) {
-        //   case "lidar_data":
-        //     setScanResult(message.data);
-        //     setIsScanning(false);
-        //     onLiDARDataRef.current?.(message.data);
-        //     break;
-        //   case "lidar_error":
-        //     setError(message.error);
-        //     setIsScanning(false);
-        //     break;
-        //   case "lidar_cancelled":
-        //     setIsScanning(false);
-        //     break;
-        // }
+        switch (message.type) {
+          case "lidar_data":
+            setScanResult(message.data);
+            setIsScanning(false);
+            onLiDARDataRef.current?.(message.data);
+            break;
+          case "lidar_error":
+            setError(message.error);
+            setIsScanning(false);
+            break;
+          case "lidar_cancelled":
+            setIsScanning(false);
+            break;
+        }
       } catch (error) {
         console.error(
           "Błąd parsowania wiadomości:",
