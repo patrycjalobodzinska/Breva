@@ -36,6 +36,12 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
     // Nasłuchuj wiadomości z aplikacji mobilnej
     const handleMessage = (event: MessageEvent) => {
       try {
+        // Sprawdź czy dane to string JSON
+        if (typeof event.data !== 'string') {
+          console.log("Otrzymano nie-JSON dane:", event.data);
+          return;
+        }
+
         const message = JSON.parse(event.data);
 
         switch (message.type) {
@@ -53,7 +59,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
             break;
         }
       } catch (error) {
-        console.error("Błąd parsowania wiadomości:", error);
+        console.error("Błąd parsowania wiadomości:", error, "Dane:", event.data);
       }
     };
 
