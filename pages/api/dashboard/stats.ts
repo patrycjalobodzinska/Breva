@@ -27,7 +27,9 @@ export default async function handler(
     });
 
     if (!user || user.role !== "ADMIN") {
-      return res.status(403).json({ error: "Forbidden - Admin access required" });
+      return res
+        .status(403)
+        .json({ error: "Forbidden - Admin access required" });
     }
 
     // Oblicz datę sprzed 7 dni
@@ -45,7 +47,7 @@ export default async function handler(
     ] = await Promise.all([
       // Całkowita liczba pomiarów
       prisma.measurement.count(),
-      
+
       // Pomiary z ostatnich 7 dni
       prisma.measurement.count({
         where: {
@@ -54,21 +56,21 @@ export default async function handler(
           },
         },
       }),
-      
+
       // Pomiary AI
       prisma.measurement.count({
         where: {
           source: "AI",
         },
       }),
-      
+
       // Pomiary ręczne
       prisma.measurement.count({
         where: {
           source: "MANUAL",
         },
       }),
-      
+
       // Pomiary AI z ostatnich 7 dni
       prisma.measurement.count({
         where: {
@@ -78,7 +80,7 @@ export default async function handler(
           },
         },
       }),
-      
+
       // Pomiary ręczne z ostatnich 7 dni
       prisma.measurement.count({
         where: {
@@ -154,8 +156,12 @@ export default async function handler(
       },
       dailyStats: formattedDailyStats,
       averageVolume: {
-        left: avgVolumeStats._avg.leftVolumeMl ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2)) : 0,
-        right: avgVolumeStats._avg.rightVolumeMl ? Number(avgVolumeStats._avg.rightVolumeMl.toFixed(2)) : 0,
+        left: avgVolumeStats._avg.leftVolumeMl
+          ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2))
+          : 0,
+        right: avgVolumeStats._avg.rightVolumeMl
+          ? Number(avgVolumeStats._avg.rightVolumeMl.toFixed(2))
+          : 0,
       },
       period: {
         startDate: sevenDaysAgo.toISOString(),

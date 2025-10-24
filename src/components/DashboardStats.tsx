@@ -1,56 +1,34 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  BarChart3, 
-  Users, 
-  Activity, 
-  TrendingUp, 
+import {
+  BarChart3,
+  Users,
+  Activity,
+  TrendingUp,
   RefreshCw,
   Brain,
-  Hand
+  Hand,
 } from "lucide-react";
-import { DashboardStats } from "@/types";
-import { toast } from "sonner";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 interface DashboardStatsProps {
   className?: string;
 }
 
 export const DashboardStats = ({ className }: DashboardStatsProps) => {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const fetchStats = async () => {
-    try {
-      setIsRefreshing(true);
-      const response = await fetch("/api/dashboard/stats");
-      
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      } else {
-        toast.error("Nie udało się pobrać statystyk");
-      }
-    } catch (error) {
-      console.error("Error fetching stats:", error);
-      toast.error("Wystąpił błąd podczas pobierania statystyk");
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const { stats, isLoading, isRefreshing, error, refetch } = useDashboardStats();
 
   const handleRefresh = () => {
-    fetchStats();
+    refetch();
   };
 
   if (isLoading) {
@@ -62,7 +40,9 @@ export const DashboardStats = ({ className }: DashboardStatsProps) => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i} className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+            <Card
+              key={i}
+              className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="p-6">
                 <div className="animate-pulse">
                   <div className="h-4 bg-gray-200 rounded mb-2"></div>
@@ -76,7 +56,7 @@ export const DashboardStats = ({ className }: DashboardStatsProps) => {
     );
   }
 
-  if (!stats) {
+  if (error || !stats) {
     return (
       <div className={`space-y-6 ${className}`}>
         <div className="flex items-center justify-between">
@@ -87,7 +67,9 @@ export const DashboardStats = ({ className }: DashboardStatsProps) => {
         </div>
         <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardContent className="p-6 text-center">
-            <p className="text-text-muted">Nie udało się załadować statystyk</p>
+            <p className="text-text-muted">
+              {error || "Nie udało się załadować statystyk"}
+            </p>
             <Button onClick={handleRefresh} className="mt-4">
               Spróbuj ponownie
             </Button>
@@ -103,15 +85,16 @@ export const DashboardStats = ({ className }: DashboardStatsProps) => {
         <div>
           <h2 className="text-2xl font-bold text-text-primary">Dashboard</h2>
           <p className="text-text-muted text-sm">
-            Statystyki z ostatnich 7 dni ({new Date(stats.period.startDate).toLocaleDateString("pl-PL")} - {new Date(stats.period.endDate).toLocaleDateString("pl-PL")})
+            Statystyki z ostatnich 7 dni (
+            {new Date(stats.period.startDate).toLocaleDateString("pl-PL")} -{" "}
+            {new Date(stats.period.endDate).toLocaleDateString("pl-PL")})
           </p>
         </div>
-        <Button 
-          onClick={handleRefresh} 
-          variant="outline" 
+        <Button
+          onClick={handleRefresh}
+          variant="outline"
           size="sm"
-          disabled={isRefreshing}
-        >
+          disabled={isRefreshing}>
           {isRefreshing ? (
             <RefreshCw className="h-4 w-4 animate-spin" />
           ) : (
@@ -238,12 +221,14 @@ export const DashboardStats = ({ className }: DashboardStatsProps) => {
             <div className="space-y-2">
               {stats.dailyStats.length > 0 ? (
                 stats.dailyStats.map((day, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between">
                     <span className="text-sm text-text-muted">
-                      {new Date(day.date).toLocaleDateString("pl-PL", { 
-                        weekday: "short", 
-                        day: "2-digit", 
-                        month: "2-digit" 
+                      {new Date(day.date).toLocaleDateString("pl-PL", {
+                        weekday: "short",
+                        day: "2-digit",
+                        month: "2-digit",
                       })}
                     </span>
                     <Badge variant="outline" className="text-xs">
@@ -252,7 +237,9 @@ export const DashboardStats = ({ className }: DashboardStatsProps) => {
                   </div>
                 ))
               ) : (
-                <p className="text-text-muted text-sm">Brak danych z ostatnich 7 dni</p>
+                <p className="text-text-muted text-sm">
+                  Brak danych z ostatnich 7 dni
+                </p>
               )}
             </div>
           </CardContent>
