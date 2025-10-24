@@ -219,9 +219,9 @@ export default function MeasurementDetailPage() {
                 </CardContent>
               </Card>
             </div>
-            {measurement.source === "AI" && hasManualMeasurement && (
+            {/* {measurement.source === "AI" && hasManualMeasurement && (
               <AccuracyDisplay measurement={measurement} />
-            )}{" "}
+            )}{" "} */}
           </div>
         )}
         <MeasurementChart

@@ -300,9 +300,9 @@ export default function MobileMeasurementDetailPage() {
                 </div>
               </CardContent>
             </Card>
-            {measurement.source === "AI" && hasManualMeasurement && (
+            {/* {measurement.source === "AI" && hasManualMeasurement && (
               <AccuracyDisplay measurement={measurement} />
-            )}
+            )} */}
           </div>
         )}
 
