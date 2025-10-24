@@ -65,7 +65,7 @@ export default function MobileUploadPage() {
       }
       return prev;
     });
-    toast.success("Dane LiDAR zostały pobrane!");
+    // toast.success("Dane LiDAR zostały pobrane!"); // Tymczasowo wyłączone
   }, []); // Usuń formData.name z dependencies
 
   const handleSubmit = async (e: React.FormEvent) => {

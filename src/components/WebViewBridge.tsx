@@ -29,7 +29,6 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
   useEffect(() => {
     onLiDARDataRef.current = onLiDARData;
   }, [onLiDARData]);
-
   useEffect(() => {
     // Sprawdź czy jesteśmy w aplikacji mobilnej - tylko raz
     const isInWebView = window.ReactNativeWebView !== undefined;
@@ -44,22 +43,22 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
           return;
         }
 
-        const message = JSON.parse(event.data);
+        // const message = JSON.parse(event.data);
 
-        switch (message.type) {
-          case "lidar_data":
-            setScanResult(message.data);
-            setIsScanning(false);
-            onLiDARDataRef.current?.(message.data);
-            break;
-          case "lidar_error":
-            setError(message.error);
-            setIsScanning(false);
-            break;
-          case "lidar_cancelled":
-            setIsScanning(false);
-            break;
-        }
+        // switch (message.type) {
+        //   case "lidar_data":
+        //     setScanResult(message.data);
+        //     setIsScanning(false);
+        //     onLiDARDataRef.current?.(message.data);
+        //     break;
+        //   case "lidar_error":
+        //     setError(message.error);
+        //     setIsScanning(false);
+        //     break;
+        //   case "lidar_cancelled":
+        //     setIsScanning(false);
+        //     break;
+        // }
       } catch (error) {
         console.error(
           "Błąd parsowania wiadomości:",
