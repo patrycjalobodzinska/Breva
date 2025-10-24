@@ -108,12 +108,6 @@ export const LiDARScanButton = ({
   }, []);
 
   const startLiDARScan = () => {
-    if (!isMobileApp) {
-      setError("Ta funkcja działa tylko w aplikacji mobilnej");
-      toast.error("Aplikacja mobilna wymagana");
-      return;
-    }
-
     setIsScanning(true);
     setError(null);
     setScanProgress(0);
@@ -155,40 +149,6 @@ export const LiDARScanButton = ({
     setError(null);
     setScanResult(null);
   };
-
-  if (!isMobileApp) {
-    return (
-      <Card className={`rounded-2xl shadow-lg bg-white ${className}`}>
-        <CardHeader>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-semibold">
-                Aplikacja mobilna wymagana
-              </CardTitle>
-              <p className="text-sm text-text-muted">
-                Skan LiDAR jest dostępny tylko w aplikacji mobilnej
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center">
-            <Smartphone className="h-16 w-16 text-text-muted mx-auto mb-4" />
-            <p className="text-text-muted mb-4">
-              Pobierz aplikację BREVA na swój telefon, aby korzystać z
-              skanowania LiDAR
-            </p>
-            <Button variant="outline" className="rounded-xl">
-              Pobierz aplikację
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (scanResult) {
     return (
