@@ -6,13 +6,50 @@ export const getAsymmetryPercentage = (left: number, right: number): string => {
   return ((difference / total) * 100).toFixed(1);
 };
 
+/**
+ * Oblicza błąd absolutny, błąd procentowy i dokładność dla dwóch wartości.
+ *
+ * @param {number} prawdziwyWynik - Rzeczywista wartość (True Value).
+ * @param {number} wynikAI - Wartość przewidziana przez model AI (Predicted Value).
+ * @returns {{
+ * bladAbsolutny: number, 
+ * bladProcentowy: number, 
+ * dokladnosc: number
+ * }} Obiekt z metrykami.
+ */
+export const obliczDokladnosc = (prawdziwyWynik: number, wynikAI: number) => {
+  // Sprawdzenie dzielenia przez zero i niepoprawnych danych
+  if (typeof prawdziwyWynik !== 'number' || typeof wynikAI !== 'number' || prawdziwyWynik === 0) {
+    // W przypadku błędu zwracamy null lub rzucamy wyjątek.
+    // Tutaj zwracamy bezpieczne wartości dla przejrzystości.
+    return {
+      bladAbsolutny: NaN,
+      bladProcentowy: NaN,
+      dokladnosc: NaN
+    };
+  }
+
+  // 1. Błąd Absolutny
+  const bladAbsolutny = Math.abs(prawdziwyWynik - wynikAI);
+
+  // 2. Błąd Procentowy
+  const bladProcentowy = (bladAbsolutny / prawdziwyWynik) * 100;
+
+  // 3. Dokładność (Accuracy)
+  const dokladnosc = 100 - bladProcentowy;
+
+  // Zwracanie wyników z zaokrągleniem do 2 miejsc po przecinku
+  return {
+    bladAbsolutny: Number(bladAbsolutny.toFixed(2)),
+    bladProcentowy: Number(bladProcentowy.toFixed(2)),
+    dokladnosc: Number(dokladnosc.toFixed(2)),
+  };
+};
+
 export const getAccuracyPercentage = (ai: number, manual: number): string => {
-  // Dokładność = 100% - (błąd względny * 100%)
-  // Błąd względny = |manual - ai| / ai
-  const relativeError = Math.abs(manual - ai) / ai;
-  const accuracy = (1 - relativeError) * 100;
-  console.log(`AI: ${ai}, Manual: ${manual}, Relative Error: ${relativeError.toFixed(3)}, Accuracy: ${accuracy.toFixed(1)}%`);
-  return Math.max(0, accuracy).toFixed(1);
+  const result = obliczDokladnosc(ai, manual);
+  console.log(`AI: ${ai}, Manual: ${manual}, Accuracy: ${result.dokladnosc}%`);
+  return result.dokladnosc.toFixed(1);
 };
 
 export const prepareChartData = (measurement: Measurement): ChartData[] => {
