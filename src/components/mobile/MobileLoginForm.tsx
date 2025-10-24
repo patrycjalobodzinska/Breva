@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { loginSchema, type LoginFormData } from "@/lib/validations";
 
 interface MobileLoginFormProps {
   onSwitchToRegister: () => void;
@@ -21,7 +22,8 @@ export const MobileLoginForm = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
@@ -30,22 +32,42 @@ export const MobileLoginForm = ({
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setFormErrors({});
 
+    // Walidacja z Zod
     try {
-      const result = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-      });
+      const validatedData = loginSchema.parse(formData);
+      
+      // Jeśli walidacja przeszła, kontynuuj z logowaniem
+      try {
+        const result = await signIn("credentials", {
+          email: validatedData.email,
+          password: validatedData.password,
+          redirect: false,
+        });
 
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        toast.success("Zalogowano pomyślnie!");
-        router.push("/mobile/panel");
+        if (result?.error) {
+          setError(result.error);
+        } else {
+          toast.success("Zalogowano pomyślnie!");
+          router.push("/mobile/panel");
+        }
+      } catch (error) {
+        setError("Wystąpił błąd podczas logowania");
       }
-    } catch (error) {
-      setError("Wystąpił błąd podczas logowania");
+    } catch (validationError: any) {
+      // Obsługa błędów walidacji Zod
+      if (validationError.errors) {
+        const errors: Record<string, string> = {};
+        validationError.errors.forEach((err: any) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      } else {
+        setError("Wystąpił błąd walidacji formularza");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -83,9 +105,14 @@ export const MobileLoginForm = ({
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="twoj@email.com"
-                  className="rounded-xl"
+                  className={`rounded-xl ${
+                    formErrors.email ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {formErrors.email && (
+                  <p className="text-red-500 text-xs">{formErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -99,7 +126,9 @@ export const MobileLoginForm = ({
                       setFormData({ ...formData, password: e.target.value })
                     }
                     placeholder="••••••••"
-                    className="rounded-xl pr-10"
+                    className={`rounded-xl pr-10 ${
+                      formErrors.password ? "border-red-500" : ""
+                    }`}
                     required
                   />
                   <button
@@ -113,6 +142,9 @@ export const MobileLoginForm = ({
                     )}
                   </button>
                 </div>
+                {formErrors.password && (
+                  <p className="text-red-500 text-xs">{formErrors.password}</p>
+                )}
               </div>
 
               <Button

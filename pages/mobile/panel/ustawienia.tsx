@@ -15,13 +15,15 @@ import { Label } from "@/components/ui/label";
 import { User, Lock, Bell, Shield, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteAccountModal } from "@/components/mobile/DeleteAccountModal";
+import { changePasswordSchema, type ChangePasswordFormData } from "@/lib/validations";
 
 export default function MobileSettingsPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<ChangePasswordFormData>({
     newPassword: "",
     confirmPassword: "",
   });
@@ -29,38 +31,46 @@ export default function MobileSettingsPage() {
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setFormErrors({});
 
-    if (formData.newPassword !== formData.confirmPassword) {
-      toast.error("Hasła nie są identyczne");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.newPassword.length < 6) {
-      toast.error("Hasło musi mieć co najmniej 6 znaków");
-      setIsLoading(false);
-      return;
-    }
-
+    // Walidacja z Zod
     try {
-      const response = await fetch("/api/user/password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const validatedData = changePasswordSchema.parse(formData);
+      
+      // Jeśli walidacja przeszła, kontynuuj ze zmianą hasła
+      try {
+        const response = await fetch("/api/user/password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(validatedData),
+        });
 
-      if (response.ok) {
-        toast.success("Hasło zostało zmienione pomyślnie");
-        setFormData({ newPassword: "", confirmPassword: "" });
-      } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "Wystąpił błąd podczas zmiany hasła");
+        if (response.ok) {
+          toast.success("Hasło zostało zmienione pomyślnie");
+          setFormData({ newPassword: "", confirmPassword: "" });
+        } else {
+          const errorData = await response.json();
+          toast.error(errorData.error || "Wystąpił błąd podczas zmiany hasła");
+        }
+      } catch (error) {
+        console.error("Password change error:", error);
+        toast.error("Wystąpił błąd podczas zmiany hasła");
       }
-    } catch (error) {
-      console.error("Password change error:", error);
-      toast.error("Wystąpił błąd podczas zmiany hasła");
+    } catch (validationError: any) {
+      // Obsługa błędów walidacji Zod
+      if (validationError.errors) {
+        const errors: Record<string, string> = {};
+        validationError.errors.forEach((err: any) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      } else {
+        toast.error("Wystąpił błąd walidacji formularza");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -152,9 +162,14 @@ export default function MobileSettingsPage() {
                     setFormData({ ...formData, newPassword: e.target.value })
                   }
                   placeholder="Wprowadź nowe hasło"
-                  className="rounded-xl"
+                  className={`rounded-xl ${
+                    formErrors.newPassword ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {formErrors.newPassword && (
+                  <p className="text-red-500 text-xs">{formErrors.newPassword}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Potwierdź nowe hasło</Label>
@@ -169,9 +184,14 @@ export default function MobileSettingsPage() {
                     })
                   }
                   placeholder="Potwierdź nowe hasło"
-                  className="rounded-xl"
+                  className={`rounded-xl ${
+                    formErrors.confirmPassword ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {formErrors.confirmPassword && (
+                  <p className="text-red-500 text-xs">{formErrors.confirmPassword}</p>
+                )}
               </div>
               <Button
                 type="submit"

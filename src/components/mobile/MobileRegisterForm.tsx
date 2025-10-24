@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heart, ArrowRight, Eye, EyeOff, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
+import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
 interface MobileRegisterFormProps {
   onSwitchToLogin: () => void;
@@ -23,7 +24,8 @@ export const MobileRegisterForm = ({
   const [success, setSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState<RegisterFormData>({
     name: "",
     email: "",
     password: "",
@@ -34,70 +36,78 @@ export const MobileRegisterForm = ({
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setFormErrors({});
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Hasła nie są identyczne");
-      setIsLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Hasło musi mieć co najmniej 6 znaków");
-      setIsLoading(false);
-      return;
-    }
-
+    // Walidacja z Zod
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      const validatedData = registerSchema.parse(formData);
+      
+      // Jeśli walidacja przeszła, kontynuuj z rejestracją
+      try {
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: validatedData.name,
+            email: validatedData.email,
+            password: validatedData.password,
+          }),
+        });
 
-      if (response.ok) {
-        setSuccess(true);
-        toast.success("Konto zostało utworzone pomyślnie!");
+        if (response.ok) {
+          setSuccess(true);
+          toast.success("Konto zostało utworzone pomyślnie!");
 
-        // Automatyczne logowanie po rejestracji
-        try {
-          const result = await signIn("credentials", {
-            email: formData.email,
-            password: formData.password,
-            redirect: false,
-          });
+          // Automatyczne logowanie po rejestracji
+          try {
+            const result = await signIn("credentials", {
+              email: validatedData.email,
+              password: validatedData.password,
+              redirect: false,
+            });
 
-          if (result?.ok) {
-            // Logowanie się powiodło - przekieruj do panelu
-            setTimeout(() => {
-              router.push("/mobile/panel");
-            }, 1500);
-          } else {
-            // Logowanie się nie powiodło - przekieruj do widoku logowania
+            if (result?.ok) {
+              // Logowanie się powiodło - przekieruj do panelu
+              setTimeout(() => {
+                router.push("/mobile/panel");
+              }, 1500);
+            } else {
+              // Logowanie się nie powiodło - przekieruj do widoku logowania
+              setTimeout(() => {
+                onSwitchToLogin(); // Przekieruj do widoku logowania
+                setSuccess(false); // Reset success state
+              }, 2000);
+            }
+          } catch (loginError) {
+            console.error("Błąd podczas automatycznego logowania:", loginError);
+            // W przypadku błędu, przekieruj do widoku logowania
             setTimeout(() => {
               onSwitchToLogin(); // Przekieruj do widoku logowania
               setSuccess(false); // Reset success state
             }, 2000);
           }
-        } catch (loginError) {
-          console.error("Błąd podczas automatycznego logowania:", loginError);
-          // W przypadku błędu, przekieruj do widoku logowania
-          setTimeout(() => {
-            onSwitchToLogin(); // Przekieruj do widoku logowania
-            setSuccess(false); // Reset success state
-          }, 2000);
+        } else {
+          const errorData = await response.json();
+          setError(errorData.error || "Wystąpił błąd podczas rejestracji");
         }
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || "Wystąpił błąd podczas rejestracji");
+      } catch (error) {
+        setError("Wystąpił błąd podczas rejestracji");
       }
-    } catch (error) {
-      setError("Wystąpił błąd podczas rejestracji");
+    } catch (validationError: any) {
+      // Obsługa błędów walidacji Zod
+      if (validationError.errors) {
+        const errors: Record<string, string> = {};
+        validationError.errors.forEach((err: any) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      } else {
+        setError("Wystąpił błąd walidacji formularza");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -127,9 +137,9 @@ export const MobileRegisterForm = ({
 
   return (
     <div className="min-h-screen z-10 flex flex-col">
-      <div className="flex-1 flex flex-col px-6 py-16">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
+      <div className="flex-1 flex flex-col px-6  py-6">
+        <div className="text-center mb-4">
+          <div className="flex items-center justify-center mb-2">
             <Heart className="h-12 w-12 text-primary" />
           </div>
           <h1 className="text-3xl font-bold text-text-primary mb-2">
@@ -138,17 +148,19 @@ export const MobileRegisterForm = ({
           <p className="text-text-muted">Utwórz konto i rozpocznij analizę</p>
         </div>
 
-        <Card className="rounded-2xl border-0 bg-white/40 backdrop-blur-sm pt-4">
+        <Card className="rounded-2xl text-sm border-0 bg-white/40 backdrop-blur-sm pt-4">
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-3">
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-600">
                   {error}
                 </div>
               )}
 
-              <div className="space-y-2">
-                <Label htmlFor="name">Imię</Label>
+              <div className="space-y-2 ">
+                <Label htmlFor="name" className="text-sm pb-1">
+                  Imię
+                </Label>
                 <Input
                   id="name"
                   type="text"
@@ -157,13 +169,20 @@ export const MobileRegisterForm = ({
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="Twoje imię"
-                  className="rounded-xl"
+                  className={`rounded-xl text-xs ${
+                    formErrors.name ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {formErrors.name && (
+                  <p className="text-red-500 text-xs">{formErrors.name}</p>
+                )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-sm pb-1">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -172,9 +191,14 @@ export const MobileRegisterForm = ({
                     setFormData({ ...formData, email: e.target.value })
                   }
                   placeholder="twoj@email.com"
-                  className="rounded-xl"
+                  className={`rounded-xl sm:text-sm text-xs ${
+                    formErrors.email ? "border-red-500" : ""
+                  }`}
                   required
                 />
+                {formErrors.email && (
+                  <p className="text-red-500 text-xs">{formErrors.email}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -188,7 +212,9 @@ export const MobileRegisterForm = ({
                       setFormData({ ...formData, password: e.target.value })
                     }
                     placeholder="Minimum 6 znaków"
-                    className="rounded-xl pr-10"
+                    className={`rounded-xl pr-10 ${
+                      formErrors.password ? "border-red-500" : ""
+                    }`}
                     required
                   />
                   <button
@@ -202,6 +228,9 @@ export const MobileRegisterForm = ({
                     )}
                   </button>
                 </div>
+                {formErrors.password && (
+                  <p className="text-red-500 text-xs">{formErrors.password}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -218,7 +247,9 @@ export const MobileRegisterForm = ({
                       })
                     }
                     placeholder="Powtórz hasło"
-                    className="rounded-xl pr-10"
+                    className={`rounded-xl pr-10 ${
+                      formErrors.confirmPassword ? "border-red-500" : ""
+                    }`}
                     required
                   />
                   <button
@@ -232,12 +263,15 @@ export const MobileRegisterForm = ({
                     )}
                   </button>
                 </div>
+                {formErrors.confirmPassword && (
+                  <p className="text-red-500 text-xs">{formErrors.confirmPassword}</p>
+                )}
               </div>
 
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-xl py-4 text-lg font-semibold">
+                className="w-full rounded-xl py-4 mt-2 text-lg font-semibold">
                 {isLoading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
@@ -254,8 +288,8 @@ export const MobileRegisterForm = ({
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6">
-          <p className="text-text-muted mb-4">Masz już konto?</p>
+        <div className="text-center mt-3">
+          <p className="text-text-muted mb-2">Masz już konto?</p>
           <Button
             variant="outline"
             onClick={onSwitchToLogin}
