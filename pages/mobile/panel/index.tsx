@@ -20,13 +20,13 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useDashboardStats } from "@/hooks/useDashboardStats";
+import { useUserStats } from "@/hooks/useUserStats";
 
 export default function MobilePanelDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { stats, isLoading } = useDashboardStats();
-
+  const { stats, isLoading } = useUserStats();
+  console.log(stats);
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -123,132 +123,6 @@ export default function MobilePanelDashboard() {
                 <div className="text-xs text-text-muted">Ostatnie 7 dni</div>
               </CardContent>
             </Card>
-          </div>
-
-          {/* Dodatkowe statystyki */}
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <BarChart3 className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold">
-                      Pomiary AI
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Sztuczna inteligencja
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-2xl font-bold text-text-primary mb-1">
-                  {stats?.measurements?.ai?.total || 0}
-                </div>
-                <div className="text-xs text-text-muted">Łącznie AI</div>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader className="pb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                    <Users className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold">
-                      Pomiary ręczne
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Wprowadzone ręcznie
-                    </CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="text-2xl font-bold text-text-primary mb-1">
-                  {stats?.measurements?.manual?.total || 0}
-                </div>
-                <div className="text-xs text-text-muted">Łącznie ręcznych</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-4">
-            {/* <h2 className="text-lg font-semibold text-text-primary">
-              Szybkie akcje
-            </h2> */}
-
-            {/* <Link href="/mobile/panel/przesylanie">
-              <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Upload className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-text-primary">
-                        Nowy pomiar
-                      </h3>
-                      <p className="text-sm text-text-muted">
-                        Dodaj nową analizę
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" className="rounded-xl">
-                      Rozpocznij
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/mobile/panel/pomiary">
-              <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <BarChart3 className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-text-primary">
-                        Historia pomiarów
-                      </h3>
-                      <p className="text-sm text-text-muted">
-                        Zobacz wszystkie analizy
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" className="rounded-xl">
-                      Otwórz
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-
-            <Link href="/mobile/panel/ustawienia">
-              <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Settings className="h-6 w-6 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-text-primary">
-                        Ustawienia
-                      </h3>
-                      <p className="text-sm text-text-muted">
-                        Zarządzaj kontem
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" className="rounded-xl">
-                      Otwórz
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link> */}
           </div>
 
           <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-2xl p-6">
