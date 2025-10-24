@@ -12,20 +12,24 @@ export const getAsymmetryPercentage = (left: number, right: number): string => {
  * @param {number} prawdziwyWynik - Rzeczywista wartość (True Value).
  * @param {number} wynikAI - Wartość przewidziana przez model AI (Predicted Value).
  * @returns {{
- * bladAbsolutny: number, 
- * bladProcentowy: number, 
+ * bladAbsolutny: number,
+ * bladProcentowy: number,
  * dokladnosc: number
  * }} Obiekt z metrykami.
  */
 export const obliczDokladnosc = (prawdziwyWynik: number, wynikAI: number) => {
   // Sprawdzenie dzielenia przez zero i niepoprawnych danych
-  if (typeof prawdziwyWynik !== 'number' || typeof wynikAI !== 'number' || prawdziwyWynik === 0) {
+  if (
+    typeof prawdziwyWynik !== "number" ||
+    typeof wynikAI !== "number" ||
+    prawdziwyWynik === 0
+  ) {
     // W przypadku błędu zwracamy null lub rzucamy wyjątek.
     // Tutaj zwracamy bezpieczne wartości dla przejrzystości.
     return {
       bladAbsolutny: NaN,
       bladProcentowy: NaN,
-      dokladnosc: NaN
+      dokladnosc: NaN,
     };
   }
 
@@ -47,7 +51,8 @@ export const obliczDokladnosc = (prawdziwyWynik: number, wynikAI: number) => {
 };
 
 export const getAccuracyPercentage = (ai: number, manual: number): string => {
-  const result = obliczDokladnosc(ai, manual);
+  // AI to "prawdziwy wynik" (ground truth), manual to "wynik do porównania"
+  const result = obliczDokladnosc(manual, ai);
   console.log(`AI: ${ai}, Manual: ${manual}, Accuracy: ${result.dokladnosc}%`);
   return result.dokladnosc.toFixed(1);
 };
