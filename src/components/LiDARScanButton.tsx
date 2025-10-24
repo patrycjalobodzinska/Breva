@@ -103,8 +103,46 @@ export const LiDARScanButton = ({
       }
     };
 
+    // Nasłuchuj prostych wiadomości z brevaNativeMessage
+    const handleNativeMessage = (message: string, data?: any) => {
+      switch (message) {
+        case 'backgroundCaptured':
+          console.log('Zdjęcie tła zostało zrobione');
+          setScanProgress(25);
+          toast.success("Zdjęcie tła zrobione");
+          break;
+        case 'objectCaptured':
+          console.log('Zdjęcie obiektu zostało zrobione');
+          setScanProgress(50);
+          toast.success("Zdjęcie obiektu zrobione");
+          break;
+        case 'maskDrawn':
+          console.log('Maska została narysowana');
+          setScanProgress(75);
+          toast.success("Maska została narysowana");
+          break;
+        case 'dataReady':
+          console.log('Dane są gotowe do wysłania');
+          setIsScanning(false);
+          setScanProgress(100);
+          setScanResult(data || { timestamp: Date.now() });
+          onScanCompleteRef.current?.(data || { timestamp: Date.now() });
+          toast.success("Skanowanie zakończone pomyślnie!");
+          break;
+      }
+    };
+
+    // Ustaw globalną funkcję brevaNativeMessage
+    (window as any).brevaNativeMessage = handleNativeMessage;
+
     window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    return () => {
+      window.removeEventListener("message", handleMessage);
+      // Wyczyść globalną funkcję
+      if ((window as any).brevaNativeMessage === handleNativeMessage) {
+        delete (window as any).brevaNativeMessage;
+      }
+    };
   }, []);
 
   const startLiDARScan = () => {
@@ -113,27 +151,22 @@ export const LiDARScanButton = ({
     setScanProgress(0);
     setScanResult(null);
 
-    const message = {
-      type: "startBackgroundCapture",
-      timestamp: Date.now(),
-      options: {
-        quality: "high",
-        duration: 30,
-        format: "mp4",
-      },
-    };
-
     try {
-      // Próbuj różne metody komunikacji
-      if (window.ReactNativeWebView) {
-        window.ReactNativeWebView.postMessage(JSON.stringify(message));
-      } else if (window.brevaNativeMessage) {
-        window.brevaNativeMessage(JSON.stringify(message));
+      // Sprawdź czy aplikacja mobilna jest dostępna
+      if (window.brevaNativeMessage) {
+        // Wyślij prostą wiadomość do aplikacji mobilnej
+        window.brevaNativeMessage('startBackgroundCapture');
+        toast.success("Rozpoczynam skanowanie LiDAR...");
+      } else if (window.ReactNativeWebView) {
+        // Fallback dla ReactNativeWebView
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: "startBackgroundCapture",
+          timestamp: Date.now()
+        }));
+        toast.success("Rozpoczynam skanowanie LiDAR...");
       } else {
-        throw new Error("Brak komunikacji z aplikacją mobilną");
+        throw new Error("Aplikacja mobilna nie jest dostępna");
       }
-
-      toast.success("Rozpoczynam skanowanie LiDAR...");
     } catch (error) {
       setIsScanning(false);
       const errorMsg = "Nie udało się uruchomić skanowania";
