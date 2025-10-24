@@ -70,7 +70,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, [onLiDARData]);
+  }, []); // Usuń onLiDARData z dependencies
 
   const requestLiDARScan = () => {
     if (!isMobileApp) {
@@ -98,7 +98,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
 
   if (!isMobileApp) {
     return (
-      <Card className="rounded-2xl shadow-lg bg-white">
+      <div className="rounded-2xl shadow-lg bg-white">
         <CardHeader>
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -126,7 +126,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
             </Button>
           </div>
         </CardContent>
-      </Card>
+      </div>
     );
   }
 

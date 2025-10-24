@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
@@ -53,7 +53,7 @@ export default function MobileUploadPage() {
     }
   };
 
-  const handleLiDARData = (data: any) => {
+  const handleLiDARData = useCallback((data: any) => {
     setLidarData(data);
     setSelectedFile(null); // Wyczyść wybrany plik
     if (!formData.name) {
@@ -63,7 +63,7 @@ export default function MobileUploadPage() {
       }));
     }
     toast.success("Dane LiDAR zostały pobrane!");
-  };
+  }, [formData.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,12 +83,16 @@ export default function MobileUploadPage() {
 
     try {
       const formDataToSend = new FormData();
-      
+
       if (lidarData) {
         // Dla LiDAR, tworzymy plik z danych
-        const lidarFile = new File([lidarData.uri], `lidar_scan_${Date.now()}.mp4`, {
-          type: "video/mp4"
-        });
+        const lidarFile = new File(
+          [lidarData.uri],
+          `lidar_scan_${Date.now()}.mp4`,
+          {
+            type: "video/mp4",
+          }
+        );
         formDataToSend.append("file", lidarFile);
         formDataToSend.append("lidarData", JSON.stringify(lidarData));
         formDataToSend.append("uploadMethod", "lidar");
@@ -96,7 +100,7 @@ export default function MobileUploadPage() {
         formDataToSend.append("file", selectedFile);
         formDataToSend.append("uploadMethod", "file");
       }
-      
+
       formDataToSend.append("name", formData.name);
       if (formData.note) {
         formDataToSend.append("note", formData.note);
