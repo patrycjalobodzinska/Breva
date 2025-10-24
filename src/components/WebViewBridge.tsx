@@ -28,33 +28,33 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
     const handleMessage = (event: MessageEvent) => {
       try {
         const message = JSON.parse(event.data);
-        
+
         switch (message.type) {
-          case 'lidar_data':
+          case "lidar_data":
             setScanResult(message.data);
             setIsScanning(false);
             onLiDARData?.(message.data);
             break;
-          case 'lidar_error':
+          case "lidar_error":
             setError(message.error);
             setIsScanning(false);
             break;
-          case 'lidar_cancelled':
+          case "lidar_cancelled":
             setIsScanning(false);
             break;
         }
       } catch (error) {
-        console.error('Błąd parsowania wiadomości:', error);
+        console.error("Błąd parsowania wiadomości:", error);
       }
     };
 
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [onLiDARData]);
 
   const requestLiDARScan = () => {
     if (!isMobileApp) {
-      setError('Ta funkcja działa tylko w aplikacji mobilnej');
+      setError("Ta funkcja działa tylko w aplikacji mobilnej");
       return;
     }
 
@@ -63,7 +63,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
     setScanResult(null);
 
     const message = {
-      type: 'request_lidar'
+      type: "request_lidar",
     };
 
     if (window.ReactNativeWebView) {
@@ -98,7 +98,8 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
           <div className="text-center">
             <Smartphone className="h-16 w-16 text-text-muted mx-auto mb-4" />
             <p className="text-text-muted mb-4">
-              Pobierz aplikację BREVA na swój telefon, aby korzystać z skanowania LiDAR
+              Pobierz aplikację BREVA na swój telefon, aby korzystać z
+              skanowania LiDAR
             </p>
             <Button variant="outline" className="rounded-xl">
               Pobierz aplikację
@@ -117,9 +118,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
             <Camera className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <CardTitle className="text-lg font-semibold">
-              Skan LiDAR
-            </CardTitle>
+            <CardTitle className="text-lg font-semibold">Skan LiDAR</CardTitle>
             <p className="text-sm text-text-muted">
               Najwyższa dokładność analizy objętości
             </p>
@@ -142,7 +141,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
               <CheckCircle className="h-5 w-5" />
               <span className="font-semibold">Skan zakończony pomyślnie!</span>
             </div>
-            
+
             <div className="bg-gray-50 rounded-xl p-4 space-y-2">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -155,7 +154,9 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
                 </div>
                 <div>
                   <span className="text-text-muted">Data:</span>
-                  <p className="font-medium">{new Date(scanResult.timestamp).toLocaleString('pl-PL')}</p>
+                  <p className="font-medium">
+                    {new Date(scanResult.timestamp).toLocaleString("pl-PL")}
+                  </p>
                 </div>
                 <div>
                   <span className="text-text-muted">ID zasobu:</span>
@@ -165,12 +166,13 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
             </div>
 
             <div className="flex space-x-2">
-              <Button onClick={resetScan} variant="outline" className="flex-1 rounded-xl">
+              <Button
+                onClick={resetScan}
+                variant="outline"
+                className="flex-1 rounded-xl">
                 Nowy skan
               </Button>
-              <Button className="flex-1 rounded-xl">
-                Prześlij do analizy
-              </Button>
+              <Button className="flex-1 rounded-xl">Prześlij do analizy</Button>
             </div>
           </div>
         ) : (
@@ -178,15 +180,15 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
             <div className="text-center">
               <Camera className="h-16 w-16 text-primary mx-auto mb-4" />
               <p className="text-text-muted mb-4">
-                Skanowanie LiDAR zapewnia najwyższą dokładność analizy objętości piersi
+                Skanowanie LiDAR zapewnia najwyższą dokładność analizy objętości
+                piersi
               </p>
             </div>
 
-            <Button 
-              onClick={requestLiDARScan} 
+            <Button
+              onClick={requestLiDARScan}
               disabled={isScanning}
-              className="w-full rounded-xl"
-            >
+              className="w-full rounded-xl">
               {isScanning ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />

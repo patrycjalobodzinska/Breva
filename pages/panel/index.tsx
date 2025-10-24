@@ -116,11 +116,11 @@ export default function PanelPage() {
           )}
 
         {/* Skan LiDAR */}
-        <WebViewBridge 
+        <WebViewBridge
           onLiDARData={(data) => {
-            console.log('Otrzymano dane LiDAR:', data);
+            console.log("Otrzymano dane LiDAR:", data);
             // Tutaj możesz przetworzyć dane LiDAR
-          }} 
+          }}
         />
 
         {/* Szybkie akcje */}
@@ -135,7 +135,7 @@ export default function PanelPage() {
               Prześlij zdjęcia, filmy lub pliki LiDAR do analizy.
             </CardContent>
           </Card>
-          
+
           <Card className="rounded-2xl shadow-lg bg-white hover:shadow-xl transition-shadow">
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-primary-dark">
