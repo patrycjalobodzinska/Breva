@@ -37,7 +37,7 @@ export const MobileLoginForm = ({
     // Walidacja z Zod
     try {
       const validatedData = loginSchema.parse(formData);
-      
+
       // Jeśli walidacja przeszła, kontynuuj z logowaniem
       try {
         const result = await signIn("credentials", {

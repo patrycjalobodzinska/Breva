@@ -15,7 +15,10 @@ import { Label } from "@/components/ui/label";
 import { User, Lock, Bell, Shield, LogOut, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { DeleteAccountModal } from "@/components/mobile/DeleteAccountModal";
-import { changePasswordSchema, type ChangePasswordFormData } from "@/lib/validations";
+import {
+  changePasswordSchema,
+  type ChangePasswordFormData,
+} from "@/lib/validations";
 
 export default function MobileSettingsPage() {
   const { data: session } = useSession();
@@ -36,7 +39,7 @@ export default function MobileSettingsPage() {
     // Walidacja z Zod
     try {
       const validatedData = changePasswordSchema.parse(formData);
-      
+
       // Jeśli walidacja przeszła, kontynuuj ze zmianą hasła
       try {
         const response = await fetch("/api/user/password", {
@@ -168,7 +171,9 @@ export default function MobileSettingsPage() {
                   required
                 />
                 {formErrors.newPassword && (
-                  <p className="text-red-500 text-xs">{formErrors.newPassword}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.newPassword}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
@@ -190,7 +195,9 @@ export default function MobileSettingsPage() {
                   required
                 />
                 {formErrors.confirmPassword && (
-                  <p className="text-red-500 text-xs">{formErrors.confirmPassword}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.confirmPassword}
+                  </p>
                 )}
               </div>
               <Button

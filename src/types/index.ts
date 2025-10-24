@@ -58,3 +58,35 @@ export interface MeasurementStats {
     right: string;
   };
 }
+
+// Dashboard API types
+export interface DashboardStats {
+  measurements: {
+    total: number;
+    last7Days: number;
+    ai: {
+      total: number;
+      last7Days: number;
+    };
+    manual: {
+      total: number;
+      last7Days: number;
+    };
+  };
+  users: {
+    total: number;
+    last7Days: number;
+  };
+  dailyStats: {
+    date: string;
+    count: number;
+  }[];
+  averageVolume: {
+    left: number;
+    right: number;
+  };
+  period: {
+    startDate: string;
+    endDate: string;
+  };
+}

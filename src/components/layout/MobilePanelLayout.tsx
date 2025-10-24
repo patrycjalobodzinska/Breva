@@ -55,6 +55,9 @@ export default function MobilePanelLayout({
               <Heart className="h-7 w-7 text-primary" />
               <span className="text-xl font-bold text-text-primary">BREVA</span>
             </div>
+            <Link href="/mobile/panel" className="flex items-center space-x-3">
+              <User />
+            </Link>
           </div>
         </header>
 

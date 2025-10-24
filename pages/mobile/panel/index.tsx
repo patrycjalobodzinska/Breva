@@ -21,11 +21,13 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+import { useMargin } from "recharts";
+import { useMeasurements } from "@/hooks/useMeasurements";
 
 export default function MobilePanelDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
+  const { pagination, isLoading } = useMeasurements();
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -93,7 +95,7 @@ export default function MobilePanelDashboard() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-2xl font-bold text-text-primary mb-1">
-                  12
+                  {pagination?.totalCount || 0}
                 </div>
                 <div className="text-xs text-text-muted">Łącznie pomiarów</div>
               </CardContent>

@@ -41,7 +41,7 @@ export const MobileRegisterForm = ({
     // Walidacja z Zod
     try {
       const validatedData = registerSchema.parse(formData);
-      
+
       // Jeśli walidacja przeszła, kontynuuj z rejestracją
       try {
         const response = await fetch("/api/auth/register", {
@@ -264,7 +264,9 @@ export const MobileRegisterForm = ({
                   </button>
                 </div>
                 {formErrors.confirmPassword && (
-                  <p className="text-red-500 text-xs">{formErrors.confirmPassword}</p>
+                  <p className="text-red-500 text-xs">
+                    {formErrors.confirmPassword}
+                  </p>
                 )}
               </div>
 
