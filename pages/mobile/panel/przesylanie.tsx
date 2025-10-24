@@ -56,14 +56,17 @@ export default function MobileUploadPage() {
   const handleLiDARData = useCallback((data: any) => {
     setLidarData(data);
     setSelectedFile(null); // Wyczyść wybrany plik
-    if (!formData.name) {
-      setFormData((prev) => ({
-        ...prev,
-        name: `Skan LiDAR ${new Date().toLocaleDateString()}`,
-      }));
-    }
+    setFormData((prev) => {
+      if (!prev.name) {
+        return {
+          ...prev,
+          name: `Skan LiDAR ${new Date().toLocaleDateString()}`,
+        };
+      }
+      return prev;
+    });
     toast.success("Dane LiDAR zostały pobrane!");
-  }, [formData.name]);
+  }, []); // Usuń formData.name z dependencies
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

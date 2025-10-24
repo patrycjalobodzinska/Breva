@@ -31,13 +31,9 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
   }, [onLiDARData]);
 
   useEffect(() => {
-    // Sprawdź czy jesteśmy w aplikacji mobilnej
-    const checkMobileApp = () => {
-      const isInWebView = window.ReactNativeWebView !== undefined;
-      setIsMobileApp(isInWebView);
-    };
-
-    checkMobileApp();
+    // Sprawdź czy jesteśmy w aplikacji mobilnej - tylko raz
+    const isInWebView = window.ReactNativeWebView !== undefined;
+    setIsMobileApp(isInWebView);
 
     // Nasłuchuj wiadomości z aplikacji mobilnej
     const handleMessage = (event: MessageEvent) => {
@@ -76,7 +72,7 @@ export const WebViewBridge = ({ onLiDARData }: WebViewBridgeProps) => {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []); 
+  }, []);
 
   const requestLiDARScan = () => {
     if (!isMobileApp) {
