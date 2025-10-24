@@ -5,6 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Smartphone, Camera, AlertCircle, CheckCircle } from "lucide-react";
 
+// Deklaracja typu dla ReactNativeWebView
+declare global {
+  interface Window {
+    ReactNativeWebView?: {
+      postMessage: (message: string) => void;
+    };
+  }
+}
+
 interface WebViewBridgeProps {
   onLiDARData?: (data: any) => void;
 }

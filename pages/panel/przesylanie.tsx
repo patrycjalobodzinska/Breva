@@ -13,7 +13,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileVideo, FileImage, File, AlertCircle, Camera } from "lucide-react";
+import {
+  Upload,
+  FileVideo,
+  FileImage,
+  File,
+  AlertCircle,
+  Camera,
+} from "lucide-react";
 import { toast } from "sonner";
 import PanelLayout from "@/components/PanelLayout";
 import { WebViewBridge } from "@/components/WebViewBridge";
@@ -75,25 +82,29 @@ export default function UploadPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (uploadMethod === "file" && !file) return;
     if (uploadMethod === "lidar" && !lidarData) return;
 
     setIsUploading(true);
     try {
       const formData = new FormData();
-      
+
       if (uploadMethod === "file" && file) {
         formData.append("file", file);
       } else if (uploadMethod === "lidar" && lidarData) {
         // Dla LiDAR, tworzymy plik z danych
-        const lidarFile = new File([lidarData.uri], `lidar_scan_${Date.now()}.mp4`, {
-          type: "video/mp4"
-        });
+        const lidarFile = new File(
+          [lidarData.uri],
+          `lidar_scan_${Date.now()}.mp4`,
+          {
+            type: "video/mp4",
+          }
+        );
         formData.append("file", lidarFile);
         formData.append("lidarData", JSON.stringify(lidarData));
       }
-      
+
       formData.append("note", note);
       formData.append("uploadMethod", uploadMethod);
 
@@ -154,14 +165,13 @@ export default function UploadPage() {
               <div className="space-y-4">
                 <Label>Wybierz metodę analizy</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card 
+                  <Card
                     className={`cursor-pointer transition-all ${
-                      uploadMethod === "file" 
-                        ? "border-primary bg-primary/5" 
+                      uploadMethod === "file"
+                        ? "border-primary bg-primary/5"
                         : "border-gray-200 hover:border-primary/30"
                     }`}
-                    onClick={() => setUploadMethod("file")}
-                  >
+                    onClick={() => setUploadMethod("file")}>
                     <CardContent className="p-4 text-center">
                       <Upload className="h-8 w-8 text-primary mx-auto mb-2" />
                       <h3 className="font-semibold">Prześlij plik</h3>
@@ -171,14 +181,13 @@ export default function UploadPage() {
                     </CardContent>
                   </Card>
 
-                  <Card 
+                  <Card
                     className={`cursor-pointer transition-all ${
-                      uploadMethod === "lidar" 
-                        ? "border-primary bg-primary/5" 
+                      uploadMethod === "lidar"
+                        ? "border-primary bg-primary/5"
                         : "border-gray-200 hover:border-primary/30"
                     }`}
-                    onClick={() => setUploadMethod("lidar")}
-                  >
+                    onClick={() => setUploadMethod("lidar")}>
                     <CardContent className="p-4 text-center">
                       <Camera className="h-8 w-8 text-primary mx-auto mb-2" />
                       <h3 className="font-semibold">Skan LiDAR</h3>
@@ -214,9 +223,12 @@ export default function UploadPage() {
                       ) : (
                         <div className="space-y-2">
                           <Upload className="h-12 w-12 text-primary mx-auto" />
-                          <p className="font-medium">Kliknij, aby wybrać plik</p>
+                          <p className="font-medium">
+                            Kliknij, aby wybrać plik
+                          </p>
                           <p className="text-sm text-text-muted">
-                            Wspierane formaty: MP4, MOV, JPG, PNG, HEIC, PLY, LAS
+                            Wspierane formaty: MP4, MOV, JPG, PNG, HEIC, PLY,
+                            LAS
                           </p>
                         </div>
                       )}
@@ -266,8 +278,8 @@ export default function UploadPage() {
               <Button
                 type="submit"
                 disabled={
-                  (uploadMethod === "file" && !file) || 
-                  (uploadMethod === "lidar" && !lidarData) || 
+                  (uploadMethod === "file" && !file) ||
+                  (uploadMethod === "lidar" && !lidarData) ||
                   isUploading
                 }
                 className="w-full rounded-2xl bg-primary hover:bg-primary-dark">
