@@ -15,7 +15,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
-import { WebViewBridge } from "@/components/WebViewBridge";
+import { LiDARScanButton } from "@/components/LiDARScanButton";
 
 export default function MobileUploadPage() {
   const { data: session } = useSession();
@@ -194,7 +194,10 @@ export default function MobileUploadPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <WebViewBridge onLiDARData={handleLiDARData} />
+                    <LiDARScanButton 
+                      onScanComplete={handleLiDARData}
+                      onScanError={(error) => toast.error(error)}
+                    />
                   </div>
                 )}
 
