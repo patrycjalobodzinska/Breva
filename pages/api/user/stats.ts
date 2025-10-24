@@ -47,7 +47,7 @@ export default async function handler(
       prisma.measurement.count({
         where: { userId: user.id },
       }),
-      
+
       // Pomiary użytkownika z ostatnich 7 dni
       prisma.measurement.count({
         where: {
@@ -57,7 +57,7 @@ export default async function handler(
           },
         },
       }),
-      
+
       // Pomiary AI użytkownika
       prisma.measurement.count({
         where: {
@@ -65,7 +65,7 @@ export default async function handler(
           source: "AI",
         },
       }),
-      
+
       // Pomiary ręczne użytkownika
       prisma.measurement.count({
         where: {
@@ -73,7 +73,7 @@ export default async function handler(
           source: "MANUAL",
         },
       }),
-      
+
       // Pomiary AI użytkownika z ostatnich 7 dni
       prisma.measurement.count({
         where: {
@@ -84,7 +84,7 @@ export default async function handler(
           },
         },
       }),
-      
+
       // Pomiary ręczne użytkownika z ostatnich 7 dni
       prisma.measurement.count({
         where: {
@@ -149,8 +149,12 @@ export default async function handler(
       },
       dailyStats: formattedDailyStats,
       averageVolume: {
-        left: avgVolumeStats._avg.leftVolumeMl ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2)) : 0,
-        right: avgVolumeStats._avg.rightVolumeMl ? Number(avgVolumeStats._avg.rightVolumeMl.toFixed(2)) : 0,
+        left: avgVolumeStats._avg.leftVolumeMl
+          ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2))
+          : 0,
+        right: avgVolumeStats._avg.rightVolumeMl
+          ? Number(avgVolumeStats._avg.rightVolumeMl.toFixed(2))
+          : 0,
       },
       period: {
         startDate: sevenDaysAgo.toISOString(),

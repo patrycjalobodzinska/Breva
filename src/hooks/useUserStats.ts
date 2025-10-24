@@ -20,9 +20,9 @@ export const useUserStats = (): UseUserStatsReturn => {
     try {
       setIsRefreshing(true);
       setError(null);
-      
+
       const response = await fetch("/api/user/stats");
-      
+
       if (response.ok) {
         const data = await response.json();
         setStats(data);
