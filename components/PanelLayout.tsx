@@ -61,7 +61,7 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2">
       {/* Header */}
-      <header className="bg-white/80 shadow-sm backdrop-blur-sm border-b border-primary/20">
+      <header className="bg-white/80 shadow-sm backdrop-blur-sm ">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/panel" className="flex items-center space-x-2">
@@ -102,13 +102,13 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                     <Menu className="h-4 w-4" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-80">
+                <SheetContent side="right" className="w-80 border-0">
                   <SheetHeader>
                     <SheetTitle className="text-left">Menu</SheetTitle>
                   </SheetHeader>
 
                   {/* User Info */}
-                  <div className="flex items-center space-x-2 text-sm text-text-muted py-4 border-b">
+                  <div className="flex items-center space-x-2 text-sm text-text-muted py-4 border-b border-primary/20">
                     <User className="h-4 w-4" />
                     <span>
                       {session?.user?.name ||
@@ -136,7 +136,7 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                   </nav>
 
                   {/* Logout Button */}
-                  <div className="pt-4 border-t">
+                  <div className="pt-4 border-t border-primary/20">
                     <Button
                       variant="outline"
                       size="sm"
