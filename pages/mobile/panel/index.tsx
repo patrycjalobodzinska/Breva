@@ -20,14 +20,13 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import Link from "next/link";
-import { useMargin } from "recharts";
-import { useMeasurements } from "@/hooks/useMeasurements";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
 
 export default function MobilePanelDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { pagination, isLoading } = useMeasurements();
+  const { stats, isLoading } = useDashboardStats();
+
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
@@ -95,7 +94,7 @@ export default function MobilePanelDashboard() {
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-2xl font-bold text-text-primary mb-1">
-                  {pagination?.totalCount || 0}
+                  {stats?.measurements?.total || 0}
                 </div>
                 <div className="text-xs text-text-muted">Łącznie pomiarów</div>
               </CardContent>
@@ -112,16 +111,67 @@ export default function MobilePanelDashboard() {
                       Postęp
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Ostatnie 30 dni
+                      Ostatnie 7 dni
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="text-2xl font-bold text-text-primary mb-1">
-                  +3
+                  +{stats?.measurements?.last7Days || 0}
                 </div>
-                <div className="text-xs text-text-muted">Nowe pomiary</div>
+                <div className="text-xs text-text-muted">Ostatnie 7 dni</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Dodatkowe statystyki */}
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">
+                      Pomiary AI
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Sztuczna inteligencja
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-2xl font-bold text-text-primary mb-1">
+                  {stats?.measurements?.ai?.total || 0}
+                </div>
+                <div className="text-xs text-text-muted">Łącznie AI</div>
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader className="pb-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <Users className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-semibold">
+                      Pomiary ręczne
+                    </CardTitle>
+                    <CardDescription className="text-xs">
+                      Wprowadzone ręcznie
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-2xl font-bold text-text-primary mb-1">
+                  {stats?.measurements?.manual?.total || 0}
+                </div>
+                <div className="text-xs text-text-muted">Łącznie ręcznych</div>
               </CardContent>
             </Card>
           </div>

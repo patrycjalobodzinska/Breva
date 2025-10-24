@@ -20,9 +20,9 @@ export const useDashboardStats = (): UseDashboardStatsReturn => {
     try {
       setIsRefreshing(true);
       setError(null);
-      
+
       const response = await fetch("/api/dashboard/stats");
-      
+
       if (response.ok) {
         const data = await response.json();
         setStats(data);

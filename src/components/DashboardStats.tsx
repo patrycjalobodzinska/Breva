@@ -25,7 +25,8 @@ interface DashboardStatsProps {
 }
 
 export const DashboardStats = ({ className }: DashboardStatsProps) => {
-  const { stats, isLoading, isRefreshing, error, refetch } = useDashboardStats();
+  const { stats, isLoading, isRefreshing, error, refetch } =
+    useDashboardStats();
 
   const handleRefresh = () => {
     refetch();
