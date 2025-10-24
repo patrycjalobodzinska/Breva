@@ -203,11 +203,6 @@ export default function MobileMeasurementDetailPage() {
     );
   }
 
-  const { diff, percentage } = getVolumeDifference(
-    measurement.leftVolumeMl,
-    measurement.rightVolumeMl
-  );
-
   return (
     <MobilePanelLayout>
       <div className="space-y-4">
@@ -260,7 +255,7 @@ export default function MobileMeasurementDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-text-primary">
+                <p className="text-2xl font-bold text-text-primary">
                   {measurement.leftVolumeMl} ml
                 </p>
               </CardContent>
@@ -273,7 +268,7 @@ export default function MobileMeasurementDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold text-text-primary">
+                <p className="text-2xl font-bold text-text-primary">
                   {measurement.rightVolumeMl} ml
                 </p>
               </CardContent>

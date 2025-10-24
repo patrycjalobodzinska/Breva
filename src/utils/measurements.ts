@@ -7,7 +7,11 @@ export const getAsymmetryPercentage = (left: number, right: number): string => {
 };
 
 export const getAccuracyPercentage = (ai: number, manual: number): string => {
-  const accuracy = 100 - (Math.abs(manual - ai) / ai) * 100;
+  // Dokładność = 100% - (błąd względny * 100%)
+  // Błąd względny = |manual - ai| / ai
+  const relativeError = Math.abs(manual - ai) / ai;
+  const accuracy = (1 - relativeError) * 100;
+  console.log(`AI: ${ai}, Manual: ${manual}, Relative Error: ${relativeError.toFixed(3)}, Accuracy: ${accuracy.toFixed(1)}%`);
   return Math.max(0, accuracy).toFixed(1);
 };
 
