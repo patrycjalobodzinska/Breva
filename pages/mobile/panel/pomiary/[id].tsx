@@ -309,7 +309,6 @@ export default function MobileMeasurementDetailPage() {
         {/* Chart */}
         {(() => {
           const chartData = prepareChartData(measurement);
-          console.log("Chart data in mobile:", chartData);
           return (
             <MeasurementChart
               data={chartData}

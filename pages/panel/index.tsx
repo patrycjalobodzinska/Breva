@@ -118,7 +118,6 @@ export default function PanelPage() {
         {/* Skan LiDAR */}
         <WebViewBridge
           onLiDARData={(data) => {
-            console.log("Otrzymano dane LiDAR:", data);
             // Tutaj możesz przetworzyć dane LiDAR
           }}
         />

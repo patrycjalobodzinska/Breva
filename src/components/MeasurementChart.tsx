@@ -76,8 +76,6 @@ export const MeasurementChart = ({
   title,
   description,
 }: MeasurementChartProps) => {
-  console.log(data);
-
   if (data && data.length > 0) {
     const leftValues = data.map((item) => item.left);
     const rightValues = data.map((item) => item.right);
@@ -155,7 +153,6 @@ export const MeasurementChart = ({
         count: rightValues.length,
       },
     ];
-    console.log("Bar data:", barData);
     return (
       <Card className="rounded-2xl bg-white">
         <CardHeader>

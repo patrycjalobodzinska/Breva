@@ -53,7 +53,6 @@ export const obliczDokladnosc = (prawdziwyWynik: number, wynikAI: number) => {
 export const getAccuracyPercentage = (ai: number, manual: number): string => {
   // AI to "prawdziwy wynik" (ground truth), manual to "wynik do porównania"
   const result = obliczDokladnosc(manual, ai);
-  console.log(`AI: ${ai}, Manual: ${manual}, Accuracy: ${result.dokladnosc}%`);
   return result.dokladnosc.toFixed(1);
 };
 

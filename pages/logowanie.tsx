@@ -27,14 +27,12 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-    console.log(email, password);
     try {
       const result = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
-      console.log(result);
       if (result?.error) {
         setError("Nieprawidłowy email lub hasło");
       } else {
@@ -44,10 +42,8 @@ export default function LoginPage() {
         const session = await response.json();
 
         if (session?.user?.role === "ADMIN") {
-          console.log("redirecting to admin panel");
           router.push("/admin");
         } else {
-          console.log("redirecting to user panel");
           router.push("/panel");
         }
       }
