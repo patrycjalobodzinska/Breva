@@ -194,7 +194,7 @@ export default function MobileUploadPage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <LiDARScanButton 
+                    <LiDARScanButton
                       onScanComplete={handleLiDARData}
                       onScanError={(error) => toast.error(error)}
                     />

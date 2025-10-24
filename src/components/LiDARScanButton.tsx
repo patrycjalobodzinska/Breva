@@ -3,7 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Camera, Smartphone, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import {
+  Camera,
+  Smartphone,
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface LiDARScanButtonProps {
@@ -22,17 +28,17 @@ declare global {
   }
 }
 
-export const LiDARScanButton = ({ 
-  onScanComplete, 
-  onScanError, 
-  className = "" 
+export const LiDARScanButton = ({
+  onScanComplete,
+  onScanError,
+  className = "",
 }: LiDARScanButtonProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [isMobileApp, setIsMobileApp] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<any>(null);
-  
+
   const onScanCompleteRef = useRef(onScanComplete);
   const onScanErrorRef = useRef(onScanError);
 
@@ -119,8 +125,8 @@ export const LiDARScanButton = ({
       options: {
         quality: "high",
         duration: 30,
-        format: "mp4"
-      }
+        format: "mp4",
+      },
     };
 
     try {
@@ -172,7 +178,8 @@ export const LiDARScanButton = ({
           <div className="text-center">
             <Smartphone className="h-16 w-16 text-text-muted mx-auto mb-4" />
             <p className="text-text-muted mb-4">
-              Pobierz aplikację BREVA na swój telefon, aby korzystać z skanowania LiDAR
+              Pobierz aplikację BREVA na swój telefon, aby korzystać z
+              skanowania LiDAR
             </p>
             <Button variant="outline" className="rounded-xl">
               Pobierz aplikację
@@ -216,7 +223,9 @@ export const LiDARScanButton = ({
                 <div>
                   <span className="text-text-muted">Data:</span>
                   <p className="font-medium">
-                    {new Date(scanResult.timestamp || Date.now()).toLocaleString("pl-PL")}
+                    {new Date(
+                      scanResult.timestamp || Date.now()
+                    ).toLocaleString("pl-PL")}
                   </p>
                 </div>
                 <div>
@@ -233,9 +242,7 @@ export const LiDARScanButton = ({
                 className="flex-1 rounded-xl">
                 Nowy skan
               </Button>
-              <Button className="flex-1 rounded-xl">
-                Prześlij do analizy
-              </Button>
+              <Button className="flex-1 rounded-xl">Prześlij do analizy</Button>
             </div>
           </div>
         </CardContent>
@@ -293,7 +300,8 @@ export const LiDARScanButton = ({
           <div className="text-center">
             <Camera className="h-16 w-16 text-primary mx-auto mb-4" />
             <p className="text-text-muted mb-4">
-              Skanowanie LiDAR zapewnia najwyższą dokładność analizy objętości piersi
+              Skanowanie LiDAR zapewnia najwyższą dokładność analizy objętości
+              piersi
             </p>
           </div>
 
