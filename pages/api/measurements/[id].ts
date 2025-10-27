@@ -23,7 +23,7 @@ export default async function handler(
           userId: session.user.id,
         },
         include: {
-          manualItems: true,
+          analyses: true,
         },
       });
 

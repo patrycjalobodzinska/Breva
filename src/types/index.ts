@@ -11,14 +11,25 @@ export interface Measurement {
   id: string;
   name: string;
   note?: string;
-  source: "AI" | "MANUAL";
-  leftVolumeMl: number;
-  rightVolumeMl: number;
   createdAt: string;
   updatedAt: string;
   userId: string;
-  baselineId?: string;
-  manualItems?: Measurement[];
+  analyses?: BreastAnalysis[];
+}
+
+export interface BreastAnalysis {
+  id: string;
+  measurementId: string;
+  side: "LEFT" | "RIGHT";
+  source?: "AI" | "MANUAL";
+  volumeMl?: number;
+  confidence?: number;
+  filePath?: string;
+  fileName?: string;
+  fileSize?: number;
+  mimeType?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MeasurementFormData {

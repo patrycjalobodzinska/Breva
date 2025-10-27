@@ -1,210 +1,274 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button, ButtonUpload } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
-import { AlertCircle, CheckCircle, Camera, Upload } from "lucide-react";
+import { AlertCircle, CheckCircle, Camera, Upload, Heart } from "lucide-react";
 import { toast } from "sonner";
 
 export default function MobileUploadPage() {
   const router = useRouter();
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [lidarData, setLidarData] = useState<any>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [measurementId, setMeasurementId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     note: "",
   });
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("Plik jest za duży. Maksymalny rozmiar to 10MB");
-        return;
-      }
+  const handleCreateMeasurement = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Nazwa pomiaru jest wymagana");
+      return;
+    }
 
-      const allowedTypes = ["image/jpeg", "image/jpg", "image/png"];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error("Nieobsługiwany format pliku. Użyj JPG lub PNG");
-        return;
-      }
+    setIsCreating(true);
+    try {
+      const response = await fetch("/api/measurements/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
 
-      setSelectedFile(file);
-      if (!formData.name) {
-        setFormData((prev) => ({
-          ...prev,
-          name: file.name.replace(/\.[^/.]+$/, ""),
-        }));
+      if (response.ok) {
+        const measurement = await response.json();
+        setMeasurementId(measurement.id);
+        toast.success("Pomiar został utworzony!");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Błąd podczas tworzenia pomiaru");
       }
+    } catch (error) {
+      toast.error("Wystąpił błąd podczas tworzenia pomiaru");
+    } finally {
+      setIsCreating(false);
     }
   };
 
-  const handleLiDARCapture = () => {
-    // Deep link do natywnej aplikacji Swift
-    const deepLink = "breva://capture-lidar";
+  const handleAnalyzeBreast = async (side: "left" | "right", file: File) => {
+    if (!measurementId) {
+      toast.error("Najpierw utwórz pomiar");
+      return;
+    }
 
-    // Po prostu otwórz deep link
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch(
+        `/api/measurements/${measurementId}/analyze/${side}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        const analysis = await response.json();
+        toast.success(
+          `Analiza ${side === "left" ? "lewej" : "prawej"} piersi zakończona!`
+        );
+        console.log("Analysis result:", analysis);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Błąd podczas analizy");
+      }
+    } catch (error) {
+      toast.error("Wystąpił błąd podczas analizy");
+    }
+  };
+
+  const handleLiDARCapture = (side: "left" | "right") => {
+    const deepLink = `breva://capture-lidar?side=${side}&measurementId=${measurementId}`;
     window.location.href = deepLink;
   };
 
-  return (
-    <MobilePanelLayout>
-      <div className="space-y-3  h-full">
-        <div>
-          <h1 className="text-lg font-bold text-text-primary ">Nowy pomiar</h1>
-          <p className="text-text-muted text-sm">
-            Wykonaj skan LiDAR dla najwyższej dokładności
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-4">
-          {/* <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-            <CardHeader>
-              <CardTitle className="text-lg">Szczegóły pomiaru</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nazwa pomiaru</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, name: e.target.value }))
-                  }
-                  placeholder="np. Pomiar kontrolny"
-                  className="rounded-xl"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="note">Notatka (opcjonalnie)</Label>
-                <Textarea
-                  id="note"
-                  value={formData.note}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, note: e.target.value }))
-                  }
-                  placeholder="Dodatkowe informacje o pomiarze..."
-                  className="rounded-xl"
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card> */}
-          <div className="bg-blue-50 rounded-2xl p-4">
-            <div className="flex items-start space-x-3">
-              <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <h3 className="font-medium text-blue-900 mb-1">Wskazówki</h3>
-                <ul className="text-sm text-blue-800 space-y-1">
-                  <li>• Użyj dobrego oświetlenia</li>
-                  <li>• Unikaj cieni na piersiach</li>
-                </ul>
-              </div>
-            </div>
+  if (measurementId) {
+    return (
+      <MobilePanelLayout>
+        <div className="space-y-4 h-full">
+          <div>
+            <h1 className="text-lg font-bold text-text-primary">
+              Analiza piersi
+            </h1>
+            <p className="text-text-muted text-sm">
+              Wykonaj skan LiDAR dla każdej piersi osobno
+            </p>
           </div>
-        </div>
 
-        {/* Sekcja skanowania LiDAR */}
-        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-          <CardContent className="space-y-4">
-            {lidarData ? (
-              <div className="space-y-3">
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                  <CheckCircle className="h-6 w-6 text-green-600" />
+          {/* Lewa pierś */}
+          <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
+                  <Heart className="h-5 w-5 text-pink-600" />
                 </div>
                 <div>
-                  <p className="font-medium line-clamp-2 text-sm text-text-primary">
-                    Skan LiDAR zakończony
-                  </p>
+                  <h3 className="font-semibold text-text-primary">
+                    Lewa pierś
+                  </h3>
                   <p className="text-xs text-text-muted">
-                    Czas: {lidarData.duration}s
+                    Najwyższa dokładność
                   </p>
                 </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setLidarData(null);
-                    setSelectedFile(null);
-                  }}
-                  className="rounded-xl">
-                  Nowy skan
-                </Button>
               </div>
-            ) : (
-              <div className="space-y-3">
-                <Button
-                  onClick={handleLiDARCapture}
-                  className="w-full rounded-xl py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-                  <Camera className="h-5 w-5 mr-2" />
-                  Zrób zdjęcie LiDAR
-                </Button>
-                <p className="text-xs text-text-muted text-center">
-                  Najwyższa dokładność analizy
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
 
-        {/* Sekcja uploadu pliku */}
-        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-          <CardContent className="space-y-4">
-            {selectedFile ? (
-              <div className="space-y-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-                  <Upload className="h-6 w-6 text-blue-600" />
-                </div>
-                <div>
-                  <p className="font-medium line-clamp-2 text-sm text-text-primary">
-                    {selectedFile.name}
-                  </p>
-                  <p className="text-xs text-text-muted">
-                    {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
-                  </p>
-                </div>
+              <div className="space-y-2">
                 <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedFile(null)}
-                  className="rounded-xl">
-                  Wybierz inny plik
+                  onClick={() => handleLiDARCapture("left")}
+                  className="w-full rounded-xl py-3 text-base font-semibold bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Skan LiDAR
                 </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
+
                 <input
                   type="file"
-                  id="file-upload"
-                  accept="image/jpeg,image/jpg,image/png"
-                  onChange={handleFileSelect}
+                  id="left-file"
+                  accept="image/jpeg,image/jpg,image/png,video/mp4"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleAnalyzeBreast("left", file);
+                  }}
                   className="hidden"
                 />
                 <Button
-                  type="button"
                   variant="outline"
-                  onClick={() =>
-                    document.getElementById("file-upload")?.click()
-                  }
-                  className="w-full rounded-xl py-4 text-lg font-semibold">
-                  <Upload className="h-5 w-5 mr-2" />
-                  Wybierz zdjęcie
+                  onClick={() => document.getElementById("left-file")?.click()}
+                  className="w-full rounded-xl py-3 text-base">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Wybierz plik
                 </Button>
-                <p className="text-xs text-text-muted text-center">
-                  JPG, PNG (max 10MB)
-                </p>
               </div>
-            )}
+            </CardContent>
+          </Card>
+
+          {/* Prawa pierś */}
+          <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3 mb-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Heart className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-text-primary">
+                    Prawa pierś
+                  </h3>
+                  <p className="text-xs text-text-muted">
+                    Najwyższa dokładność
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Button
+                  onClick={() => handleLiDARCapture("right")}
+                  className="w-full rounded-xl py-3 text-base font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white">
+                  <Camera className="h-4 w-4 mr-2" />
+                  Skan LiDAR
+                </Button>
+
+                <input
+                  type="file"
+                  id="right-file"
+                  accept="image/jpeg,image/jpg,image/png,video/mp4"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleAnalyzeBreast("right", file);
+                  }}
+                  className="hidden"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => document.getElementById("right-file")?.click()}
+                  className="w-full rounded-xl py-3 text-base">
+                  <Upload className="h-4 w-4 mr-2" />
+                  Wybierz plik
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex space-x-3 pb-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
+              className="flex-1 rounded-xl">
+              Anuluj
+            </Button>
+            <Button
+              onClick={() => router.push("/mobile/panel/pomiary")}
+              className="flex-1 rounded-xl">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Zobacz wyniki
+            </Button>
+          </div>
+        </div>
+      </MobilePanelLayout>
+    );
+  }
+
+  return (
+    <MobilePanelLayout>
+      <div className="space-y-4 h-full">
+        <div>
+          <h1 className="text-lg font-bold text-text-primary">Nowy pomiar</h1>
+          <p className="text-text-muted text-sm">
+            Utwórz nowy pomiar i wykonaj analizę obu piersi
+          </p>
+        </div>
+
+        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nazwa pomiaru</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, name: e.target.value }))
+                }
+                placeholder="np. Pomiar kontrolny"
+                className="rounded-xl"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="note">Notatka (opcjonalnie)</Label>
+              <Textarea
+                id="note"
+                value={formData.note}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, note: e.target.value }))
+                }
+                placeholder="Dodatkowe informacje o pomiarze..."
+                className="rounded-xl"
+                rows={3}
+              />
+            </div>
           </CardContent>
         </Card>
+
+        <div className="bg-blue-50 rounded-2xl p-4">
+          <div className="flex items-start space-x-3">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-blue-900 mb-1">Wskazówki</h3>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>• Użyj dobrego oświetlenia</li>
+                <li>• Unikaj cieni na piersiach</li>
+                <li>• Skanuj każdą pierś osobno</li>
+              </ul>
+            </div>
+          </div>
+        </div>
 
         <div className="flex space-x-3 pb-2">
           <Button
@@ -215,18 +279,18 @@ export default function MobileUploadPage() {
             Anuluj
           </Button>
           <Button
-            type="submit"
-            disabled={(!selectedFile && !lidarData) || isUploading}
+            onClick={handleCreateMeasurement}
+            disabled={isCreating || !formData.name.trim()}
             className="flex-1 rounded-xl">
-            {isUploading ? (
+            {isCreating ? (
               <>
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Przesyłanie...
+                Tworzenie...
               </>
             ) : (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Prześlij do analizy
+                Utwórz pomiar
               </>
             )}
           </Button>

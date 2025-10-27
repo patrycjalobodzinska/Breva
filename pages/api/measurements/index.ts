@@ -25,40 +25,55 @@ export default async function handler(
       pageSize = "10",
     } = req.query;
 
-    const where = {
-      userId: session.user.id,
-      source: "AI", // Only show AI measurements, not manual ones
-      ...(search && {
-        OR: [
-          {
-            name: { contains: search as string, mode: "insensitive" as const },
-          },
-          {
-            note: { contains: search as string, mode: "insensitive" as const },
-          },
-        ],
-      }),
-    };
-
     const [measurements, totalCount] = await Promise.all([
       prisma.measurement.findMany({
-        where,
+        where: {
+          userId: session.user.id,
+          ...(search && {
+            OR: [
+              {
+                name: {
+                  contains: search as string,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                note: {
+                  contains: search as string,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }),
+        },
         include: {
-          manualItems: {
-            select: {
-              id: true,
-              name: true,
-              leftVolumeMl: true,
-              rightVolumeMl: true,
-              createdAt: true,
-            },
-          },
+          analyses: true,
         },
         orderBy: { [sort as string]: order },
         skip: (parseInt(page as string) - 1) * parseInt(pageSize as string),
         take: parseInt(pageSize as string),
       }),
-      prisma.measurement.count({ where }),
+      prisma.measurement.count({
+        where: {
+          userId: session.user.id,
+          ...(search && {
+            OR: [
+              {
+                name: {
+                  contains: search as string,
+                  mode: "insensitive" as const,
+                },
+              },
+              {
+                note: {
+                  contains: search as string,
+                  mode: "insensitive" as const,
+                },
+              },
+            ],
+          }),
+        },
+      }),
     ]);
 
     const totalPages = Math.ceil(totalCount / parseInt(pageSize as string));

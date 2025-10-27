@@ -33,7 +33,7 @@ export default function MobilePanelLayout({
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center">
+      <div className="max-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center">
         <div className="text-center">
           <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
           <p className="text-text-muted">Ładowanie...</p>
@@ -47,7 +47,7 @@ export default function MobilePanelLayout({
   }
 
   return (
-    <div className="mobile-layout min-h-screen bg-gradient-to-br max-h-screen from-accent-1 to-accent-2 overflow-x-hidden">
+    <div className="max-h-screen bg-gradient-to-br from-accent-1 to-accent-2 overflow-x-hidden">
       <div className="flex flex-col h-screen overflow-x-hidden">
         <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-primary/20 sticky top-0 z-50">
           <div className="flex items-center justify-between px-4 py-3">

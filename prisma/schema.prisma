@@ -28,16 +28,32 @@ model Measurement {
   id            String   @id @default(cuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id])
-  name          String   // default = file name
-  note          String?  // optional
-  source        Source   // AI or MANUAL
-  leftVolumeMl  Float
-  rightVolumeMl Float
+  name          String   // measurement name
+  note          String?  // optional note
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  baselineId    String?  // reference to an AI measurement
-  baseline      Measurement? @relation("Baseline", fields: [baselineId], references: [id])
-  manualItems   Measurement[] @relation("Baseline")
+  analyses      BreastAnalysis[]
+}
+
+model BreastAnalysis {
+  id            String   @id @default(cuid())
+  measurementId String
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  side          BreastSide
+  source        Source?  // AI or MANUAL - nullable until analysis is complete
+  volumeMl      Float?   // null until analysis is complete
+  confidence    Float?   // AI confidence score
+  filePath      String?  // path to uploaded file
+  fileName      String?  // original file name
+  fileSize      Int?     // file size in bytes
+  mimeType      String?  // file mime type
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum BreastSide {
+  LEFT
+  RIGHT
 }
 
 enum Source {
