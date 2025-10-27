@@ -5,8 +5,15 @@ import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, ButtonUpload } from "@/components/ui/button";
 
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Camera, Upload } from "lucide-react";
 import { toast } from "sonner";
+
+// Deklaracja typu dla komunikacji z aplikacją mobilną
+declare global {
+  interface Window {
+    brevaNativeMessage?: (message: string) => void;
+  }
+}
 
 export default function MobileUploadPage() {
   const router = useRouter();
@@ -40,6 +47,27 @@ export default function MobileUploadPage() {
           name: file.name.replace(/\.[^/.]+$/, ""),
         }));
       }
+    }
+  };
+
+  const handleLiDARCapture = () => {
+    // Deep link do natywnej aplikacji Swift
+    const deepLink = "breva://capture-lidar";
+
+    // Sprawdź czy jesteśmy w aplikacji mobilnej
+    if (window.brevaNativeMessage) {
+      // Jeśli jesteśmy w WebView, wyślij wiadomość do natywnej aplikacji
+      window.brevaNativeMessage("capture-lidar");
+    } else {
+      // Jeśli nie, spróbuj otworzyć deep link
+      window.location.href = deepLink;
+
+      // Fallback - pokaż informację o aplikacji mobilnej
+      setTimeout(() => {
+        toast.info(
+          "Otwórz tę stronę w aplikacji mobilnej BREVA dla skanowania LiDAR"
+        );
+      }, 1000);
     }
   };
 
@@ -101,6 +129,103 @@ export default function MobileUploadPage() {
             </div>
           </div>
         </div>
+
+        {/* Sekcja skanowania LiDAR */}
+        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <CardContent className="space-y-4">
+            {lidarData ? (
+              <div className="space-y-3">
+                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <p className="font-medium line-clamp-2 text-sm text-text-primary">
+                    Skan LiDAR zakończony
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    Czas: {lidarData.duration}s
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setLidarData(null);
+                    setSelectedFile(null);
+                  }}
+                  className="rounded-xl">
+                  Nowy skan
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Button
+                  onClick={handleLiDARCapture}
+                  className="w-full rounded-xl py-4 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                  <Camera className="h-5 w-5 mr-2" />
+                  Zrób zdjęcie LiDAR
+                </Button>
+                <p className="text-xs text-text-muted text-center">
+                  Najwyższa dokładność analizy
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Sekcja uploadu pliku */}
+        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <CardContent className="space-y-4">
+            {selectedFile ? (
+              <div className="space-y-3">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <Upload className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <p className="font-medium line-clamp-2 text-sm text-text-primary">
+                    {selectedFile.name}
+                  </p>
+                  <p className="text-xs text-text-muted">
+                    {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedFile(null)}
+                  className="rounded-xl">
+                  Wybierz inny plik
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <input
+                  type="file"
+                  id="file-upload"
+                  accept="image/jpeg,image/jpg,image/png"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    document.getElementById("file-upload")?.click()
+                  }
+                  className="w-full rounded-xl py-4 text-lg font-semibold">
+                  <Upload className="h-5 w-5 mr-2" />
+                  Wybierz zdjęcie
+                </Button>
+                <p className="text-xs text-text-muted text-center">
+                  JPG, PNG (max 10MB)
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <div className="flex space-x-3 pb-2">
           <Button
             type="button"

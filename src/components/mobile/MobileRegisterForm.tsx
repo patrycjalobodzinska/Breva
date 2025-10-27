@@ -69,9 +69,9 @@ export const MobileRegisterForm = ({
             });
 
             if (result?.ok) {
-              // Logowanie się powiodło - przekieruj do panelu
+              // Logowanie się powiodło - przekieruj do loading
               setTimeout(() => {
-                router.push("/mobile/panel");
+                router.push("/mobile/loading");
               }, 1500);
             } else {
               // Logowanie się nie powiodło - przekieruj do widoku logowania
