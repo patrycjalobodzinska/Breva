@@ -8,16 +8,6 @@ import { Button, ButtonUpload } from "@/components/ui/button";
 import { AlertCircle, CheckCircle, Camera, Upload } from "lucide-react";
 import { toast } from "sonner";
 
-// Deklaracja typu dla komunikacji z aplikacją mobilną
-declare global {
-  interface Window {
-    brevaNativeMessage?: (message: string) => void;
-    ReactNativeWebView?: {
-      postMessage: (message: string) => void;
-    };
-  }
-}
-
 export default function MobileUploadPage() {
   const router = useRouter();
   const [isUploading, setIsUploading] = useState(false);
@@ -57,53 +47,8 @@ export default function MobileUploadPage() {
     // Deep link do natywnej aplikacji Swift
     const deepLink = "breva://capture-lidar";
 
-    // Debug - sprawdź co jest dostępne
-    console.log("🔍 Debug aplikacji mobilnej:");
-    console.log("- window.brevaNativeMessage:", !!window.brevaNativeMessage);
-    console.log("- window.ReactNativeWebView:", !!window.ReactNativeWebView);
-    console.log("- navigator.userAgent:", navigator.userAgent);
-    console.log("- window.location.protocol:", window.location.protocol);
-    console.log("- document.referrer:", document.referrer);
-
-    // Sprawdź czy jesteśmy w aplikacji mobilnej (różne sposoby wykrywania)
-    const isInMobileApp =
-      window.brevaNativeMessage ||
-      window.ReactNativeWebView ||
-      navigator.userAgent.includes("BrevaApp") ||
-      window.location.protocol === "file:" ||
-      document.referrer.includes("breva://");
-
-    console.log("📱 Czy w aplikacji mobilnej:", isInMobileApp);
-
-    if (isInMobileApp) {
-      // Jeśli jesteśmy w WebView, wyślij wiadomość do natywnej aplikacji
-      if (window.brevaNativeMessage) {
-        console.log("📤 Wysyłam przez brevaNativeMessage");
-        window.brevaNativeMessage("capture-lidar");
-      } else if (window.ReactNativeWebView) {
-        console.log("📤 Wysyłam przez ReactNativeWebView");
-        window.ReactNativeWebView.postMessage(
-          JSON.stringify({
-            type: "capture-lidar",
-          })
-        );
-      } else {
-        console.log("📤 Używam deep link jako fallback");
-        // Fallback - użyj deep link
-        window.location.href = deepLink;
-      }
-    } else {
-      console.log("🌐 Nie w aplikacji mobilnej - używam deep link");
-      // Jeśli nie, spróbuj otworzyć deep link
-      window.location.href = deepLink;
-
-      // Fallback - pokaż informację o aplikacji mobilnej
-      setTimeout(() => {
-        toast.info(
-          "Otwórz tę stronę w aplikacji mobilnej BREVA dla skanowania LiDAR"
-        );
-      }, 1000);
-    }
+    // Po prostu otwórz deep link
+    window.location.href = deepLink;
   };
 
   return (
