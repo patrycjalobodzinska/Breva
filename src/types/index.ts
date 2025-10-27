@@ -20,14 +20,19 @@ export interface Measurement {
 export interface BreastAnalysis {
   id: string;
   measurementId: string;
-  side: "LEFT" | "RIGHT";
-  source?: "AI" | "MANUAL";
-  volumeMl?: number;
-  confidence?: number;
-  filePath?: string;
-  fileName?: string;
-  fileSize?: number;
-  mimeType?: string;
+  measurementType: "AI" | "MANUAL";
+  leftVolumeMl?: number;
+  rightVolumeMl?: number;
+  leftConfidence?: number;
+  rightConfidence?: number;
+  leftFilePath?: string;
+  rightFilePath?: string;
+  leftFileName?: string;
+  rightFileName?: string;
+  leftFileSize?: number;
+  rightFileSize?: number;
+  leftMimeType?: string;
+  rightMimeType?: string;
   createdAt: string;
   updatedAt: string;
 }

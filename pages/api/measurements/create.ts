@@ -29,9 +29,6 @@ export default async function handler(
         userId: session.user.id,
         name,
         note: note || null,
-        source: "MANUAL",
-        leftVolumeMl: 0,
-        rightVolumeMl: 0,
       },
     });
 

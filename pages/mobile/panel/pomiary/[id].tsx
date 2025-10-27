@@ -115,12 +115,11 @@ export default function MobileMeasurementDetailPage() {
   const handleShare = async () => {
     if (!measurement) return;
 
-    const leftAnalysis = measurement?.analyses?.find((a) => a.side === "LEFT");
-    const rightAnalysis = measurement?.analyses?.find(
-      (a) => a.side === "RIGHT"
+    const aiAnalysis = measurement?.analyses?.find(
+      (a) => a.measurementType === "AI"
     );
-    const leftVolume = leftAnalysis?.volumeMl || 0;
-    const rightVolume = rightAnalysis?.volumeMl || 0;
+    const leftVolume = aiAnalysis?.leftVolumeMl || 0;
+    const rightVolume = aiAnalysis?.rightVolumeMl || 0;
 
     const shareData = {
       title: `Pomiar: ${measurement?.name}`,
@@ -167,10 +166,14 @@ export default function MobileMeasurementDetailPage() {
   };
 
   const hasManualMeasurement = measurement?.analyses?.some(
-    (a) => a.source === "MANUAL"
+    (a) => a.measurementType === "MANUAL"
   );
-  const manualAnalyses =
-    measurement?.analyses?.filter((a) => a.source === "MANUAL") || [];
+  const aiAnalysis = measurement?.analyses?.find(
+    (a) => a.measurementType === "AI"
+  );
+  const manualAnalysis = measurement?.analyses?.find(
+    (a) => a.measurementType === "MANUAL"
+  );
 
   if (isLoading) {
     return (
@@ -252,7 +255,7 @@ export default function MobileMeasurementDetailPage() {
         </div>
 
         {/* AI Results */}
-        {measurement?.analyses && measurement?.analyses.length > 0 && (
+        {aiAnalysis && (
           <div className="grid grid-cols-2 gap-4">
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader className="pb-2">
@@ -263,10 +266,7 @@ export default function MobileMeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-text-primary">
-                  {measurement?.analyses
-                    ?.find((a) => a.side === "LEFT")
-                    ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
-                  ml
+                  {aiAnalysis?.leftVolumeMl?.toFixed(1) || "Brak danych"} ml
                 </p>
               </CardContent>
             </Card>
@@ -279,10 +279,7 @@ export default function MobileMeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-text-primary">
-                  {measurement?.analyses
-                    ?.find((a) => a.side === "RIGHT")
-                    ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
-                  ml
+                  {aiAnalysis?.rightVolumeMl?.toFixed(1) || "Brak danych"} ml
                 </p>
               </CardContent>
             </Card>
@@ -301,18 +298,16 @@ export default function MobileMeasurementDetailPage() {
                   <div>
                     <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
-                      {manualAnalyses
-                        .find((a) => a.side === "LEFT")
-                        ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
+                      {manualAnalysis?.leftVolumeMl?.toFixed(1) ||
+                        "Brak danych"}{" "}
                       ml
                     </p>
                   </div>
                   <div>
                     <p className="text-text-muted text-sm">Prawa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
-                      {manualAnalyses
-                        .find((a) => a.side === "RIGHT")
-                        ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
+                      {manualAnalysis?.rightVolumeMl?.toFixed(1) ||
+                        "Brak danych"}{" "}
                       ml
                     </p>
                   </div>

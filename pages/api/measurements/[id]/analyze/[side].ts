@@ -75,42 +75,40 @@ export default async function handler(
         timestamp: lidarData.timestamp || "unknown",
       });
 
-      // Sprawdź czy analiza już istnieje
+      // Sprawdź czy analiza AI już istnieje
       const existingAnalysis = await prisma.breastAnalysis?.findFirst({
         where: {
           measurementId: measurementId as string,
-          side: side.toUpperCase() as "LEFT" | "RIGHT",
+          measurementType: "AI",
         },
       });
 
       let breastAnalysis;
       if (existingAnalysis) {
-        // Aktualizuj istniejącą analizę
+        // Aktualizuj istniejącą analizę AI
         breastAnalysis = await prisma.breastAnalysis?.update({
           where: { id: existingAnalysis.id },
           data: {
-            source: "AI",
-            volumeMl: aiResult.volumeMl,
-            confidence: aiResult.confidence,
-            filePath: `lidar_data_${side}_${Date.now()}.json`,
-            fileName: `lidar_scan_${side}.json`,
-            fileSize: JSON.stringify(lidarData).length,
-            mimeType: "application/json",
+            [`${side}VolumeMl`]: aiResult.volumeMl,
+            [`${side}Confidence`]: aiResult.confidence,
+            [`${side}FilePath`]: `lidar_data_${side}_${Date.now()}.json`,
+            [`${side}FileName`]: `lidar_scan_${side}.json`,
+            [`${side}FileSize`]: JSON.stringify(lidarData).length,
+            [`${side}MimeType`]: "application/json",
           },
         });
       } else {
-        // Utwórz nową analizę
+        // Utwórz nową analizę AI
         breastAnalysis = await prisma.breastAnalysis?.create({
           data: {
             measurementId: measurementId as string,
-            side: side.toUpperCase() as "LEFT" | "RIGHT",
-            source: "AI",
-            volumeMl: aiResult.volumeMl,
-            confidence: aiResult.confidence,
-            filePath: `lidar_data_${side}_${Date.now()}.json`,
-            fileName: `lidar_scan_${side}.json`,
-            fileSize: JSON.stringify(lidarData).length,
-            mimeType: "application/json",
+            measurementType: "AI",
+            [`${side}VolumeMl`]: aiResult.volumeMl,
+            [`${side}Confidence`]: aiResult.confidence,
+            [`${side}FilePath`]: `lidar_data_${side}_${Date.now()}.json`,
+            [`${side}FileName`]: `lidar_scan_${side}.json`,
+            [`${side}FileSize`]: JSON.stringify(lidarData).length,
+            [`${side}MimeType`]: "application/json",
           },
         });
       }
@@ -170,42 +168,41 @@ export default async function handler(
 
       console.log(`🤖 Mock AI Analysis Result for ${side} breast:`, aiResult);
 
-      // Sprawdź czy analiza już istnieje
+      // Sprawdź czy analiza AI już istnieje
       const existingAnalysis = await prisma.breastAnalysis.findFirst({
         where: {
           measurementId: measurementId as string,
-          side: side.toUpperCase() as "LEFT" | "RIGHT",
+          measurementType: "AI",
         },
       });
 
       let breastAnalysis;
       if (existingAnalysis) {
-        // Aktualizuj istniejącą analizę
+        // Aktualizuj istniejącą analizę AI
         breastAnalysis = await prisma.breastAnalysis.update({
           where: { id: existingAnalysis.id },
           data: {
-            source: "AI",
-            volumeMl: aiResult.volumeMl,
-            confidence: aiResult.confidence,
-            filePath: file.filepath,
-            fileName: file.originalFilename,
-            fileSize: file.size,
-            mimeType: file.mimetype,
+            measurementType: "AI",
+            [`${side}VolumeMl`]: aiResult.volumeMl,
+            [`${side}Confidence`]: aiResult.confidence,
+            [`${side}FilePath`]: file.filepath,
+            [`${side}FileName`]: file.originalFilename,
+            [`${side}FileSize`]: file.size,
+            [`${side}MimeType`]: file.mimetype,
           },
         });
       } else {
-        // Utwórz nową analizę
+        // Utwórz nową analizę AI
         breastAnalysis = await prisma.breastAnalysis.create({
           data: {
             measurementId: measurementId as string,
-            side: side.toUpperCase() as "LEFT" | "RIGHT",
-            source: "AI",
-            volumeMl: aiResult.volumeMl,
-            confidence: aiResult.confidence,
-            filePath: file.filepath,
-            fileName: file.originalFilename,
-            fileSize: file.size,
-            mimeType: file.mimetype,
+            measurementType: "AI",
+            [`${side}VolumeMl`]: aiResult.volumeMl,
+            [`${side}Confidence`]: aiResult.confidence,
+            [`${side}FilePath`]: file.filepath,
+            [`${side}FileName`]: file.originalFilename,
+            [`${side}FileSize`]: file.size,
+            [`${side}MimeType`]: file.mimetype,
           },
         });
       }

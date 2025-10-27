@@ -26,7 +26,6 @@ export default async function handler(
       where: {
         id: id as string,
         userId: session.user.id,
-        source: "AI",
       },
     });
 

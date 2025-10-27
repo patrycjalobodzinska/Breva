@@ -36,27 +36,27 @@ model Measurement {
 }
 
 model BreastAnalysis {
-  id            String   @id @default(cuid())
-  measurementId String
-  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
-  side          BreastSide
-  source        Source?  // AI or MANUAL - nullable until analysis is complete
-  volumeMl      Float?   // null until analysis is complete
-  confidence    Float?   // AI confidence score
-  filePath      String?  // path to uploaded file
-  fileName      String?  // original file name
-  fileSize      Int?     // file size in bytes
-  mimeType      String?  // file mime type
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id              String   @id @default(cuid())
+  measurementId   String
+  measurement     Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  measurementType MeasurementType
+  leftVolumeMl    Float?   // null until analysis is complete
+  rightVolumeMl   Float?   // null until analysis is complete
+  leftConfidence  Float?   // AI confidence score for left
+  rightConfidence Float?   // AI confidence score for right
+  leftFilePath    String?  // path to uploaded file for left
+  rightFilePath   String?  // path to uploaded file for right
+  leftFileName    String?  // original file name for left
+  rightFileName   String?  // original file name for right
+  leftFileSize    Int?     // file size in bytes for left
+  rightFileSize   Int?     // file size in bytes for right
+  leftMimeType    String?  // file mime type for left
+  rightMimeType   String?  // file mime type for right
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
-enum BreastSide {
-  LEFT
-  RIGHT
-}
-
-enum Source {
+enum MeasurementType {
   AI
   MANUAL
 }
