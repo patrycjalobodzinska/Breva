@@ -115,11 +115,18 @@ export default function MobileMeasurementDetailPage() {
   const handleShare = async () => {
     if (!measurement) return;
 
+    const leftAnalysis = measurement?.analyses?.find((a) => a.side === "LEFT");
+    const rightAnalysis = measurement?.analyses?.find(
+      (a) => a.side === "RIGHT"
+    );
+    const leftVolume = leftAnalysis?.volumeMl || 0;
+    const rightVolume = rightAnalysis?.volumeMl || 0;
+
     const shareData = {
       title: `Pomiar: ${measurement?.name}`,
-      text: `Pomiar piersi - Lewa: ${measurement?.leftVolumeMl?.toFixed(
+      text: `Pomiar piersi - Lewa: ${leftVolume.toFixed(
         1
-      )}ml, Prawa: ${measurement?.rightVolumeMl?.toFixed(1)}ml`,
+      )}ml, Prawa: ${rightVolume.toFixed(1)}ml`,
       url: window.location.href,
     };
 
@@ -159,11 +166,11 @@ export default function MobileMeasurementDetailPage() {
     return { diff, percentage };
   };
 
-  const hasManualMeasurement =
-    measurement?.manualItems && measurement?.manualItems.length > 0;
-  const manualMeasurement = hasManualMeasurement
-    ? measurement?.manualItems![0]
-    : null;
+  const hasManualMeasurement = measurement?.analyses?.some(
+    (a) => a.source === "MANUAL"
+  );
+  const manualAnalyses =
+    measurement?.analyses?.filter((a) => a.source === "MANUAL") || [];
 
   if (isLoading) {
     return (
@@ -245,7 +252,7 @@ export default function MobileMeasurementDetailPage() {
         </div>
 
         {/* AI Results */}
-        {measurement?.source === "AI" && (
+        {measurement?.analyses && measurement?.analyses.length > 0 && (
           <div className="grid grid-cols-2 gap-4">
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader className="pb-2">
@@ -256,7 +263,10 @@ export default function MobileMeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-text-primary">
-                  {measurement?.leftVolumeMl} ml
+                  {measurement?.analyses
+                    ?.find((a) => a.side === "LEFT")
+                    ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
+                  ml
                 </p>
               </CardContent>
             </Card>
@@ -269,7 +279,10 @@ export default function MobileMeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-text-primary">
-                  {measurement?.rightVolumeMl} ml
+                  {measurement?.analyses
+                    ?.find((a) => a.side === "RIGHT")
+                    ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
+                  ml
                 </p>
               </CardContent>
             </Card>
@@ -288,21 +301,24 @@ export default function MobileMeasurementDetailPage() {
                   <div>
                     <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
-                      {manualMeasurement?.leftVolumeMl} ml
+                      {manualAnalyses
+                        .find((a) => a.side === "LEFT")
+                        ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
+                      ml
                     </p>
                   </div>
                   <div>
                     <p className="text-text-muted text-sm">Prawa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
-                      {manualMeasurement?.rightVolumeMl} ml
+                      {manualAnalyses
+                        .find((a) => a.side === "RIGHT")
+                        ?.volumeMl?.toFixed(1) || "Brak danych"}{" "}
+                      ml
                     </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            {/* {measurement?.source === "AI" && hasManualMeasurement && (
-              <AccuracyDisplay measurement={measurement} />
-            )} */}
           </div>
         )}
 

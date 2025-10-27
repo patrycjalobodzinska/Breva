@@ -24,12 +24,14 @@ export default async function handler(
     }
 
     const { name, note } = createMeasurementSchema.parse(req.body);
-
-    const measurement = await prisma.measurement?.create({
+    const measurement = await prisma.measurement.create({
       data: {
         userId: session.user.id,
         name,
         note: note || null,
+        source: "MANUAL",
+        leftVolumeMl: 0,
+        rightVolumeMl: 0,
       },
     });
 
