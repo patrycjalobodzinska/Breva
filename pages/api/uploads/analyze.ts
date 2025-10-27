@@ -8,6 +8,8 @@ import fs from "fs";
 export const config = {
   api: {
     bodyParser: false,
+    responseLimit: false,
+    externalResolver: true,
   },
 };
 
@@ -26,7 +28,7 @@ export default async function handler(
     }
 
     const form = formidable({
-      maxFileSize: 300 * 1024 * 1024, // 300MB
+      maxFileSize: 500 * 1024 * 1024, // 500MB
       filter: ({ mimetype }) => {
         const allowedTypes = [
           "video/mp4",
@@ -35,6 +37,7 @@ export default async function handler(
           "image/png",
           "image/heic",
           "application/octet-stream", // For LiDAR files
+          "application/json", // For LiDAR JSON data
         ];
         return allowedTypes.includes(mimetype || "");
       },
