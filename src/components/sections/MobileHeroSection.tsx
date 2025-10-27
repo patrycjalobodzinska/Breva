@@ -36,7 +36,7 @@ export const MobileHeroSection = () => {
 
   return (
     <div className="min-h-screen  bg-gradient-to-br h-full from-accent-1 to-accent-2 relative overflow-hidden">
-      <div className="relative  h-screen justify-between gap-6 z-10 flex flex-col ">
+      <div className="relative  h-screen gap-6 z-10 flex flex-col ">
         <div className=" absolute    top-0 left-0 h-screen w-screen">
           <div className="bg-accent-2 z-0    h-[45%] "></div>
           <div className="gradient-to-b z-0  h-[15%] bg-gradient-to-t from-transparent to-accent-2  w-full "></div>
@@ -54,7 +54,7 @@ export const MobileHeroSection = () => {
         )}
         {currentView === "home" && (
           <>
-            <div className="flex-1 z-10 flex flex-col ">
+            <div className="flex z-10 flex flex-col ">
               <div className="text-center mt-10">
                 <div className="flex items-center justify-center mb-6">
                   <Heart className="h-20 w-20 text-primary" />
