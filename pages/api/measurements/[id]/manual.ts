@@ -40,10 +40,13 @@ export default async function handler(
         userId: session.user.id,
         name: name || `Pomiar ręczny ${new Date().toLocaleDateString()}`,
         note,
-        source: "MANUAL",
-        leftVolumeMl,
-        rightVolumeMl,
-        baselineId: id as string,
+        analyses: {
+          create: {
+            measurementType: "MANUAL",
+            leftVolumeMl,
+            rightVolumeMl,
+          },
+        },
       },
     });
 
