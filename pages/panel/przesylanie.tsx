@@ -80,53 +80,53 @@ export default function UploadPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    if (uploadMethod === "file" && !file) return;
-    if (uploadMethod === "lidar" && !lidarData) return;
+  //   if (uploadMethod === "file" && !file) return;
+  //   if (uploadMethod === "lidar" && !lidarData) return;
 
-    setIsUploading(true);
-    try {
-      const formData = new FormData();
+  //   setIsUploading(true);
+  //   try {
+  //     const formData = new FormData();
 
-      if (uploadMethod === "file" && file) {
-        formData.append("file", file);
-      } else if (uploadMethod === "lidar" && lidarData) {
-        // Dla LiDAR, tworzymy plik z danych
-        const lidarFile = new File(
-          [lidarData.uri],
-          `lidar_scan_${Date.now()}.mp4`,
-          {
-            type: "video/mp4",
-          }
-        );
-        formData.append("file", lidarFile);
-        formData.append("lidarData", JSON.stringify(lidarData));
-      }
+  //     if (uploadMethod === "file" && file) {
+  //       formData.append("file", file);
+  //     } else if (uploadMethod === "lidar" && lidarData) {
+  //       // Dla LiDAR, tworzymy plik z danych
+  //       const lidarFile = new File(
+  //         [lidarData.uri],
+  //         `lidar_scan_${Date.now()}.mp4`,
+  //         {
+  //           type: "video/mp4",
+  //         }
+  //       );
+  //       formData.append("file", lidarFile);
+  //       formData.append("lidarData", JSON.stringify(lidarData));
+  //     }
 
-      formData.append("note", note);
-      formData.append("uploadMethod", uploadMethod);
+  //     formData.append("note", note);
+  //     formData.append("uploadMethod", uploadMethod);
 
-      const response = await fetch("/api/uploads/analyze", {
-        method: "POST",
-        body: formData,
-      });
+  //     const response = await fetch("/api/uploads/analyze", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
 
-      if (response.ok) {
-        const result = await response.json();
-        toast.success("Analiza zakończona pomyślnie!");
-        router.push(`/panel/pomiary/${result.id}`);
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Wystąpił błąd podczas analizy");
-      }
-    } catch (error) {
-      toast.error("Wystąpił błąd podczas przesyłania pliku");
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  //     if (response.ok) {
+  //       const result = await response.json();
+  //       toast.success("Analiza zakończona pomyślnie!");
+  //       router.push(`/panel/pomiary/${result.id}`);
+  //     } else {
+  //       const error = await response.json();
+  //       toast.error(error.error || "Wystąpił błąd podczas analizy");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Wystąpił błąd podczas przesyłania pliku");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
 
   const handleLiDARData = (data: any) => {
     setLidarData(data);
@@ -160,9 +160,8 @@ export default function UploadPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Upload Method Selection */}
-              <div className="space-y-4">
+            {/* Upload Method Selection */}
+            {/* <div className="space-y-4">
                 <Label>Wybierz metodę analizy</Label>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Card
@@ -197,10 +196,10 @@ export default function UploadPage() {
                     </CardContent>
                   </Card>
                 </div>
-              </div>
+              </div> */}
 
-              {/* File Upload */}
-              {uploadMethod === "file" && (
+            {/* File Upload */}
+            {/* {uploadMethod === "file" && (
                 <div className="space-y-2">
                   <Label htmlFor="file">Plik do analizy</Label>
                   <div className="border-2 border-dashed border-primary/30 rounded-2xl p-8 text-center hover:border-primary/50 transition-colors">
@@ -235,57 +234,56 @@ export default function UploadPage() {
                     </label>
                   </div>
                 </div>
-              )}
+              )} */}
 
-              {/* LiDAR Scanner */}
-              {uploadMethod === "lidar" && (
-                <div className="space-y-2">
-                  <Label>Skan LiDAR</Label>
-                  <WebViewBridge onLiDARData={handleLiDARData} />
-                </div>
-              )}
-
-              {/* Note */}
+            {/* LiDAR Scanner */}
+            {uploadMethod === "lidar" && (
               <div className="space-y-2">
-                <Label htmlFor="note">Notatka (opcjonalna)</Label>
-                <Textarea
-                  id="note"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Dodaj notatkę do tego pomiaru..."
-                  className="rounded-2xl"
-                  rows={3}
-                />
+                <Label>Skan LiDAR</Label>
+                <WebViewBridge onLiDARData={handleLiDARData} />
               </div>
+            )}
 
-              {/* File Info */}
-              <div className="bg-accent-1 rounded-2xl p-4">
-                <div className="flex items-start space-x-3">
-                  <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
-                  <div className="text-sm">
-                    <p className="font-medium mb-2">
-                      Wymagania dotyczące plików:
-                    </p>
-                    <ul className="space-y-1 text-text-muted">
-                      <li>• Wideo: MP4, MOV (max 300MB)</li>
-                      <li>• Zdjęcia: JPG, PNG, HEIC (max 30MB)</li>
-                      <li>• LiDAR: PLY, LAS (max 200MB)</li>
-                    </ul>
-                  </div>
+            {/* Note */}
+            <div className="space-y-2">
+              <Label htmlFor="note">Notatka (opcjonalna)</Label>
+              <Textarea
+                id="note"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="Dodaj notatkę do tego pomiaru..."
+                className="rounded-2xl"
+                rows={3}
+              />
+            </div>
+
+            {/* File Info */}
+            <div className="bg-accent-1 rounded-2xl p-4">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium mb-2">
+                    Wymagania dotyczące plików:
+                  </p>
+                  <ul className="space-y-1 text-text-muted">
+                    <li>• Wideo: MP4, MOV (max 300MB)</li>
+                    <li>• Zdjęcia: JPG, PNG, HEIC (max 30MB)</li>
+                    <li>• LiDAR: PLY, LAS (max 200MB)</li>
+                  </ul>
                 </div>
               </div>
+            </div>
 
-              <Button
-                type="submit"
-                disabled={
-                  (uploadMethod === "file" && !file) ||
-                  (uploadMethod === "lidar" && !lidarData) ||
-                  isUploading
-                }
-                className="w-full rounded-2xl bg-primary hover:bg-primary-dark">
-                {isUploading ? "Analizowanie..." : "Rozpocznij analizę"}
-              </Button>
-            </form>
+            <Button
+              type="submit"
+              disabled={
+                (uploadMethod === "file" && !file) ||
+                (uploadMethod === "lidar" && !lidarData) ||
+                isUploading
+              }
+              className="w-full rounded-2xl bg-primary hover:bg-primary-dark">
+              {isUploading ? "Analizowanie..." : "Rozpocznij analizę"}
+            </Button>
           </CardContent>
         </Card>
       </div>

@@ -71,7 +71,7 @@ export default async function handler(
       }),
     ]);
 
-    // Na razie zwracamy wszystkie pomiary, filtrowanie będzie działać gdy Prisma będzie zaktualizowane
+    // Na razie zwracamy wszystkie pomiary - filtrowanie będzie działać gdy Prisma będzie zaktualizowane
     const measurements = allMeasurements || [];
 
     // Paginacja na poziomie aplikacji

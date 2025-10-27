@@ -30,9 +30,6 @@ export default async function handler(
         userId: session.user.id,
         name,
         note: note || null,
-        source: "AI",
-        leftVolumeMl: 0,
-        rightVolumeMl: 0,
       },
     });
 

@@ -200,7 +200,7 @@ export default function MobileUploadPage() {
                       }}
                       className="hidden"
                     />
-                    <Button
+                    {/* <Button
                       variant="outline"
                       onClick={() =>
                         document.getElementById("left-file")?.click()
@@ -208,7 +208,7 @@ export default function MobileUploadPage() {
                       className="w-full rounded-xl py-3 text-base">
                       <Upload className="h-4 w-4 mr-2" />
                       Wybierz plik
-                    </Button>
+                    </Button> */}
                   </>
                 )}
               </div>
@@ -264,7 +264,7 @@ export default function MobileUploadPage() {
                       }}
                       className="hidden"
                     />
-                    <Button
+                    {/* <Button
                       variant="outline"
                       onClick={() =>
                         document.getElementById("right-file")?.click()
@@ -272,7 +272,7 @@ export default function MobileUploadPage() {
                       className="w-full rounded-xl py-3 text-base">
                       <Upload className="h-4 w-4 mr-2" />
                       Wybierz plik
-                    </Button>
+                    </Button> */}
                   </>
                 )}
               </div>
