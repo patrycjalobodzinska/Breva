@@ -97,9 +97,9 @@ export default function MeasurementDetailPage() {
   }
 
   const hasManualMeasurement =
-    measurement.manualItems && measurement.manualItems.length > 0;
+    measurement?.manualItems && measurement?.manualItems.length > 0;
   const manualMeasurement = hasManualMeasurement
-    ? measurement.manualItems![0]
+    ? measurement?.manualItems![0]
     : null;
 
   return (
@@ -116,7 +116,7 @@ export default function MeasurementDetailPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h1 className="text-3xl font-bold text-text-primary">
-              {measurement.name}
+              {measurement?.name}
             </h1>
           </div>
           <MeasurementActions
@@ -161,7 +161,7 @@ export default function MeasurementDetailPage() {
           isEdit={false}
         />
         {/* AI Results */}
-        {measurement.source === "AI" && (
+        {measurement?.source === "AI" && (
           <div className="grid md:grid-cols-2 gap-6">
             <Card white>
               <CardHeader>
@@ -172,7 +172,7 @@ export default function MeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-5xl font-bold text-text-primary">
-                  {measurement.leftVolumeMl} ml
+                  {measurement?.leftVolumeMl} ml
                 </p>
               </CardContent>
             </Card>
@@ -185,7 +185,7 @@ export default function MeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-5xl font-bold text-text-primary">
-                  {measurement.rightVolumeMl} ml
+                  {measurement?.rightVolumeMl} ml
                 </p>
               </CardContent>
             </Card>
@@ -219,7 +219,7 @@ export default function MeasurementDetailPage() {
                 </CardContent>
               </Card>
             </div>
-            {/* {measurement.source === "AI" && hasManualMeasurement && (
+            {/* {measurement?.source === "AI" && hasManualMeasurement && (
               <AccuracyDisplay measurement={measurement} />
             )}{" "} */}
           </div>
@@ -231,11 +231,11 @@ export default function MeasurementDetailPage() {
         />
         {/* Accuracy */}
         {/* Note */}
-        {measurement.note && (
+        {measurement?.note && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-text-primary">Notatka</h2>
             <Card className="rounded-2xl p-6 bg-white/80">
-              <p className="text-text-muted">{measurement.note}</p>
+              <p className="text-text-muted">{measurement?.note}</p>
             </Card>
           </div>
         )}

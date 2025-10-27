@@ -13,17 +13,16 @@ interface Measurement {
   id: string;
   name: string;
   note?: string;
-  source: "AI" | "MANUAL";
-  leftVolumeMl: number;
-  rightVolumeMl: number;
   createdAt: string;
-  manualItems?: {
-    id: string;
-    name: string;
-    leftVolumeMl: number;
-    rightVolumeMl: number;
-    createdAt: string;
-  }[];
+  analyses?: BreastAnalysis[];
+}
+
+interface BreastAnalysis {
+  id: string;
+  side: "LEFT" | "RIGHT";
+  source?: "AI" | "MANUAL";
+  volumeMl?: number;
+  filePath?: string;
 }
 
 export default function MobileMeasurementsPage() {
@@ -69,9 +68,8 @@ export default function MobileMeasurementsPage() {
 
   const filteredMeasurements = measurements.filter(
     (measurement) =>
-      measurement.source !== "MANUAL" &&
-      (measurement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        measurement.note?.toLowerCase().includes(searchTerm.toLowerCase()))
+      measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      measurement?.note?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString: string) => {
@@ -137,33 +135,42 @@ export default function MobileMeasurementsPage() {
         ) : (
           <div className="space-y-4">
             {filteredMeasurements.map((measurement) => {
+              const leftAnalysis = measurement?.analyses?.find(
+                (a) => a.side === "LEFT"
+              );
+              const rightAnalysis = measurement?.analyses?.find(
+                (a) => a.side === "RIGHT"
+              );
+              const leftVolume = leftAnalysis?.volumeMl || 0;
+              const rightVolume = rightAnalysis?.volumeMl || 0;
+
               const { diff, percentage } = getVolumeDifference(
-                measurement.leftVolumeMl,
-                measurement.rightVolumeMl
+                leftVolume,
+                rightVolume
               );
 
               return (
                 <Card
-                  key={measurement.id}
+                  key={measurement?.id}
                   className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow"
                   onClick={() =>
-                    router.push(`/mobile/panel/pomiary/${measurement.id}`)
+                    router.push(`/mobile/panel/pomiary/${measurement?.id}`)
                   }>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-text-primary mb-1">
-                          {measurement.name}
+                          {measurement?.name}
                         </h3>
-                        {measurement.note && (
+                        {measurement?.note && (
                           <p className="text-sm text-text-muted mb-2">
-                            {measurement.note}
+                            {measurement?.note}
                           </p>
                         )}
                         <div className="flex items-center space-x-2">
                           <div className="flex items-center text-xs text-text-muted">
                             <Calendar className="h-3 w-3 mr-1" />
-                            {formatDate(measurement.createdAt)}
+                            {formatDate(measurement?.createdAt)}
                           </div>
                         </div>
                       </div>
@@ -172,7 +179,9 @@ export default function MobileMeasurementsPage() {
                     <div className="grid grid-cols-2 gap-4 mb-3">
                       <div className="text-center">
                         <div className="text-lg font-bold text-text-primary">
-                          {measurement.leftVolumeMl.toFixed(1)}ml
+                          {leftVolume > 0
+                            ? `${leftVolume.toFixed(1)}ml`
+                            : "Brak danych"}
                         </div>
                         <div className="text-xs text-text-muted">
                           Lewa pierś
@@ -180,7 +189,9 @@ export default function MobileMeasurementsPage() {
                       </div>
                       <div className="text-center">
                         <div className="text-lg font-bold text-text-primary">
-                          {measurement.rightVolumeMl.toFixed(1)}ml
+                          {rightVolume > 0
+                            ? `${rightVolume.toFixed(1)}ml`
+                            : "Brak danych"}
                         </div>
                         <div className="text-xs text-text-muted">
                           Prawa pierś
@@ -192,7 +203,9 @@ export default function MobileMeasurementsPage() {
                       <div className="flex items-center space-x-1">
                         <span className="text-text-muted">Różnica:</span>
                         <span className="font-medium text-text-primary">
-                          {diff.toFixed(1)}ml ({percentage}%)
+                          {leftVolume > 0 && rightVolume > 0
+                            ? `${diff.toFixed(1)}ml (${percentage}%)`
+                            : "Brak danych"}
                         </span>
                       </div>
                     </div>

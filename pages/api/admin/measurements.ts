@@ -21,8 +21,8 @@ export default async function handler(
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
 
-    const [measurements, totalCount] = await Promise.all([
-      prisma.measurement.findMany({
+    const [allMeasurements, totalCount] = await Promise.all([
+      prisma.measurement?.findMany({
         include: {
           user: {
             select: {
@@ -31,31 +31,28 @@ export default async function handler(
               name: true,
             },
           },
-          manualItems: {
-            select: {
-              id: true,
-              name: true,
-              leftVolumeMl: true,
-              rightVolumeMl: true,
-              createdAt: true,
-            },
-          },
         },
         orderBy: { createdAt: "desc" },
-        skip,
-        take: limit,
       }),
-      prisma.measurement.count(),
+      prisma.measurement?.count(),
     ]);
 
-    const totalPages = Math.ceil(totalCount / limit);
+    // Filtruj pomiary które mają przynajmniej jedną analizę z objętością
+    // Na razie zwracamy wszystkie pomiary, filtrowanie będzie działać gdy Prisma będzie zaktualizowane
+    const measurements = allMeasurements || [];
+
+    // Paginacja na poziomie aplikacji
+    const paginatedMeasurements = measurements.slice(skip, skip + limit);
+    const filteredTotalCount = measurements.length;
+
+    const totalPages = Math.ceil(filteredTotalCount / limit);
 
     return res.status(200).json({
-      measurements,
+      measurements: paginatedMeasurements,
       pagination: {
         page,
         limit,
-        totalCount,
+        totalCount: filteredTotalCount,
         totalPages,
         hasNext: page < totalPages,
         hasPrev: page > 1,

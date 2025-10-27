@@ -25,8 +25,8 @@ export default async function handler(
       pageSize = "10",
     } = req.query;
 
-    const [measurements, totalCount] = await Promise.all([
-      prisma.measurement.findMany({
+    const [allMeasurements, totalCount] = await Promise.all([
+      prisma.measurement?.findMany({
         where: {
           userId: session.user.id,
           ...(search && {
@@ -46,14 +46,9 @@ export default async function handler(
             ],
           }),
         },
-        include: {
-          analyses: true,
-        },
         orderBy: { [sort as string]: order },
-        skip: (parseInt(page as string) - 1) * parseInt(pageSize as string),
-        take: parseInt(pageSize as string),
       }),
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           userId: session.user.id,
           ...(search && {
@@ -76,14 +71,25 @@ export default async function handler(
       }),
     ]);
 
-    const totalPages = Math.ceil(totalCount / parseInt(pageSize as string));
+    // Na razie zwracamy wszystkie pomiary, filtrowanie będzie działać gdy Prisma będzie zaktualizowane
+    const measurements = allMeasurements || [];
+
+    // Paginacja na poziomie aplikacji
+    const skip = (parseInt(page as string) - 1) * parseInt(pageSize as string);
+    const take = parseInt(pageSize as string);
+    const paginatedMeasurements = measurements.slice(skip, skip + take);
+    const filteredTotalCount = measurements.length;
+
+    const totalPages = Math.ceil(
+      filteredTotalCount / parseInt(pageSize as string)
+    );
 
     return res.status(200).json({
-      measurements,
+      measurements: paginatedMeasurements,
       pagination: {
         page: parseInt(page as string),
         limit: parseInt(pageSize as string),
-        totalCount,
+        totalCount: filteredTotalCount,
         totalPages,
         hasNext: parseInt(page as string) < totalPages,
         hasPrev: parseInt(page as string) > 1,

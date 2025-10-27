@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
@@ -11,14 +11,51 @@ import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, CheckCircle, Camera, Upload, Heart } from "lucide-react";
 import { toast } from "sonner";
 
+interface Measurement {
+  id: string;
+  name: string;
+  note?: string;
+  analyses?: BreastAnalysis[];
+}
+
+interface BreastAnalysis {
+  id: string;
+  side: "LEFT" | "RIGHT";
+  source?: "AI" | "MANUAL";
+  volumeMl?: number;
+  filePath?: string;
+}
+
 export default function MobileUploadPage() {
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
   const [measurementId, setMeasurementId] = useState<string | null>(null);
+  const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     note: "",
   });
+
+  // Pobierz dane pomiaru gdy measurementId się zmieni
+  useEffect(() => {
+    if (measurementId) {
+      fetchMeasurement();
+    }
+  }, [measurementId]);
+
+  const fetchMeasurement = async () => {
+    if (!measurementId) return;
+
+    try {
+      const response = await fetch(`/api/measurements/${measurementId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setMeasurement(data);
+      }
+    } catch (error) {
+      console.error("Error fetching measurement:", error);
+    }
+  };
 
   const handleCreateMeasurement = async () => {
     if (!formData.name.trim()) {
@@ -38,7 +75,8 @@ export default function MobileUploadPage() {
 
       if (response.ok) {
         const measurement = await response.json();
-        setMeasurementId(measurement.id);
+        setMeasurementId(measurement?.id);
+        setMeasurement(measurement);
         toast.success("Pomiar został utworzony!");
       } else {
         const error = await response.json();
@@ -70,11 +108,12 @@ export default function MobileUploadPage() {
       );
 
       if (response.ok) {
-        const analysis = await response.json();
+        const updatedMeasurement = await response.json();
+        setMeasurement(updatedMeasurement);
         toast.success(
           `Analiza ${side === "left" ? "lewej" : "prawej"} piersi zakończona!`
         );
-        console.log("Analysis result:", analysis);
+        console.log("Analysis result:", updatedMeasurement);
       } else {
         const error = await response.json();
         toast.error(error.error || "Błąd podczas analizy");
@@ -87,6 +126,16 @@ export default function MobileUploadPage() {
   const handleLiDARCapture = (side: "left" | "right") => {
     const deepLink = `breva://capture-lidar?side=${side}&measurementId=${measurementId}`;
     window.location.href = deepLink;
+  };
+
+  const getAnalysisForSide = (side: "left" | "right") => {
+    if (!measurement?.analyses) return null;
+    return measurement?.analyses.find((a) => a.side === side.toUpperCase());
+  };
+
+  const isAnalysisComplete = (side: "left" | "right") => {
+    const analysis = getAnalysisForSide(side);
+    return analysis && analysis.volumeMl && analysis.volumeMl > 0;
   };
 
   if (measurementId) {
@@ -120,30 +169,48 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                <Button
-                  onClick={() => handleLiDARCapture("left")}
-                  className="w-full rounded-xl py-3 text-base font-semibold bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white">
-                  <Camera className="h-4 w-4 mr-2" />
-                  Skan LiDAR
-                </Button>
+                {isAnalysisComplete("left") ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">
+                      Analiza zakończona
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {getAnalysisForSide("left")?.volumeMl?.toFixed(1)}ml
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => handleLiDARCapture("left")}
+                      className="w-full rounded-xl py-3 text-base font-semibold bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white">
+                      <Camera className="h-4 w-4 mr-2" />
+                      Skan LiDAR
+                    </Button>
 
-                <input
-                  type="file"
-                  id="left-file"
-                  accept="image/jpeg,image/jpg,image/png,video/mp4"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleAnalyzeBreast("left", file);
-                  }}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => document.getElementById("left-file")?.click()}
-                  className="w-full rounded-xl py-3 text-base">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Wybierz plik
-                </Button>
+                    <input
+                      type="file"
+                      id="left-file"
+                      accept="image/jpeg,image/jpg,image/png,video/mp4"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleAnalyzeBreast("left", file);
+                      }}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById("left-file")?.click()
+                      }
+                      className="w-full rounded-xl py-3 text-base">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Wybierz plik
+                    </Button>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -166,30 +233,48 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                <Button
-                  onClick={() => handleLiDARCapture("right")}
-                  className="w-full rounded-xl py-3 text-base font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white">
-                  <Camera className="h-4 w-4 mr-2" />
-                  Skan LiDAR
-                </Button>
+                {isAnalysisComplete("right") ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                    <p className="text-sm font-medium text-text-primary">
+                      Analiza zakończona
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {getAnalysisForSide("right")?.volumeMl?.toFixed(1)}ml
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => handleLiDARCapture("right")}
+                      className="w-full rounded-xl py-3 text-base font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white">
+                      <Camera className="h-4 w-4 mr-2" />
+                      Skan LiDAR
+                    </Button>
 
-                <input
-                  type="file"
-                  id="right-file"
-                  accept="image/jpeg,image/jpg,image/png,video/mp4"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleAnalyzeBreast("right", file);
-                  }}
-                  className="hidden"
-                />
-                <Button
-                  variant="outline"
-                  onClick={() => document.getElementById("right-file")?.click()}
-                  className="w-full rounded-xl py-3 text-base">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Wybierz plik
-                </Button>
+                    <input
+                      type="file"
+                      id="right-file"
+                      accept="image/jpeg,image/jpg,image/png,video/mp4"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleAnalyzeBreast("right", file);
+                      }}
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      onClick={() =>
+                        document.getElementById("right-file")?.click()
+                      }
+                      className="w-full rounded-xl py-3 text-base">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Wybierz plik
+                    </Button>
+                  </>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -204,6 +289,9 @@ export default function MobileUploadPage() {
             </Button>
             <Button
               onClick={() => router.push("/mobile/panel/pomiary")}
+              disabled={
+                !isAnalysisComplete("left") || !isAnalysisComplete("right")
+              }
               className="flex-1 rounded-xl">
               <CheckCircle className="h-4 w-4 mr-2" />
               Zobacz wyniki

@@ -35,7 +35,7 @@ export const MeasurementActions = ({
         Usuń
       </Button>
 
-      {measurement.source === "AI" && (
+      {measurement?.source === "AI" && (
         <>
           {hasManualMeasurement ? (
             <Button

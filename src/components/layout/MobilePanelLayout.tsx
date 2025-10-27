@@ -50,7 +50,7 @@ export default function MobilePanelLayout({
     <div className="max-h-screen bg-gradient-to-br from-accent-1 to-accent-2 overflow-x-hidden">
       <div className="flex flex-col h-screen overflow-x-hidden">
         <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-primary/20 sticky top-0 z-50">
-          <div className="flex items-center justify-between px-4 py-3">
+          <div className="flex items-center justify-between px-4 py-3 pt-12">
             <div className="flex items-center space-x-3">
               <Heart className="h-7 w-7 text-primary" />
               <span className="text-xl font-bold text-text-primary">BREVA</span>
@@ -66,7 +66,7 @@ export default function MobilePanelLayout({
         </main>
 
         <nav className="bg-white/90 backdrop-blur-sm border-t border-primary/20 sticky bottom-0 z-50">
-          <div className="flex items-center justify-around py-2">
+          <div className="flex items-center justify-around py-2 pb-4">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = router.pathname === item.href;

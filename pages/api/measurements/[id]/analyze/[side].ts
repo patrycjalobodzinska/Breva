@@ -38,7 +38,7 @@ export default async function handler(
     }
 
     // Sprawdź czy pomiar należy do użytkownika
-    const measurement = await prisma.measurement.findFirst({
+    const measurement = await prisma.measurement?.findFirst({
       where: {
         id: measurementId as string,
         userId: session.user.id,
@@ -136,7 +136,15 @@ export default async function handler(
     // Usuń plik tymczasowy
     fs.unlinkSync(file.filepath);
 
-    return res.status(200).json(breastAnalysis);
+    // Zwróć zaktualizowany pomiar z analizami
+    const updatedMeasurement = await prisma.measurement?.findUnique({
+      where: { id: measurementId as string },
+      include: {
+        analyses: true,
+      },
+    });
+
+    return res.status(200).json(updatedMeasurement);
   } catch (error) {
     console.error("Error processing breast analysis:", error);
     return res.status(500).json({

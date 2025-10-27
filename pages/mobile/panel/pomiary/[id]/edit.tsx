@@ -113,11 +113,11 @@ export default function MobileMeasurementEditPage() {
     try {
       setIsSaving(true);
       const hasManual =
-        measurement.manualItems && measurement.manualItems.length > 0;
+        measurement?.manualItems && measurement?.manualItems.length > 0;
 
-      if (hasManual && measurement.manualItems) {
+      if (hasManual && measurement?.manualItems) {
         // Edytuj istniejący pomiar ręczny
-        const manualId = measurement.manualItems[0].id;
+        const manualId = measurement?.manualItems[0].id;
         const response = await fetch(`/api/measurements/manual/${manualId}`, {
           method: "PUT",
           headers: {
@@ -167,12 +167,12 @@ export default function MobileMeasurementEditPage() {
   };
 
   const startEditManual = () => {
-    if (measurement?.manualItems && measurement.manualItems.length > 0) {
-      const manual = measurement.manualItems[0];
+    if (measurement?.manualItems && measurement?.manualItems.length > 0) {
+      const manual = measurement?.manualItems[0];
       setManualForm({
         name: manual.name,
         leftVolumeMl: manual.leftVolumeMl.toString(),
-        rightVolumeMl: manual.rightVolumeMl.toString(),
+        rightVolumeMl: manual.rightVolumeMl?.toString(),
       });
     } else {
       setManualForm({ name: "", leftVolumeMl: "", rightVolumeMl: "" });
@@ -280,13 +280,13 @@ export default function MobileMeasurementEditPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-lg font-bold text-text-primary">
-                  {measurement.leftVolumeMl.toFixed(1)}ml
+                  {measurement?.leftVolumeMl?.toFixed(1)}ml
                 </div>
                 <div className="text-sm text-text-muted">Lewa pierś</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-text-primary">
-                  {measurement.rightVolumeMl.toFixed(1)}ml
+                  {measurement?.rightVolumeMl?.toFixed(1)}ml
                 </div>
                 <div className="text-sm text-text-muted">Prawa pierś</div>
               </div>
@@ -307,7 +307,7 @@ export default function MobileMeasurementEditPage() {
                 onClick={startEditManual}
                 className="rounded-xl">
                 <Edit3 className="h-4 w-4 mr-2" />
-                {measurement.manualItems && measurement.manualItems.length > 0
+                {measurement?.manualItems && measurement?.manualItems.length > 0
                   ? "Edytuj"
                   : "Dodaj"}
               </Button>
@@ -389,16 +389,16 @@ export default function MobileMeasurementEditPage() {
               </div>
             )}
 
-            {measurement.manualItems && measurement.manualItems.length > 0 ? (
+            {measurement?.manualItems && measurement?.manualItems.length > 0 ? (
               <div className="p-3 bg-gray-50 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium text-text-primary">
-                      {measurement.manualItems[0].name}
+                      {measurement?.manualItems[0].name}
                     </div>
                     <div className="text-sm text-text-muted">
-                      {measurement.manualItems[0].leftVolumeMl.toFixed(1)}ml /{" "}
-                      {measurement.manualItems[0].rightVolumeMl.toFixed(1)}ml
+                      {measurement?.manualItems[0].leftVolumeMl.toFixed(1)}ml /{" "}
+                      {measurement?.manualItems[0].rightVolumeMl?.toFixed(1)}ml
                     </div>
                   </div>
                 </div>

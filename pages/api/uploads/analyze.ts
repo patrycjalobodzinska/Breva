@@ -73,7 +73,7 @@ export default async function handler(
 
     console.log("🤖 Mock AI Analysis Result:", aiResult);
 
-    const measurement = await prisma.measurement.create({
+    const measurement = await prisma.measurement?.create({
       data: {
         userId: session.user.id,
         name: (file.originalFilename || "").replace(/\.[^/.]+$/, ""),

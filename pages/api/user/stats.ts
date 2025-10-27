@@ -44,12 +44,12 @@ export default async function handler(
       recentManualMeasurements,
     ] = await Promise.all([
       // Całkowita liczba pomiarów użytkownika
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: { userId: user.id },
       }),
 
       // Pomiary użytkownika z ostatnich 7 dni
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           userId: user.id,
           createdAt: {
@@ -59,7 +59,7 @@ export default async function handler(
       }),
 
       // Pomiary AI użytkownika
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           userId: user.id,
           source: "AI",
@@ -67,7 +67,7 @@ export default async function handler(
       }),
 
       // Pomiary ręczne użytkownika
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           userId: user.id,
           source: "MANUAL",
@@ -75,7 +75,7 @@ export default async function handler(
       }),
 
       // Pomiary AI użytkownika z ostatnich 7 dni
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           userId: user.id,
           source: "AI",
@@ -86,7 +86,7 @@ export default async function handler(
       }),
 
       // Pomiary ręczne użytkownika z ostatnich 7 dni
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           userId: user.id,
           source: "MANUAL",
@@ -98,7 +98,7 @@ export default async function handler(
     ]);
 
     // Pobierz statystyki dzienne z ostatnich 7 dni dla użytkownika
-    const dailyStats = await prisma.measurement.groupBy({
+    const dailyStats = await prisma.measurement?.groupBy({
       by: ["createdAt"],
       where: {
         userId: user.id,
@@ -121,7 +121,7 @@ export default async function handler(
     }));
 
     // Oblicz średnią objętość dla użytkownika
-    const avgVolumeStats = await prisma.measurement.aggregate({
+    const avgVolumeStats = await prisma.measurement?.aggregate({
       where: {
         userId: user.id,
         createdAt: {
@@ -153,7 +153,7 @@ export default async function handler(
           ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2))
           : 0,
         right: avgVolumeStats._avg.rightVolumeMl
-          ? Number(avgVolumeStats._avg.rightVolumeMl.toFixed(2))
+          ? Number(avgVolumeStats._avg.rightVolumeMl?.toFixed(2))
           : 0,
       },
       period: {

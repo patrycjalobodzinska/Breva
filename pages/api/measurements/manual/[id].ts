@@ -22,7 +22,7 @@ export default async function handler(
     const { leftVolumeMl, rightVolumeMl, name, note } =
       manualMeasurementSchema.parse(req.body);
 
-    const measurement = await prisma.measurement.findFirst({
+    const measurement = await prisma.measurement?.findFirst({
       where: {
         id: id as string,
         userId: session.user.id,
@@ -36,7 +36,7 @@ export default async function handler(
         .json({ error: "Pomiar ręczny nie został znaleziony" });
     }
 
-    const updatedMeasurement = await prisma.measurement.update({
+    const updatedMeasurement = await prisma.measurement?.update({
       where: { id: id as string },
       data: {
         leftVolumeMl,

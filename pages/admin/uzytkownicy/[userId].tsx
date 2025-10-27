@@ -310,20 +310,20 @@ export default function UserDetailPage() {
               <div className="space-y-4">
                 {measurements.map((measurement) => (
                   <div
-                    key={measurement.id}
+                    key={measurement?.id}
                     className="border border-primary/20 rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h4 className="font-medium">{measurement.name}</h4>
-                        {measurement.note && (
+                        <h4 className="font-medium">{measurement?.name}</h4>
+                        {measurement?.note && (
                           <p className="text-sm text-text-muted">
-                            {measurement.note}
+                            {measurement?.note}
                           </p>
                         )}
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className="text-sm text-text-muted">
-                          {formatDate(measurement.createdAt)}
+                          {formatDate(measurement?.createdAt)}
                         </span>
                       </div>
                     </div>
@@ -332,21 +332,21 @@ export default function UserDetailPage() {
                       <div>
                         <p className="text-sm text-text-muted">Lewa pierś</p>
                         <p className="font-medium">
-                          {measurement.leftVolumeMl.toFixed(1)} ml
+                          {measurement?.leftVolumeMl?.toFixed(1)} ml
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-text-muted">Prawa pierś</p>
                         <p className="font-medium">
-                          {measurement.rightVolumeMl.toFixed(1)} ml
+                          {measurement?.rightVolumeMl?.toFixed(1)} ml
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-text-muted">Asymetria</p>
                         <p className="font-medium">
                           {getAsymmetryPercentage(
-                            measurement.leftVolumeMl,
-                            measurement.rightVolumeMl
+                            measurement?.leftVolumeMl,
+                            measurement?.rightVolumeMl
                           )}
                           %
                         </p>

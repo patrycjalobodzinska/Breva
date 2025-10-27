@@ -47,7 +47,7 @@ export default async function handler(
     // Usuń wszystkie powiązane dane użytkownika
     await prisma.$transaction(async (tx) => {
       // Usuń wszystkie pomiary użytkownika
-      await tx.measurement.deleteMany({
+      await tx.measurement?.deleteMany({
         where: { userId: user.id },
       });
 

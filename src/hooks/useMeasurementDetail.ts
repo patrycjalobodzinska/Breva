@@ -52,8 +52,8 @@ export const useMeasurementDetail = (measurementId: string) => {
   const handleEdit = () => {
     if (measurement) {
       setEditForm({
-        name: measurement.name,
-        note: measurement.note || "",
+        name: measurement?.name,
+        note: measurement?.note || "",
       });
       setIsEditing(true);
     }
@@ -64,7 +64,7 @@ export const useMeasurementDetail = (measurementId: string) => {
     if (!measurement) return;
 
     try {
-      const response = await fetch(`/api/measurements/${measurement.id}`, {
+      const response = await fetch(`/api/measurements/${measurement?.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -88,11 +88,11 @@ export const useMeasurementDetail = (measurementId: string) => {
   };
 
   const handleEditManual = () => {
-    if (measurement?.manualItems && measurement.manualItems.length > 0) {
-      const manualMeasurement = measurement.manualItems[0];
+    if (measurement?.manualItems && measurement?.manualItems.length > 0) {
+      const manualMeasurement = measurement?.manualItems[0];
       setEditManualForm({
-        leftVolumeMl: manualMeasurement.leftVolumeMl.toString(),
-        rightVolumeMl: manualMeasurement.rightVolumeMl.toString(),
+        leftVolumeMl: manualmeasurement?.leftVolumeMl?.toString(),
+        rightVolumeMl: manualmeasurement?.rightVolumeMl?.toString(),
       });
       setIsEditingManual(true);
     }
@@ -100,12 +100,12 @@ export const useMeasurementDetail = (measurementId: string) => {
 
   const handleSaveEditManual = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!measurement?.manualItems || measurement.manualItems.length === 0)
+    if (!measurement?.manualItems || measurement?.manualItems.length === 0)
       return;
 
     try {
       const response = await fetch(
-        `/api/measurements/manual/${measurement.manualItems[0].id}`,
+        `/api/measurements/manual/${measurement?.manualItems[0].id}`,
         {
           method: "PUT",
           headers: {
@@ -185,7 +185,7 @@ export const useMeasurementDetail = (measurementId: string) => {
     }
 
     try {
-      const response = await fetch(`/api/measurements/${measurement.id}`, {
+      const response = await fetch(`/api/measurements/${measurement?.id}`, {
         method: "DELETE",
       });
 

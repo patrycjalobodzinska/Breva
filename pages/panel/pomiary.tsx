@@ -44,9 +44,9 @@ export default function MeasurementsPage() {
   const router = useRouter();
   const filteredMeasurements = measurements.filter(
     (measurement) =>
-      measurement.source !== "MANUAL" && // Wyklucz pomiary ręczne
-      (measurement.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        measurement.note?.toLowerCase().includes(searchTerm.toLowerCase()))
+      measurement?.source !== "MANUAL" && // Wyklucz pomiary ręczne
+      (measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        measurement?.note?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (isLoading) {
@@ -132,16 +132,16 @@ export default function MeasurementsPage() {
                 {filteredMeasurements.map((measurement) => (
                   <TableRow
                     onClick={() =>
-                      router.push(`/panel/pomiary/${measurement.id}`)
+                      router.push(`/panel/pomiary/${measurement?.id}`)
                     }
                     className="cursor-pointer"
-                    key={measurement.id}>
+                    key={measurement?.id}>
                     <TableCell>
                       <div>
-                        <p className="font-medium">{measurement.name}</p>
-                        {measurement.note && (
+                        <p className="font-medium">{measurement?.name}</p>
+                        {measurement?.note && (
                           <p className="text-sm text-text-muted">
-                            {measurement.note}
+                            {measurement?.note}
                           </p>
                         )}
                       </div>
@@ -149,22 +149,24 @@ export default function MeasurementsPage() {
 
                     <TableCell>
                       <div className="text-sm">
-                        <p>Lewa: {measurement.leftVolumeMl.toFixed(1)} ml</p>
-                        <p>Prawa: {measurement.rightVolumeMl.toFixed(1)} ml</p>
+                        <p>Lewa: {measurement?.leftVolumeMl?.toFixed(1)} ml</p>
+                        <p>
+                          Prawa: {measurement?.rightVolumeMl?.toFixed(1)} ml
+                        </p>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {measurement.manualItems &&
-                      measurement.manualItems.length > 0 ? (
+                      {measurement?.manualItems &&
+                      measurement?.manualItems.length > 0 ? (
                         <div className="space-y-1">
-                          {measurement.manualItems.map((manual) => (
+                          {measurement?.manualItems.map((manual) => (
                             <div
                               key={manual.id}
                               className="text-xs text-text-muted">
                               <div className="font-medium">{manual.name}</div>
                               <div>
                                 {manual.leftVolumeMl.toFixed(1)}ml /{" "}
-                                {manual.rightVolumeMl.toFixed(1)}ml
+                                {manual.rightVolumeMl?.toFixed(1)}ml
                               </div>
                             </div>
                           ))}
@@ -176,8 +178,8 @@ export default function MeasurementsPage() {
                     <TableCell>
                       <span className="text-sm font-medium">
                         {getAsymmetryPercentage(
-                          measurement.leftVolumeMl,
-                          measurement.rightVolumeMl
+                          measurement?.leftVolumeMl,
+                          measurement?.rightVolumeMl
                         )}
                         %
                       </span>
@@ -185,7 +187,7 @@ export default function MeasurementsPage() {
                     <TableCell>
                       <div className="flex items-center text-sm text-text-muted">
                         <Calendar className="h-4 w-4 mr-1" />
-                        {formatDate(measurement.createdAt)}
+                        {formatDate(measurement?.createdAt)}
                       </div>
                     </TableCell>
                   </TableRow>

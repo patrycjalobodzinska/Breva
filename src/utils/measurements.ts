@@ -62,28 +62,28 @@ export const prepareChartData = (measurement: Measurement): ChartData[] => {
   const data: ChartData[] = [];
 
   // Jeśli to pomiar AI, dodaj go jako "AI"
-  if (measurement.source === "AI") {
+  if (measurement?.source === "AI") {
     data.push({
       name: "AI",
-      left: measurement.leftVolumeMl,
-      right: measurement.rightVolumeMl,
-      date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
+      left: measurement?.leftVolumeMl,
+      right: measurement?.rightVolumeMl,
+      date: new Date(measurement?.createdAt).toLocaleDateString("pl-PL"),
     });
   }
 
   // Jeśli to pomiar ręczny, dodaj go jako "Ręczny"
-  if (measurement.source === "MANUAL") {
+  if (measurement?.source === "MANUAL") {
     data.push({
       name: "Ręczny",
-      left: measurement.leftVolumeMl,
-      right: measurement.rightVolumeMl,
-      date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
+      left: measurement?.leftVolumeMl,
+      right: measurement?.rightVolumeMl,
+      date: new Date(measurement?.createdAt).toLocaleDateString("pl-PL"),
     });
   }
 
   // Dodaj dodatkowe pomiary ręczne jeśli istnieją
-  if (measurement.manualItems) {
-    measurement.manualItems.forEach((item) => {
+  if (measurement?.manualItems) {
+    measurement?.manualItems.forEach((item) => {
       data.push({
         name: item.name || "Ręczny",
         left: item.leftVolumeMl,
@@ -100,21 +100,21 @@ export const getMeasurementStats = (
   measurement: Measurement
 ): MeasurementStats => {
   const asymmetry = getAsymmetryPercentage(
-    measurement.leftVolumeMl,
-    measurement.rightVolumeMl
+    measurement?.leftVolumeMl,
+    measurement?.rightVolumeMl
   );
 
   let accuracy;
-  if (measurement.manualItems && measurement.manualItems.length > 0) {
-    const manualMeasurement = measurement.manualItems[0];
+  if (measurement?.manualItems && measurement?.manualItems.length > 0) {
+    const manualMeasurement = measurement?.manualItems[0];
     accuracy = {
       left: getAccuracyPercentage(
-        measurement.leftVolumeMl,
-        manualMeasurement.leftVolumeMl
+        measurement?.leftVolumeMl,
+        manualmeasurement?.leftVolumeMl
       ),
       right: getAccuracyPercentage(
-        measurement.rightVolumeMl,
-        manualMeasurement.rightVolumeMl
+        measurement?.rightVolumeMl,
+        manualmeasurement?.rightVolumeMl
       ),
     };
   }

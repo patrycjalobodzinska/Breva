@@ -19,7 +19,7 @@ export default async function handler(
 
     const { userId } = req.query;
 
-    const measurements = await prisma.measurement.findMany({
+    const measurements = await prisma.measurement?.findMany({
       where: { userId: userId as string },
       orderBy: { createdAt: "desc" },
     });

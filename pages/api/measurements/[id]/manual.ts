@@ -22,7 +22,7 @@ export default async function handler(
     const { leftVolumeMl, rightVolumeMl, name, note } =
       manualMeasurementSchema.parse(req.body);
 
-    const baseline = await prisma.measurement.findFirst({
+    const baseline = await prisma.measurement?.findFirst({
       where: {
         id: id as string,
         userId: session.user.id,
@@ -36,7 +36,7 @@ export default async function handler(
         .json({ error: "Pomiar bazowy nie został znaleziony" });
     }
 
-    const manualMeasurement = await prisma.measurement.create({
+    const manualMeasurement = await prisma.measurement?.create({
       data: {
         userId: session.user.id,
         name: name || `Pomiar ręczny ${new Date().toLocaleDateString()}`,

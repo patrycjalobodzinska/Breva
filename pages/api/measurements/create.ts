@@ -25,14 +25,14 @@ export default async function handler(
 
     const { name, note } = createMeasurementSchema.parse(req.body);
 
-    const measurement = await prisma.measurement.create({
+    const measurement = await prisma.measurement?.create({
       data: {
         userId: session.user.id,
         name,
         note: note || null,
-      },
-      include: {
-        analyses: true,
+        source: "AI",
+        leftVolumeMl: 0,
+        rightVolumeMl: 0,
       },
     });
 

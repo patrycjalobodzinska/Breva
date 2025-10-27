@@ -11,21 +11,21 @@ interface AccuracyDisplayProps {
 }
 
 export const AccuracyDisplay = ({ measurement }: AccuracyDisplayProps) => {
-  if (!measurement.manualItems || measurement.manualItems.length === 0) {
+  if (!measurement?.manualItems || measurement?.manualItems.length === 0) {
     return null;
   }
 
-  const manualMeasurement = measurement.manualItems[0];
+  const manualMeasurement = measurement?.manualItems[0];
   const leftAccuracy = parseFloat(
     getAccuracyPercentage(
-      measurement.leftVolumeMl,
-      manualMeasurement.leftVolumeMl
+      measurement?.leftVolumeMl,
+      manualmeasurement?.leftVolumeMl
     )
   );
   const rightAccuracy = parseFloat(
     getAccuracyPercentage(
-      measurement.rightVolumeMl,
-      manualMeasurement.rightVolumeMl
+      measurement?.rightVolumeMl,
+      manualmeasurement?.rightVolumeMl
     )
   );
   return (

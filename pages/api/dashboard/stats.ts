@@ -46,10 +46,10 @@ export default async function handler(
       recentManualMeasurements,
     ] = await Promise.all([
       // Całkowita liczba pomiarów
-      prisma.measurement.count(),
+      prisma.measurement?.count(),
 
       // Pomiary z ostatnich 7 dni
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           createdAt: {
             gte: sevenDaysAgo,
@@ -58,21 +58,21 @@ export default async function handler(
       }),
 
       // Pomiary AI
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           source: "AI",
         },
       }),
 
       // Pomiary ręczne
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           source: "MANUAL",
         },
       }),
 
       // Pomiary AI z ostatnich 7 dni
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           source: "AI",
           createdAt: {
@@ -82,7 +82,7 @@ export default async function handler(
       }),
 
       // Pomiary ręczne z ostatnich 7 dni
-      prisma.measurement.count({
+      prisma.measurement?.count({
         where: {
           source: "MANUAL",
           createdAt: {
@@ -103,7 +103,7 @@ export default async function handler(
     });
 
     // Pobierz statystyki dzienne z ostatnich 7 dni
-    const dailyStats = await prisma.measurement.groupBy({
+    const dailyStats = await prisma.measurement?.groupBy({
       by: ["createdAt"],
       where: {
         createdAt: {
@@ -125,7 +125,7 @@ export default async function handler(
     }));
 
     // Oblicz średnią objętość
-    const avgVolumeStats = await prisma.measurement.aggregate({
+    const avgVolumeStats = await prisma.measurement?.aggregate({
       where: {
         createdAt: {
           gte: sevenDaysAgo,
@@ -160,7 +160,7 @@ export default async function handler(
           ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2))
           : 0,
         right: avgVolumeStats._avg.rightVolumeMl
-          ? Number(avgVolumeStats._avg.rightVolumeMl.toFixed(2))
+          ? Number(avgVolumeStats._avg.rightVolumeMl?.toFixed(2))
           : 0,
       },
       period: {

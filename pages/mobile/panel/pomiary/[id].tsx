@@ -96,7 +96,7 @@ export default function MobileMeasurementDetailPage() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `pomiar-${measurement.name}-${
+        a.download = `pomiar-${measurement?.name}-${
           new Date().toISOString().split("T")[0]
         }.pdf`;
         document.body.appendChild(a);
@@ -116,10 +116,10 @@ export default function MobileMeasurementDetailPage() {
     if (!measurement) return;
 
     const shareData = {
-      title: `Pomiar: ${measurement.name}`,
-      text: `Pomiar piersi - Lewa: ${measurement.leftVolumeMl.toFixed(
+      title: `Pomiar: ${measurement?.name}`,
+      text: `Pomiar piersi - Lewa: ${measurement?.leftVolumeMl?.toFixed(
         1
-      )}ml, Prawa: ${measurement.rightVolumeMl.toFixed(1)}ml`,
+      )}ml, Prawa: ${measurement?.rightVolumeMl?.toFixed(1)}ml`,
       url: window.location.href,
     };
 
@@ -160,9 +160,9 @@ export default function MobileMeasurementDetailPage() {
   };
 
   const hasManualMeasurement =
-    measurement?.manualItems && measurement.manualItems.length > 0;
+    measurement?.manualItems && measurement?.manualItems.length > 0;
   const manualMeasurement = hasManualMeasurement
-    ? measurement.manualItems![0]
+    ? measurement?.manualItems![0]
     : null;
 
   if (isLoading) {
@@ -239,13 +239,13 @@ export default function MobileMeasurementDetailPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <h1 className="text-2xl font-bold text-text-primary">
-              {measurement.name}
+              {measurement?.name}
             </h1>
           </div>
         </div>
 
         {/* AI Results */}
-        {measurement.source === "AI" && (
+        {measurement?.source === "AI" && (
           <div className="grid grid-cols-2 gap-4">
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader className="pb-2">
@@ -256,7 +256,7 @@ export default function MobileMeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-text-primary">
-                  {measurement.leftVolumeMl} ml
+                  {measurement?.leftVolumeMl} ml
                 </p>
               </CardContent>
             </Card>
@@ -269,7 +269,7 @@ export default function MobileMeasurementDetailPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold text-text-primary">
-                  {measurement.rightVolumeMl} ml
+                  {measurement?.rightVolumeMl} ml
                 </p>
               </CardContent>
             </Card>
@@ -300,7 +300,7 @@ export default function MobileMeasurementDetailPage() {
                 </div>
               </CardContent>
             </Card>
-            {/* {measurement.source === "AI" && hasManualMeasurement && (
+            {/* {measurement?.source === "AI" && hasManualMeasurement && (
               <AccuracyDisplay measurement={measurement} />
             )} */}
           </div>
@@ -319,12 +319,12 @@ export default function MobileMeasurementDetailPage() {
         })()}
 
         {/* Note */}
-        {measurement.note && (
+        {measurement?.note && (
           <div className="space-y-4">
             <h2 className="text-xl font-bold text-text-primary">Notatka</h2>
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardContent className="p-4">
-                <p className="text-text-muted">{measurement.note}</p>
+                <p className="text-text-muted">{measurement?.note}</p>
               </CardContent>
             </Card>
           </div>

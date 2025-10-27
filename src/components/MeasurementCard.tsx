@@ -26,14 +26,14 @@ export const MeasurementCard = ({
       </CardHeader>
       <CardContent>
         <div className="text-5xl font-bold text-text-primary mb-2">
-          {measurement.leftVolumeMl} ml
+          {measurement?.leftVolumeMl} ml
         </div>
         <div className="flex items-center justify-between">
           <span className="text-sm text-text-muted">
             Asymetria:{" "}
             {getAsymmetryPercentage(
-              measurement.leftVolumeMl,
-              measurement.rightVolumeMl
+              measurement?.leftVolumeMl,
+              measurement?.rightVolumeMl
             )}
             %
           </span>
