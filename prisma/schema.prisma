@@ -33,6 +33,20 @@ model Measurement {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   analyses      BreastAnalysis[]
+  lidarCaptures LidarCapture[]
+}
+
+model LidarCapture {
+  id            String   @id @default(cuid())
+  measurementId String
+  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  side          BreastSide
+  requestId     Int      @unique
+  status        String   // PENDING, COMPLETED, FAILED
+  estimatedVolume Float?
+  metadata      Json?    // Device info, camera intrinsics, etc.
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 model BreastAnalysis {
@@ -54,6 +68,11 @@ model BreastAnalysis {
   rightMimeType   String?  // file mime type for right
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+enum BreastSide {
+  LEFT
+  RIGHT
 }
 
 enum MeasurementType {
