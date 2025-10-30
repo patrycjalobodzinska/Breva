@@ -36,10 +36,24 @@ interface PanelLayoutProps {
 export default function PanelLayout({ children }: PanelLayoutProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
+
   useEffect(() => {
-    if (status === "loading") return;
+    console.log("🔍 PanelLayout Check:");
+    console.log("  - Status:", status);
+    console.log("  - Session exists?", !!session);
+    console.log("  - User:", session?.user);
+    console.log("  - Current path:", router.pathname);
+
+    if (status === "loading") {
+      console.log("⏳ Still loading, waiting...");
+      return;
+    }
+
     if (!session) {
+      console.log("❌ NO SESSION - Redirecting to /logowanie");
       router.push("/logowanie");
+    } else {
+      console.log("✅ SESSION EXISTS - User can access panel");
     }
   }, [session, status, router]);
 
