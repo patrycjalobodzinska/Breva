@@ -9,7 +9,6 @@ interface MeasurementActionsProps {
   onDelete: () => void;
   onEditManual?: () => void;
   onAddManual?: () => void;
-  hasManualMeasurement?: boolean;
 }
 
 export const MeasurementActions = ({
@@ -18,7 +17,6 @@ export const MeasurementActions = ({
   onDelete,
   onEditManual,
   onAddManual,
-  hasManualMeasurement = false,
 }: MeasurementActionsProps) => {
   return (
     <div className="flex items-center space-x-2">

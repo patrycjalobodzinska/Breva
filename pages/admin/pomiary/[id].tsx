@@ -95,8 +95,6 @@ export default function MeasurementDetailPage() {
       </Layout>
     );
   }
-
-  const hasManualMeasurement = !!measurement?.manualAnalysis;
   const hasAiMeasurement = !!measurement?.aiAnalysis;
 
   return (
@@ -122,7 +120,6 @@ export default function MeasurementDetailPage() {
             onDelete={handleDelete}
             onEditManual={handleEditManual}
             onAddManual={() => setIsAddingManual(true)}
-            hasManualMeasurement={hasManualMeasurement}
           />
         </div>
         {/* Edit Dialog */}

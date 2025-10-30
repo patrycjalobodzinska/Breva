@@ -96,12 +96,6 @@ export default function MeasurementDetailPage() {
     );
   }
 
-  const hasManualMeasurement =
-    measurement?.manualItems && measurement?.manualItems.length > 0;
-  const manualMeasurement = hasManualMeasurement
-    ? measurement?.manualItems![0]
-    : null;
-
   return (
     <Layout>
       <div className="space-y-6">
@@ -125,7 +119,6 @@ export default function MeasurementDetailPage() {
             onDelete={handleDelete}
             onEditManual={handleEditManual}
             onAddManual={() => setIsAddingManual(true)}
-            hasManualMeasurement={hasManualMeasurement}
           />
         </div>
         {/* Edit Dialog */}
@@ -161,76 +154,78 @@ export default function MeasurementDetailPage() {
           isEdit={false}
         />
         {/* AI Results */}
-        {measurement?.source === "AI" && (
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card white>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Lewa pierś (AI)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-5xl font-bold text-text-primary">
-                  {measurement?.leftVolumeMl} ml
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl bg-white/80">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Prawa pierś (AI)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-5xl font-bold text-text-primary">
-                  {measurement?.rightVolumeMl} ml
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Card white>
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Target className="h-5 w-5 text-primary" />
+                <span>Lewa pierś (AI)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-5xl font-bold text-text-primary">
+                {measurement?.aiAnalysis?.leftVolumeMl
+                  ? measurement?.aiAnalysis?.leftVolumeMl?.toFixed(1) + " ml"
+                  : "-"}
+              </p>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl bg-white/80">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Target className="h-5 w-5 text-primary" />
+                <span>Prawa pierś (AI)</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-5xl font-bold text-text-primary">
+                {measurement?.aiAnalysis?.rightVolumeMl
+                  ? measurement?.aiAnalysis?.rightVolumeMl?.toFixed(1) + " ml"
+                  : "-"}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
         {/* Manual Measurements */}
-        {hasManualMeasurement && (
-          <div className="space-y-4 grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-text-primary">
-                Pomiar ręczny
-              </h2>
-              <Card className="rounded-2xl bg-white/80">
-                <CardContent className="p-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
-                      <p className="text-xl font-semibold text-text-primary">
-                        {manualMeasurement?.leftVolumeMl} ml
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-text-muted text-sm">
-                        Prawa pierś (ml)
-                      </p>
-                      <p className="text-xl font-semibold text-text-primary">
-                        {manualMeasurement?.rightVolumeMl} ml
-                      </p>
-                    </div>
+        <div className="space-y-4 grid md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-text-primary">
+              Pomiar ręczny
+            </h2>
+            <Card className="rounded-2xl bg-white/80">
+              <CardContent className="p-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
+                    <p className="text-5xl font-bold text-text-primary">
+                      {measurement?.manualAnalysis?.leftVolumeMl
+                        ? measurement?.manualAnalysis?.leftVolumeMl?.toFixed(
+                            1
+                          ) + " ml"
+                        : "-"}
+                      manualAnalysis
+                    </p>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-            {/* {measurement?.source === "AI" && hasManualMeasurement && (
-              <AccuracyDisplay measurement={measurement} />
-            )}{" "} */}
+                  <div>
+                    <p className="text-text-muted text-sm">Prawa pierś (ml)</p>
+                    <p className="text-5xl font-bold text-text-primary">
+                      {measurement?.manualAnalysis?.rightVolumeMl
+                        ? measurement?.manualAnalysis?.rightVolumeMl?.toFixed(
+                            1
+                          ) + " ml"
+                        : "-"}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-        )}
+        </div>
         <MeasurementChart
           data={prepareChartData(measurement)}
           title="Porównanie AI vs Pomiary ręczne"
           description="Wykres porównujący wyniki AI z pomiarami ręcznymi"
         />
-        {/* Accuracy */}
-        {/* Note */}
         {measurement?.note && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-text-primary">Notatka</h2>
