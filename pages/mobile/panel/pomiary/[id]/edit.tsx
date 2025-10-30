@@ -149,6 +149,15 @@ export default function MobileMeasurementEditPage() {
     setIsEditingManual(true);
   };
 
+  const triggerLidar = (side: "left" | "right") => {
+    const mid = Array.isArray(id) ? id[0] : (id as string);
+    if (!mid) return;
+    const url = `breva://capture-lidar?measurementId=${encodeURIComponent(
+      mid
+    )}&side=${side}`;
+    window.location.href = url;
+  };
+
   if (isLoading) {
     return (
       <MobilePanelLayout>
@@ -269,6 +278,31 @@ export default function MobileMeasurementEditPage() {
                 </div>
                 <div className="text-sm text-text-muted">Prawa pierś</div>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center">
+                <Edit3 className="h-5 w-5 mr-2" />
+                Skan LiDAR
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={() => triggerLidar("left")}
+                className="rounded-xl w-full">
+                Zrób zdjęcie LiDAR (lewa)
+              </Button>
+              <Button
+                onClick={() => triggerLidar("right")}
+                className="rounded-xl w-full">
+                Zrób zdjęcie LiDAR (prawa)
+              </Button>
             </div>
           </CardContent>
         </Card>
