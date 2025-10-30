@@ -19,8 +19,9 @@ export default async function handler(
     }
 
     const { id } = req.query;
-    const { leftVolumeMl, rightVolumeMl, name, note } =
-      manualMeasurementSchema.parse(req.body);
+    const { leftVolumeMl, rightVolumeMl, note } = manualMeasurementSchema.parse(
+      req.body
+    );
 
     const baseline = await prisma.measurement?.findFirst({
       where: {
@@ -35,22 +36,37 @@ export default async function handler(
         .json({ error: "Pomiar bazowy nie został znaleziony" });
     }
 
-    const manualMeasurement = await prisma.measurement?.create({
-      data: {
-        userId: session.user.id,
-        name: name || `Pomiar ręczny ${new Date().toLocaleDateString()}`,
-        note,
-        analyses: {
-          create: {
-            measurementType: "MANUAL",
-            leftVolumeMl,
-            rightVolumeMl,
-          },
-        },
+    // Zapisz analizę MANUAL do istniejącego pomiaru
+    const manualAnalysis = await prisma.breastAnalysis?.upsert({
+      where: {
+        // unikalność logiczna: jedna analiza MANUAL na measurement
+        // tworzymy sztuczny klucz przez wyszukanie wcześniej, bo Prisma upsert wymaga unique
+        id:
+          (
+            await prisma.breastAnalysis?.findFirst({
+              where: { measurementId: id as string, measurementType: "MANUAL" },
+            })
+          )?.id || "",
+      },
+      update: {
+        leftVolumeMl,
+        rightVolumeMl,
+      },
+      create: {
+        measurementId: id as string,
+        measurementType: "MANUAL",
+        leftVolumeMl,
+        rightVolumeMl,
       },
     });
 
-    return res.status(201).json(manualMeasurement);
+    // Zwróć zaktualizowany pomiar
+    const updatedMeasurement = await prisma.measurement?.findFirst({
+      where: { id: id as string, userId: session.user.id },
+      include: { analyses: true },
+    });
+
+    return res.status(201).json(updatedMeasurement);
   } catch (error) {
     console.error("Error creating manual measurement:", error);
     return res.status(500).json({

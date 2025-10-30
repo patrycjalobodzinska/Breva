@@ -10,26 +10,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, X, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 
+interface BreastAnalysis {
+  measurementType: "AI" | "MANUAL";
+  leftVolumeMl?: number;
+  rightVolumeMl?: number;
+}
+
 interface Measurement {
   id: string;
   name: string;
   note?: string;
-  source: "AI" | "MANUAL";
-  leftVolumeMl: number;
-  rightVolumeMl: number;
   createdAt: string;
   user: {
     id: string;
     email: string;
     name?: string;
   };
-  manualItems?: {
-    id: string;
-    name: string;
-    leftVolumeMl: number;
-    rightVolumeMl: number;
-    createdAt: string;
-  }[];
+  analyses?: BreastAnalysis[];
 }
 
 export default function MobileMeasurementEditPage() {
@@ -47,7 +44,6 @@ export default function MobileMeasurementEditPage() {
   });
 
   const [manualForm, setManualForm] = useState({
-    name: "",
     leftVolumeMl: "",
     rightVolumeMl: "",
   });
@@ -112,51 +108,23 @@ export default function MobileMeasurementEditPage() {
 
     try {
       setIsSaving(true);
-      const hasManual =
-        measurement?.manualItems && measurement?.manualItems.length > 0;
+      // Upsert manual przez POST /manual
+      const response = await fetch(`/api/measurements/${id}/manual`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leftVolumeMl: parseFloat(manualForm.leftVolumeMl),
+          rightVolumeMl: parseFloat(manualForm.rightVolumeMl),
+        }),
+      });
 
-      if (hasManual && measurement?.manualItems) {
-        // Edytuj istniejący pomiar ręczny
-        const manualId = measurement?.manualItems[0].id;
-        const response = await fetch(`/api/measurements/manual/${manualId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: manualForm.name,
-            leftVolumeMl: parseFloat(manualForm.leftVolumeMl),
-            rightVolumeMl: parseFloat(manualForm.rightVolumeMl),
-          }),
-        });
-
-        if (response.ok) {
-          toast.success("Pomiar ręczny został zaktualizowany");
-        } else {
-          toast.error("Nie udało się zaktualizować pomiaru ręcznego");
-        }
+      if (response.ok) {
+        toast.success("Pomiar ręczny zapisany");
       } else {
-        // Dodaj nowy pomiar ręczny
-        const response = await fetch(`/api/measurements/${id}/manual`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: manualForm.name,
-            leftVolumeMl: parseFloat(manualForm.leftVolumeMl),
-            rightVolumeMl: parseFloat(manualForm.rightVolumeMl),
-          }),
-        });
-
-        if (response.ok) {
-          toast.success("Pomiar ręczny został dodany");
-        } else {
-          toast.error("Nie udało się dodać pomiaru ręcznego");
-        }
+        toast.error("Nie udało się zapisać pomiaru ręcznego");
       }
 
-      setManualForm({ name: "", leftVolumeMl: "", rightVolumeMl: "" });
+      setManualForm({ leftVolumeMl: "", rightVolumeMl: "" });
       setIsEditingManual(false);
       fetchMeasurement();
     } catch (error) {
@@ -167,15 +135,16 @@ export default function MobileMeasurementEditPage() {
   };
 
   const startEditManual = () => {
-    if (measurement?.manualItems && measurement?.manualItems.length > 0) {
-      const manual = measurement?.manualItems[0];
+    const manual = measurement?.analyses?.find(
+      (a) => a.measurementType === "MANUAL"
+    );
+    if (manual) {
       setManualForm({
-        name: manual.name,
-        leftVolumeMl: manual.leftVolumeMl.toString(),
-        rightVolumeMl: manual.rightVolumeMl?.toString(),
+        leftVolumeMl: (manual.leftVolumeMl ?? "").toString(),
+        rightVolumeMl: (manual.rightVolumeMl ?? "").toString(),
       });
     } else {
-      setManualForm({ name: "", leftVolumeMl: "", rightVolumeMl: "" });
+      setManualForm({ leftVolumeMl: "", rightVolumeMl: "" });
     }
     setIsEditingManual(true);
   };
@@ -280,13 +249,23 @@ export default function MobileMeasurementEditPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-lg font-bold text-text-primary">
-                  {measurement?.leftVolumeMl?.toFixed(1)}ml
+                  {(
+                    measurement?.analyses?.find(
+                      (a) => a.measurementType === "AI"
+                    )?.leftVolumeMl ?? 0
+                  ).toFixed(1)}
+                  ml
                 </div>
                 <div className="text-sm text-text-muted">Lewa pierś</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-text-primary">
-                  {measurement?.rightVolumeMl?.toFixed(1)}ml
+                  {(
+                    measurement?.analyses?.find(
+                      (a) => a.measurementType === "AI"
+                    )?.rightVolumeMl ?? 0
+                  ).toFixed(1)}
+                  ml
                 </div>
                 <div className="text-sm text-text-muted">Prawa pierś</div>
               </div>
@@ -307,7 +286,9 @@ export default function MobileMeasurementEditPage() {
                 onClick={startEditManual}
                 className="rounded-xl">
                 <Edit3 className="h-4 w-4 mr-2" />
-                {measurement?.manualItems && measurement?.manualItems.length > 0
+                {measurement?.analyses?.some(
+                  (a) => a.measurementType === "MANUAL"
+                )
                   ? "Edytuj"
                   : "Dodaj"}
               </Button>
@@ -316,18 +297,6 @@ export default function MobileMeasurementEditPage() {
           <CardContent>
             {isEditingManual && (
               <div className="space-y-4 mb-4 p-4 bg-blue-50 rounded-xl">
-                <div className="space-y-2">
-                  <Label htmlFor="manualName">Nazwa pomiaru ręcznego</Label>
-                  <Input
-                    id="manualName"
-                    value={manualForm.name}
-                    onChange={(e) =>
-                      setManualForm({ ...manualForm, name: e.target.value })
-                    }
-                    placeholder="Nazwa pomiaru"
-                    className="rounded-xl"
-                  />
-                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="manualLeft">Lewa pierś (ml)</Label>
@@ -377,7 +346,6 @@ export default function MobileMeasurementEditPage() {
                     onClick={() => {
                       setIsEditingManual(false);
                       setManualForm({
-                        name: "",
                         leftVolumeMl: "",
                         rightVolumeMl: "",
                       });
@@ -389,16 +357,25 @@ export default function MobileMeasurementEditPage() {
               </div>
             )}
 
-            {measurement?.manualItems && measurement?.manualItems.length > 0 ? (
+            {measurement?.analyses?.some(
+              (a) => a.measurementType === "MANUAL"
+            ) ? (
               <div className="p-3 bg-gray-50 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="font-medium text-text-primary">
-                      {measurement?.manualItems[0].name}
-                    </div>
                     <div className="text-sm text-text-muted">
-                      {measurement?.manualItems[0].leftVolumeMl.toFixed(1)}ml /{" "}
-                      {measurement?.manualItems[0].rightVolumeMl?.toFixed(1)}ml
+                      {(
+                        measurement?.analyses?.find(
+                          (a) => a.measurementType === "MANUAL"
+                        )?.leftVolumeMl ?? 0
+                      ).toFixed(1)}
+                      ml /{" "}
+                      {(
+                        measurement?.analyses?.find(
+                          (a) => a.measurementType === "MANUAL"
+                        )?.rightVolumeMl ?? 0
+                      ).toFixed(1)}
+                      ml
                     </div>
                   </div>
                 </div>
