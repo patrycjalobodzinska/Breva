@@ -1,78 +1,133 @@
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
-import { useEffect } from "react";
-import AdminLayout from "@/components/AdminLayout";
+import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield } from "lucide-react";
+import { useAdminStats } from "@/hooks/useAdminStats";
+import {
+  Users,
+  BarChart3,
+  Shield,
+  TrendingUp,
+  Activity,
+  Loader2,
+} from "lucide-react";
 import Link from "next/link";
 
-export default function AdminPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (status === "loading") return;
-    if (!session || session.user?.role !== "ADMIN") {
-    }
-  }, [session, status, router]);
-
-  if (status === "loading") {
-    return (
-      <AdminLayout>
-        <Card className="rounded-2xl">
-          <CardContent className="p-8 text-center">
-            <Shield className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-            <p className="text-text-muted">Ładowanie...</p>
-          </CardContent>
-        </Card>
-      </AdminLayout>
-    );
-  }
-
-  if (!session || session.user?.role !== "ADMIN") {
-    return null;
-  }
+export default function MobileAdminPage() {
+  const { data: stats, isLoading } = useAdminStats();
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <MobileAdminLayout>
+      <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold text-text-primary">
+          <h1 className="text-2xl font-bold text-text-primary">
             Panel Administratora
           </h1>
-          <p className="text-text-muted">Zarządzaj systemem BREVA</p>
+          <p className="text-text-muted text-sm">Zarządzaj systemem BREVA</p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-2">Użytkownicy</h3>
-              <p className="text-text-muted mb-4">
-                Zarządzaj użytkownikami systemu
-              </p>
-              <Link
-                href="/admin/uzytkownicy"
-                className="text-primary hover:underline">
-                Otwórz →
-              </Link>
-            </CardContent>
-          </Card>
+        {/* Quick Stats */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-4 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-4 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Users className="h-5 w-5 text-primary" />
+                  <TrendingUp className="h-4 w-4 text-green-600" />
+                </div>
+                <p className="text-2xl font-bold text-text-primary">
+                  {stats?.users.total || 0}
+                </p>
+                <p className="text-xs text-text-muted">
+                  Użytkownicy
+                  {stats?.users.last7Days ? (
+                    <span className="text-green-600 ml-1">
+                      +{stats.users.last7Days} (7d)
+                    </span>
+                  ) : null}
+                </p>
+              </CardContent>
+            </Card>
 
-          <Card className="rounded-2xl">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-semibold mb-2">Pomiary</h3>
-              <p className="text-text-muted mb-4">
-                Przeglądaj wszystkie pomiary
-              </p>
-              <Link
-                href="/admin/pomiary"
-                className="text-primary hover:underline">
-                Otwórz →
-              </Link>
-            </CardContent>
-          </Card>
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                  <Activity className="h-4 w-4 text-blue-600" />
+                </div>
+                <p className="text-2xl font-bold text-text-primary">
+                  {stats?.measurements.total || 0}
+                </p>
+                <p className="text-xs text-text-muted">
+                  Pomiary
+                  {stats?.measurements.last7Days ? (
+                    <span className="text-blue-600 ml-1">
+                      +{stats.measurements.last7Days} (7d)
+                    </span>
+                  ) : null}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          <h2 className="text-lg font-semibold text-text-primary">
+            Zarządzanie
+          </h2>
+
+          <Link href="/mobile/admin/uzytkownicy">
+            <Card className="rounded-2xl bg-white/90 mb-3 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <Users className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-text-primary">
+                      Użytkownicy
+                    </h3>
+                    <p className="text-sm text-text-muted">
+                      Zarządzaj użytkownikami systemu
+                    </p>
+                  </div>
+                  <Shield className="h-5 w-5 text-text-muted" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/mobile/admin/pomiary">
+            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                    <BarChart3 className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-text-primary">Pomiary</h3>
+                    <p className="text-sm text-text-muted">
+                      Przeglądaj wszystkie pomiary
+                    </p>
+                  </div>
+                  <Shield className="h-5 w-5 text-text-muted" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         </div>
       </div>
-    </AdminLayout>
+    </MobileAdminLayout>
   );
 }

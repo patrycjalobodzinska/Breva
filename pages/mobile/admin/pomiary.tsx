@@ -20,8 +20,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Eye, Calendar, BarChart3, User, Edit } from "lucide-react";
-import AdminLayout from "@/components/AdminLayout";
+import {
+  Search,
+  Eye,
+  Calendar,
+  BarChart3,
+  User,
+  Edit,
+  ChevronRight,
+} from "lucide-react";
+import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 import { useRouter } from "next/router";
 import { Pagination } from "@/components/ui/pagination";
 
@@ -107,41 +115,37 @@ export default function AdminMeasurementsPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-text-primary">Pomiary</h1>
-          </div>
-          <Card className="rounded-2xl bg-white backdrop-blur-sm">
+      <MobileAdminLayout>
+        <div className="space-y-4">
+          <Card className="rounded-2xl bg-white/90">
             <CardContent className="p-8 text-center">
               <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
               <p className="text-text-muted">Ładowanie pomiarów...</p>
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </MobileAdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-text-primary">Pomiary</h1>
+    <MobileAdminLayout>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-text-primary">Pomiary</h1>
+          <Badge className="rounded-full">{measurements?.length || 0}</Badge>
+        </div>
 
         {/* Search */}
-        <Card className="bg-white rounded-2xl">
-          <CardContent className="p-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-muted" />
-              <Input
-                placeholder="Szukaj pomiarów..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 rounded-2xl"
-              />
-            </div>
-          </CardContent>
-        </Card>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-muted" />
+          <Input
+            placeholder="Szukaj pomiarów..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 rounded-xl bg-white/90"
+          />
+        </div>
 
         {/* Measurements List */}
         {measurements?.length === 0 ? (
@@ -261,6 +265,6 @@ export default function AdminMeasurementsPage() {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </MobileAdminLayout>
   );
 }

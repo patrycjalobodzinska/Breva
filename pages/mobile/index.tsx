@@ -8,9 +8,13 @@ export default function MobileHome() {
   const router = useRouter();
 
   useEffect(() => {
-    // Jeśli użytkownik jest zalogowany, przekieruj na panel
+    // Jeśli użytkownik jest zalogowany, przekieruj na odpowiedni panel
     if (status === "authenticated" && session) {
-      router.push("/mobile/panel");
+      if (session.user?.role === "ADMIN") {
+        router.push("/mobile/admin");
+      } else {
+        router.push("/mobile/panel");
+      }
     }
   }, [session, status, router]);
 

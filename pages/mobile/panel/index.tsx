@@ -32,6 +32,10 @@ export default function MobilePanelDashboard() {
     if (!session) {
       router.push("/mobile");
     }
+    // Jeśli admin wejdzie na panel użytkownika, przekieruj na panel admina
+    if (session?.user?.role === "ADMIN") {
+      router.push("/mobile/admin");
+    }
   }, [session, status, router]);
 
   if (status === "loading") {

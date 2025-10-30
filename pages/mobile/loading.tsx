@@ -7,10 +7,14 @@ export default function MobileLoading() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    // Jeśli sesja jest załadowana i użytkownik jest zalogowany, przekieruj na panel
+    // Jeśli sesja jest załadowana i użytkownik jest zalogowany, przekieruj na odpowiedni panel
     if (status === "authenticated" && session) {
       const timer = setTimeout(() => {
-        router.push("/mobile/panel");
+        if (session.user?.role === "ADMIN") {
+          router.push("/mobile/admin");
+        } else {
+          router.push("/mobile/panel");
+        }
       }, 2000); // 2 sekundy ładowania dla lepszego UX
 
       return () => clearTimeout(timer);
