@@ -1,5 +1,11 @@
 {
   "functions": {
+    "pages/api/auth/[...nextauth].ts": {
+      "maxDuration": 30
+    },
+    "pages/api/auth/register.ts": {
+      "maxDuration": 30
+    },
     "pages/api/uploads/analyze.ts": {
       "maxDuration": 60
     },

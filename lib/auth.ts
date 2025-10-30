@@ -1,9 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 if (!process.env.NEXTAUTH_URL) {
   process.env.NEXTAUTH_URL = "http://localhost:3000";
@@ -62,7 +60,7 @@ export const authOptions: NextAuthOptions = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: false, // Always false for development
+        secure: process.env.NODE_ENV === "production", // true w produkcji
       },
     },
   },
