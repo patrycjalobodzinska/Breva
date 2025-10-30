@@ -39,11 +39,13 @@ export default async function handler(
       return res.status(400).json({ error: "Side must be 'left' or 'right'" });
     }
 
-    // Sprawdź czy pomiar należy do użytkownika
+    const isAdmin = session.user.role === "ADMIN";
+
+    // Sprawdź czy pomiar należy do użytkownika (admin ma dostęp do wszystkich)
     const measurement = await prisma.measurement?.findFirst({
       where: {
         id: measurementId as string,
-        userId: session.user.id,
+        ...(isAdmin ? {} : { userId: session.user.id }),
       },
     });
 

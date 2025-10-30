@@ -116,36 +116,8 @@ export default function PanelPage() {
           )}
 
         {/* Skan LiDAR */}
-        <WebViewBridge
-          onLiDARData={(data) => {
-            // Tutaj możesz przetworzyć dane LiDAR
-          }}
-        />
 
         {/* Szybkie akcje */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="rounded-2xl shadow-lg bg-white hover:shadow-xl transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-primary-dark">
-                📁 Przesyłanie plików
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-text-muted">
-              Prześlij zdjęcia, filmy lub pliki LiDAR do analizy.
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-2xl shadow-lg bg-white hover:shadow-xl transition-shadow">
-            <CardHeader>
-              <CardTitle className="text-2xl font-semibold text-primary-dark">
-                📊 Moje pomiary
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-text-muted">
-              Przeglądaj historię swoich pomiarów i analiz.
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </PanelLayout>
   );

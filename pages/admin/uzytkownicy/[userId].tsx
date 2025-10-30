@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, Key, BarChart3, Calendar, User } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
+import { Measurement } from "@/types";
 
 interface User {
   id: string;
@@ -25,15 +26,6 @@ interface User {
   role: "USER" | "ADMIN";
   createdAt: string;
   updatedAt: string;
-}
-
-interface Measurement {
-  id: string;
-  name: string;
-  note?: string;
-  leftVolumeMl: number;
-  rightVolumeMl: number;
-  createdAt: string;
 }
 
 export default function UserDetailPage() {
@@ -327,27 +319,25 @@ export default function UserDetailPage() {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="flex  gap-4">
                       <div>
                         <p className="text-sm text-text-muted">Lewa pierś</p>
                         <p className="font-medium">
-                          {measurement?.leftVolumeMl?.toFixed(1)} ml
+                          {measurement?.aiAnalysis?.leftVolumeMl
+                            ? measurement?.aiAnalysis?.leftVolumeMl?.toFixed(
+                                1
+                              ) + "  ml"
+                            : "-"}{" "}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-text-muted">Prawa pierś</p>
                         <p className="font-medium">
-                          {measurement?.rightVolumeMl?.toFixed(1)} ml
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-text-muted">Asymetria</p>
-                        <p className="font-medium">
-                          {getAsymmetryPercentage(
-                            measurement?.leftVolumeMl,
-                            measurement?.rightVolumeMl
-                          )}
-                          %
+                          {measurement?.aiAnalysis?.rightVolumeMl
+                            ? measurement?.aiAnalysis?.rightVolumeMl?.toFixed(
+                                1
+                              ) + " ml"
+                            : "-"}{" "}
                         </p>
                       </div>
                     </div>

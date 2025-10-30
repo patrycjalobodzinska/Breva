@@ -33,7 +33,7 @@ export const ManualMeasurementDialog = ({
 }: ManualMeasurementDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-2xl">
+      <DialogContent className="w-md rounded-2xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

@@ -114,10 +114,29 @@ export default function MeasurementsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nazwa</TableHead>
-                  <TableHead>Objetość (ml)</TableHead>
-                  <TableHead>Pomiary ręczne</TableHead>
-                  <TableHead>Asymetria</TableHead>
+                  <TableHead colSpan={1}>Nazwa</TableHead>
+                  <TableHead className="text-center" colSpan={2}>
+                    Objetość (ml)
+                    <div className="grid grid-cols-2">
+                      <div className="col-span-1">
+                        <p>Lewa</p>
+                      </div>
+                      <div className="col-span-1">
+                        <p>Prawa</p>
+                      </div>
+                    </div>
+                  </TableHead>
+                  <TableHead colSpan={2} className="text-center">
+                    Pomiary ręczne
+                    <div className="grid grid-cols-2">
+                      <div className="col-span-1">
+                        <p>Lewa</p>
+                      </div>
+                      <div className="col-span-1">
+                        <p>Prawa</p>
+                      </div>
+                    </div>
+                  </TableHead>
                   <TableHead>Data</TableHead>
                 </TableRow>
               </TableHeader>
@@ -140,22 +159,41 @@ export default function MeasurementsPage() {
                       </div>
                     </TableCell>
 
-                    <TableCell>
-                      <div className="text-sm">
+                    <TableCell colSpan={2}>
+                      <div className="text-sm text-center grid-cols-2 grid">
                         <p>
-                          Lewa:{" "}
-                          {measurement?.aiAnalysis?.leftVolumeMl?.toFixed(1)} ml
+                          {measurement?.aiAnalysis?.leftVolumeMl
+                            ? measurement?.aiAnalysis?.leftVolumeMl?.toFixed(
+                                1
+                              ) + ""
+                            : "-"}{" "}
                         </p>
                         <p>
-                          Prawa:{" "}
-                          {measurement?.aiAnalysis?.rightVolumeMl?.toFixed(1)}{" "}
-                          ml
+                          {measurement?.aiAnalysis?.rightVolumeMl
+                            ? measurement?.aiAnalysis?.rightVolumeMl?.toFixed(
+                                1
+                              ) + " ml"
+                            : "-"}{" "}
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      {measurement?.manualAnalysis?.leftVolumeMl}{" "}
-                      {measurement?.manualAnalysis?.rightVolumeMl}
+                    <TableCell colSpan={2}>
+                      <div className="text-sm text-center grid-cols-2 grid">
+                        <p>
+                          {measurement?.manualAnalysis?.leftVolumeMl
+                            ? measurement?.manualAnalysis?.leftVolumeMl?.toFixed(
+                                1
+                              ) + ""
+                            : "-"}{" "}
+                        </p>
+                        <p>
+                          {measurement?.manualAnalysis?.rightVolumeMl
+                            ? measurement?.manualAnalysis?.rightVolumeMl?.toFixed(
+                                1
+                              ) + " ml"
+                            : "-"}{" "}
+                        </p>
+                      </div>
                     </TableCell>
 
                     <TableCell>

@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import PanelLayout from "@/components/PanelLayout";
-import { WebViewBridge } from "@/components/WebViewBridge";
 
 const ACCEPTED_FILE_TYPES = {
   video: [".mp4", ".mov"],
@@ -155,8 +154,7 @@ export default function UploadPage() {
           <CardHeader>
             <CardTitle className="text-2xl">Prześlij plik do analizy</CardTitle>
             <CardDescription>
-              Wybierz plik wideo, zdjęcie lub dane LiDAR do analizy objętości
-              piersi
+              Ta funkcja jest dostępna tylko w aplikacji mobilnej
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -237,53 +235,51 @@ export default function UploadPage() {
               )} */}
 
             {/* LiDAR Scanner */}
-            {uploadMethod === "lidar" && (
-              <div className="space-y-2">
-                <Label>Skan LiDAR</Label>
-                <WebViewBridge onLiDARData={handleLiDARData} />
-              </div>
-            )}
 
-            {/* Note */}
-            <div className="space-y-2">
-              <Label htmlFor="note">Notatka (opcjonalna)</Label>
-              <Textarea
-                id="note"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Dodaj notatkę do tego pomiaru..."
-                className="rounded-2xl"
-                rows={3}
-              />
-            </div>
-
-            {/* File Info */}
-            <div className="bg-accent-1 rounded-2xl p-4">
-              <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium mb-2">
-                    Wymagania dotyczące plików:
+            {/* Mobile App Info */}
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
+              <div className="flex items-start space-x-4">
+                <div className="flex-shrink-0">
+                  <Camera className="h-8 w-8 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-blue-900 mb-2">
+                    Skan LiDAR - Aplikacja mobilna iOS
+                  </h3>
+                  <p className="text-sm text-blue-800 mb-3">
+                    Funkcja analizy piersi z wykorzystaniem technologii LiDAR
+                    jest dostępna wyłącznie w aplikacji mobilnej BREVA na
+                    urządzenia iOS z czujnikiem LiDAR (iPhone 12 Pro i nowsze,
+                    iPad Pro z LiDAR).
                   </p>
-                  <ul className="space-y-1 text-text-muted">
-                    <li>• Wideo: MP4, MOV (max 300MB)</li>
-                    <li>• Zdjęcia: JPG, PNG, HEIC (max 30MB)</li>
-                    <li>• LiDAR: PLY, LAS (max 200MB)</li>
-                  </ul>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-blue-900">
+                      Dlaczego aplikacja mobilna?
+                    </p>
+                    <ul className="space-y-1 text-sm text-blue-800">
+                      <li>• Bezpośredni dostęp do czujnika LiDAR</li>
+                      <li>• Skanowanie 3D w czasie rzeczywistym</li>
+                      <li>• Najwyższa precyzja pomiarów</li>
+                      <li>• Prosta i intuicyjna obsługa</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              disabled={
-                (uploadMethod === "file" && !file) ||
-                (uploadMethod === "lidar" && !lidarData) ||
-                isUploading
-              }
-              className="w-full rounded-2xl bg-primary hover:bg-primary-dark">
-              {isUploading ? "Analizowanie..." : "Rozpocznij analizę"}
-            </Button>
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-5 w-5 text-gray-600 mt-0.5" />
+                <div className="text-sm text-gray-700">
+                  <p className="font-medium mb-1">Jak zacząć?</p>
+                  <p>
+                    Pobierz aplikację BREVA na swoje urządzenie iOS, zaloguj się
+                    i skorzystaj z funkcji "Nowy pomiar" aby wykonać skan LiDAR
+                    piersi.
+                  </p>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

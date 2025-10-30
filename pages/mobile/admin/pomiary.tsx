@@ -165,7 +165,6 @@ export default function AdminMeasurementsPage() {
                   <TableHead>Użytkownik</TableHead>
                   <TableHead>Objetość (ml)</TableHead>
                   <TableHead>Pomiary ręczne</TableHead>
-                  <TableHead>Asymetria</TableHead>
                   <TableHead>Data</TableHead>
                 </TableRow>
               </TableHeader>

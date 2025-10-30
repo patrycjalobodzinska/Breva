@@ -22,11 +22,12 @@ export default async function handler(
     const { leftVolumeMl, rightVolumeMl, name, note } =
       manualMeasurementSchema.parse(req.body);
 
+    const isAdmin = session.user.role === "ADMIN";
+
     const measurement = await prisma.measurement?.findFirst({
       where: {
         id: id as string,
-        userId: session.user.id,
-        source: "MANUAL",
+        ...(isAdmin ? {} : { userId: session.user.id }),
       },
     });
 

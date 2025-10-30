@@ -57,10 +57,10 @@ export default function LoginPage() {
         }
       }
     } catch (validationError: any) {
-      if (validationError.errors) {
+      if (validationError.issues) {
         const errors: Record<string, string> = {};
-        validationError.errors.forEach((err: any) => {
-          if (err.path) {
+        validationError.issues.forEach((err: any) => {
+          if (err.path && err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
         });
@@ -75,7 +75,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white/90 border-none rounded-2xl shadow-lg">
+      <Card className="min-w-full md:min-w-md bg-white/90 border-none rounded-2xl shadow-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Heart className="h-8 w-8 text-primary" />

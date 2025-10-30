@@ -1,30 +1,31 @@
 import { z } from "zod";
 
 // Schemat walidacji dla rejestracji
-export const registerSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Imię musi mieć co najmniej 2 znaki")
-    .max(50, "Imię nie może mieć więcej niż 50 znaków")
-    .regex(/^[a-zA-ZąćęłńóśźżĄĆĘŁŃÓŚŹŻ\s]+$/, "Imię może zawierać tylko litery"),
-  email: z
-    .string()
-    .email("Nieprawidłowy adres email")
-    .min(5, "Email musi mieć co najmniej 5 znaków")
-    .max(100, "Email nie może mieć więcej niż 100 znaków"),
-  password: z
-    .string()
-    .min(6, "Hasło musi mieć co najmniej 6 znaków")
-    .max(100, "Hasło nie może mieć więcej niż 100 znaków")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę i jedną cyfrę"
-    ),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Hasła nie są identyczne",
-  path: ["confirmPassword"],
-});
+export const registerSchema = z
+  .object({
+    name: z
+      .string()
+      .min(2, "Imię musi mieć co najmniej 2 znaki")
+      .max(50, "Imię nie może mieć więcej niż 50 znaków"),
+    email: z
+      .string()
+      .email("Nieprawidłowy adres email")
+      .min(5, "Email musi mieć co najmniej 5 znaków")
+      .max(100, "Email nie może mieć więcej niż 100 znaków"),
+    password: z
+      .string()
+      .min(6, "Hasło musi mieć co najmniej 6 znaków")
+      .max(100, "Hasło nie może mieć więcej niż 100 znaków")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę i jedną cyfrę"
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Hasła nie są identyczne",
+    path: ["confirmPassword"],
+  });
 
 // Schemat walidacji dla logowania
 export const loginSchema = z.object({
@@ -39,20 +40,22 @@ export const loginSchema = z.object({
 });
 
 // Schemat walidacji dla zmiany hasła
-export const changePasswordSchema = z.object({
-  newPassword: z
-    .string()
-    .min(6, "Nowe hasło musi mieć co najmniej 6 znaków")
-    .max(100, "Nowe hasło nie może mieć więcej niż 100 znaków")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Nowe hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę i jedną cyfrę"
-    ),
-  confirmPassword: z.string(),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "Hasła nie są identyczne",
-  path: ["confirmPassword"],
-});
+export const changePasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(6, "Nowe hasło musi mieć co najmniej 6 znaków")
+      .max(100, "Nowe hasło nie może mieć więcej niż 100 znaków")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Nowe hasło musi zawierać co najmniej jedną małą literę, jedną wielką literę i jedną cyfrę"
+      ),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Hasła nie są identyczne",
+    path: ["confirmPassword"],
+  });
 
 // Schemat walidacji dla pomiarów
 export const measurementSchema = z.object({

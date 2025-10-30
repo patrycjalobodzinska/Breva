@@ -23,10 +23,12 @@ export default async function handler(
       req.body
     );
 
+    const isAdmin = session.user.role === "ADMIN";
+
     const baseline = await prisma.measurement?.findFirst({
       where: {
         id: id as string,
-        userId: session.user.id,
+        ...(isAdmin ? {} : { userId: session.user.id }),
       },
     });
 

@@ -57,10 +57,10 @@ export const MobileLoginForm = ({
       }
     } catch (validationError: any) {
       // Obsługa błędów walidacji Zod
-      if (validationError.errors) {
+      if (validationError.issues) {
         const errors: Record<string, string> = {};
-        validationError.errors.forEach((err: any) => {
-          if (err.path) {
+        validationError.issues.forEach((err: any) => {
+          if (err.path && err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
         });
@@ -75,9 +75,9 @@ export const MobileLoginForm = ({
 
   return (
     <div className="min-h-screen z-10  flex flex-col">
-      <div className="flex-1 flex flex-col  px-6 py-16">
+      <div className="flex-col flex   px-6 py-6 pt-16">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center justify-center  mb-1 mt-6">
             <Heart className="h-12 w-12 text-primary" />
           </div>
           <h1 className="text-3xl font-bold text-text-primary mb-2">
@@ -108,10 +108,11 @@ export const MobileLoginForm = ({
                   className={`rounded-xl ${
                     formErrors.email ? "border-red-500" : ""
                   }`}
-                  required
                 />
                 {formErrors.email && (
-                  <p className="text-red-500 text-xs">{formErrors.email}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.email}
+                  </p>
                 )}
               </div>
 
@@ -129,7 +130,6 @@ export const MobileLoginForm = ({
                     className={`rounded-xl pr-10 ${
                       formErrors.password ? "border-red-500" : ""
                     }`}
-                    required
                   />
                   <button
                     type="button"
@@ -143,7 +143,9 @@ export const MobileLoginForm = ({
                   </button>
                 </div>
                 {formErrors.password && (
-                  <p className="text-red-500 text-xs">{formErrors.password}</p>
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.password}
+                  </p>
                 )}
               </div>
 

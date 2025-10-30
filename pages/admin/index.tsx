@@ -44,7 +44,7 @@ export default function AdminPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          <Card className="rounded-2xl">
+          <Card className="bg-white/90  rounded-2xl">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Użytkownicy</h3>
               <p className="text-text-muted mb-4">
@@ -58,7 +58,7 @@ export default function AdminPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl bg-white/90">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Pomiary</h3>
               <p className="text-text-muted mb-4">

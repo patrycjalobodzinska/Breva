@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Heart } from "lucide-react";
+import { Heart, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
@@ -28,6 +28,8 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -80,13 +82,15 @@ export default function RegisterPage() {
         }
       } else {
         const data = await response.json();
+        console.log(data);
         setError(data.error || "Wystąpił błąd podczas rejestracji");
       }
     } catch (validationError: any) {
-      if (validationError.errors) {
+      console.log(validationError);
+      if (validationError.issues) {
         const errors: Record<string, string> = {};
-        validationError.errors.forEach((err: any) => {
-          if (err.path) {
+        validationError.issues.forEach((err: any) => {
+          if (err.path && err.path.length > 0) {
             errors[err.path[0]] = err.message;
           }
         });
@@ -102,7 +106,7 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-2xl shadow-lg">
+        <Card className="min-w-full md:min-w-md bg-white/90 max-w-md rounded-2xl shadow-lg">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-4">
               <Heart className="h-8 w-8 text-primary" />
@@ -124,8 +128,8 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md rounded-2xl shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br flex-col from-accent-1 to-accent-2 flex items-center justify-center p-4">
+      <Card className=" md:min-w-md min-w-full bg-white/90 border-none rounded-2xl shadow-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Heart className="h-8 w-8 text-primary" />
@@ -138,7 +142,7 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium mb-2">
-                Imię (opcjonalne)
+                Imię
               </label>
               <Input
                 id="name"
@@ -185,20 +189,31 @@ export default function RegisterPage() {
                 className="block text-sm font-medium mb-2">
                 Hasło
               </label>
-              <Input
-                id="password"
-                type="password"
-                value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
-                placeholder="••••••••"
-                required
-                minLength={6}
-                className={`rounded-2xl ${
-                  formErrors.password ? "border-red-500" : ""
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
+                  placeholder="••••••••"
+                  minLength={6}
+                  className={`rounded-2xl pr-10 ${
+                    formErrors.password ? "border-red-500" : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted hover:text-text-primary">
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {formErrors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.password}
@@ -212,20 +227,34 @@ export default function RegisterPage() {
                 className="block text-sm font-medium mb-2">
                 Potwierdź hasło
               </label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) =>
-                  setFormData({ ...formData, confirmPassword: e.target.value })
-                }
-                placeholder="••••••••"
-                required
-                minLength={6}
-                className={`rounded-2xl ${
-                  formErrors.confirmPassword ? "border-red-500" : ""
-                }`}
-              />
+              <div className="relative">
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      confirmPassword: e.target.value,
+                    })
+                  }
+                  placeholder="••••••••"
+                  minLength={6}
+                  className={`rounded-2xl pr-10 ${
+                    formErrors.confirmPassword ? "border-red-500" : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted hover:text-text-primary">
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {formErrors.confirmPassword && (
                 <p className="text-red-500 text-sm mt-1">
                   {formErrors.confirmPassword}

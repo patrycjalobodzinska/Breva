@@ -32,7 +32,7 @@ export const MeasurementEditDialog = ({
 }: MeasurementEditDialogProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-2xl">
+      <DialogContent className="rounded-2xl w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

@@ -103,7 +103,7 @@ export default function UsersPage() {
               Użytkownicy
             </h1>
           </div>
-          <Card className="rounded-2xl">
+          <Card className="rounded-2xl bg-white/90">
             <CardContent className="p-8 text-center">
               <Users className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
               <p className="text-text-muted">Ładowanie użytkowników...</p>

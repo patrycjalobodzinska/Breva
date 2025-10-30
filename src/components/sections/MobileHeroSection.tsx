@@ -54,9 +54,9 @@ export const MobileHeroSection = () => {
         )}
         {currentView === "home" && (
           <>
-            <div className="flex z-10 flex flex-col ">
+            <div className="flex z-10 flex-col ">
               <div className="text-center mt-10">
-                <div className="flex items-center justify-center mb-6">
+                <div className="flex mt-6 items-center justify-center mb-1">
                   <Heart className="h-20 w-20 text-primary" />
                 </div>
                 <h1 className="text-4xl font-bold text-text-primary  mb-4 w-full text-center">

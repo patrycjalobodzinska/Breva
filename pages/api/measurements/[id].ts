@@ -14,18 +14,26 @@ export default async function handler(
   }
 
   const { id } = req.query;
+  const isAdmin = session.user.role === "ADMIN";
 
   if (req.method === "GET") {
     try {
       const measurement = await prisma.measurement.findFirst({
         where: {
           id: id as string,
-          userId: session.user.id,
+          ...(isAdmin ? {} : { userId: session.user.id }),
         },
         include: {
           aiAnalysis: true,
           manualAnalysis: true,
           lidarCaptures: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
         },
       });
 
@@ -49,7 +57,7 @@ export default async function handler(
       const measurement = await prisma.measurement.findFirst({
         where: {
           id: id as string,
-          userId: session.user.id,
+          ...(isAdmin ? {} : { userId: session.user.id }),
         },
       });
 
@@ -79,7 +87,7 @@ export default async function handler(
       const measurement = await prisma.measurement.findFirst({
         where: {
           id: id as string,
-          userId: session.user.id,
+          ...(isAdmin ? {} : { userId: session.user.id }),
         },
       });
 

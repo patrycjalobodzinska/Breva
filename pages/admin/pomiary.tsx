@@ -190,8 +190,7 @@ export default function AdminMeasurementsPage() {
                   <TableHead>Pomiar</TableHead>
                   <TableHead>Użytkownik</TableHead>
                   <TableHead>Objetość (ml)</TableHead>
-                  <TableHead>Analizy</TableHead>
-                  <TableHead>Asymetria</TableHead>
+
                   <TableHead>Data</TableHead>
                 </TableRow>
               </TableHeader>
@@ -239,19 +238,7 @@ export default function AdminMeasurementsPage() {
                         </p>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <span className="text-xs text-text-muted">
-                        {measurement?.analyses?.length || 0} analiz
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-medium">
-                        {getAsymmetryPercentage(
-                          getVolumeForSide(measurement, "LEFT"),
-                          getVolumeForSide(measurement, "RIGHT")
-                        )}
-                      </span>
-                    </TableCell>
+
                     <TableCell>
                       <div className="flex items-center text-sm text-text-muted">
                         <Calendar className="h-4 w-4 mr-1" />

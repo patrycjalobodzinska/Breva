@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import {
   Measurement,
   EditManualFormData,
@@ -9,6 +10,7 @@ import { toast } from "sonner";
 
 export const useMeasurementDetail = (measurementId: string) => {
   const router = useRouter();
+  const { data: session } = useSession();
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -19,7 +21,7 @@ export const useMeasurementDetail = (measurementId: string) => {
     name: "",
     note: "",
   });
-
+  console.log(measurementId);
   const [editManualForm, setEditManualForm] = useState<EditManualFormData>({
     leftVolumeMl: "",
     rightVolumeMl: "",
@@ -89,11 +91,12 @@ export const useMeasurementDetail = (measurementId: string) => {
   };
 
   const handleEditManual = () => {
-    if (measurement?.manualItems && measurement?.manualItems.length > 0) {
-      const manualMeasurement = measurement?.manualItems[0];
+    if (measurement?.manualAnalysis) {
       setEditManualForm({
-        leftVolumeMl: manualmeasurement?.leftVolumeMl?.toString(),
-        rightVolumeMl: manualmeasurement?.rightVolumeMl?.toString(),
+        leftVolumeMl:
+          measurement?.manualAnalysis?.leftVolumeMl?.toString() || "",
+        rightVolumeMl:
+          measurement?.manualAnalysis?.rightVolumeMl?.toString() || "",
       });
       setIsEditingManual(true);
     }
@@ -101,14 +104,13 @@ export const useMeasurementDetail = (measurementId: string) => {
 
   const handleSaveEditManual = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!measurement?.manualItems || measurement?.manualItems.length === 0)
-      return;
+    if (!measurement?.manualAnalysis) return;
 
     try {
       const response = await fetch(
-        `/api/measurements/manual/${measurement?.manualItems[0].id}`,
+        `/api/measurements/${measurementId}/manual`,
         {
-          method: "PUT",
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
@@ -192,7 +194,8 @@ export const useMeasurementDetail = (measurementId: string) => {
 
       if (response.ok) {
         toast.success("Pomiar został usunięty");
-        router.push("/panel/pomiary");
+        const isAdmin = session?.user?.role === "ADMIN";
+        router.push(isAdmin ? "/admin/pomiary" : "/panel/pomiary");
       } else {
         const error = await response.json();
         toast.error(error.error || "Wystąpił błąd podczas usuwania pomiaru");

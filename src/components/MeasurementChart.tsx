@@ -95,7 +95,7 @@ export const MeasurementChart = ({
       ];
 
       return (
-        <Card className="rounded-2xl">
+        <Card className="rounded-2xl bg-white/90">
           <CardHeader>
             <CardTitle>{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
