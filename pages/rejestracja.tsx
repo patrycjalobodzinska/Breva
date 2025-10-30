@@ -118,8 +118,7 @@ export default function RegisterPage() {
               Konto utworzone!
             </CardTitle>
             <CardDescription>
-              Twoje konto zostało pomyślnie utworzone. Logujemy Cię
-              automatycznie...
+              Twoje konto zostało pomyślnie utworzone
             </CardDescription>
           </CardHeader>
         </Card>

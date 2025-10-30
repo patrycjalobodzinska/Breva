@@ -125,8 +125,7 @@ export const MobileRegisterForm = ({
               Konto utworzone!
             </h1>
             <p className="text-text-muted mb-6">
-              Twoje konto zostało pomyślnie utworzone. Logujemy Cię
-              automatycznie...
+              Twoje konto zostało pomyślnie utworzone
             </p>
             <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
           </div>

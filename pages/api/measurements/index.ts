@@ -17,6 +17,9 @@ export default async function handler(
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    console.log("📊 Measurements API - User ID:", session.user.id);
+    console.log("📊 Measurements API - User Role:", session.user.role);
+
     const {
       search,
       sort = "createdAt",
@@ -87,6 +90,9 @@ export default async function handler(
     const totalPages = Math.ceil(
       filteredTotalCount / parseInt(pageSize as string)
     );
+
+    console.log("📊 Total measurements found:", measurements.length);
+    console.log("📊 Paginated measurements:", paginatedMeasurements.length);
 
     return res.status(200).json({
       measurements: paginatedMeasurements,

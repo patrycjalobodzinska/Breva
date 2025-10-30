@@ -1,11 +1,10 @@
 import PanelLayout from "@/components/PanelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUserStats } from "@/hooks/useUserStats";
-import { WebViewBridge } from "@/components/WebViewBridge";
 import { BarChart3, TrendingUp, Brain, Hand, Activity } from "lucide-react";
 
 export default function PanelPage() {
-  const { stats, isLoading } = useUserStats();
+  const { data: stats, isLoading } = useUserStats();
 
   if (isLoading) {
     return (
