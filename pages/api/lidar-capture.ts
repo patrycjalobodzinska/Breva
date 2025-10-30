@@ -88,41 +88,18 @@ export default async function handler(
     console.log("📱 Mask size:", data.object.mask.length);
     console.log("📱 Device:", data.metadata.deviceModel);
 
-    // Wyślij dane do Python API
-    const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
+    // Tymczasowo bez Python API: generuj losową objętość i zapisuj od razu
+    const mockRequestId = Math.floor(100000 + Math.random() * 900000);
+    const mockVolume = Math.round((Math.random() * 800 + 200) * 10) / 10; // 200–1000 ml, 0.1
 
-    const enqueueResponse = await fetch(
-      `${pythonApiUrl}/enqueue-volume-estimation`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          side: data.side,
-          measurementId: data.measurementId,
-          background: data.background,
-          object: data.object,
-          cameraIntrinsics: data.cameraIntrinsics,
-          metadata: data.metadata,
-        }),
-      }
-    );
-
-    if (!enqueueResponse.ok) {
-      throw new Error(`Python API error: ${enqueueResponse.status}`);
-    }
-
-    const enqueueResult = await enqueueResponse.json();
-    console.log("🐍 Python API Enqueue Response:", enqueueResult);
-
-    // Zapisz requestId do bazy danych
+    // Zapisz capture jako COMPLETED z oszacowaniem
     const captureRecord = await prisma.lidarCapture?.create({
       data: {
         measurementId: data.measurementId,
         side: data.side.toUpperCase(),
-        requestId: enqueueResult.requestId,
-        status: "PENDING",
+        requestId: mockRequestId,
+        status: "COMPLETED",
+        estimatedVolume: mockVolume,
         metadata: {
           deviceModel: data.metadata.deviceModel,
           iosVersion: data.metadata.iosVersion,
@@ -132,20 +109,17 @@ export default async function handler(
       },
     });
 
-    // Rozpocznij polling w tle (nie blokuj odpowiedzi)
-    pollVolumeEstimation(
-      enqueueResult.requestId,
-      data.measurementId,
-      data.side
-    );
+    // Zapisz wynik do analizy AI
+    await saveVolumeResult(data.measurementId, data.side, mockVolume);
 
     const response = {
       success: true,
-      message: "LiDAR data received successfully",
+      message: "LiDAR data received successfully (mocked processing)",
       captureId: captureRecord?.id,
-      requestId: enqueueResult.requestId,
+      requestId: mockRequestId,
       side: data.side,
       measurementId: data.measurementId,
+      estimatedVolume: mockVolume,
       timestamp: new Date().toISOString(),
     };
 
