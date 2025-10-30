@@ -57,6 +57,9 @@ export default function RegisterPage() {
         setSuccess(true);
         toast.success("Konto zostało utworzone pomyślnie!");
 
+        // Poczekaj chwilę aby upewnić się, że użytkownik jest zapisany w bazie
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
@@ -65,17 +68,29 @@ export default function RegisterPage() {
             redirect: false,
           });
 
+          console.log("🔐 Rezultat logowania:", result);
+
           if (result?.ok) {
+            toast.success("Logowanie udane!");
+            // Użyj window.location.href aby wymusić pełne przeładowanie z nową sesją
             setTimeout(() => {
-              router.push("/panel");
-            }, 1500);
+              window.location.href = "/panel";
+            }, 500);
           } else {
+            console.error("❌ Błąd logowania:", result?.error);
+            toast.error(
+              "Nie udało się automatycznie zalogować. Zaloguj się ręcznie."
+            );
             setTimeout(() => {
               router.push("/logowanie");
             }, 2000);
           }
         } catch (loginError) {
-          console.error("Błąd podczas automatycznego logowania:", loginError);
+          console.error(
+            "❌ Błąd podczas automatycznego logowania:",
+            loginError
+          );
+          toast.error("Wystąpił błąd. Spróbuj zalogować się ręcznie.");
           setTimeout(() => {
             router.push("/logowanie");
           }, 2000);

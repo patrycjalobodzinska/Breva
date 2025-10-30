@@ -60,6 +60,9 @@ export const MobileRegisterForm = ({
           setSuccess(true);
           toast.success("Konto zostało utworzone pomyślnie!");
 
+          // Poczekaj chwilę aby upewnić się, że użytkownik jest zapisany w bazie
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
           // Automatyczne logowanie po rejestracji
           try {
             const result = await signIn("credentials", {
@@ -68,24 +71,35 @@ export const MobileRegisterForm = ({
               redirect: false,
             });
 
+            console.log("🔐 Rezultat logowania:", result);
+
             if (result?.ok) {
-              // Logowanie się powiodło - przekieruj do loading
+              toast.success("Logowanie udane!");
+              // Użyj window.location.href aby wymusić pełne przeładowanie z nową sesją
               setTimeout(() => {
-                router.push("/mobile/loading");
-              }, 1500);
+                window.location.href = "/mobile/loading";
+              }, 500);
             } else {
+              console.error("❌ Błąd logowania:", result?.error);
+              toast.error(
+                "Nie udało się automatycznie zalogować. Zaloguj się ręcznie."
+              );
               // Logowanie się nie powiodło - przekieruj do widoku logowania
               setTimeout(() => {
-                onSwitchToLogin(); // Przekieruj do widoku logowania
-                setSuccess(false); // Reset success state
+                onSwitchToLogin();
+                setSuccess(false);
               }, 2000);
             }
           } catch (loginError) {
-            console.error("Błąd podczas automatycznego logowania:", loginError);
+            console.error(
+              "❌ Błąd podczas automatycznego logowania:",
+              loginError
+            );
+            toast.error("Wystąpił błąd. Spróbuj zalogować się ręcznie.");
             // W przypadku błędu, przekieruj do widoku logowania
             setTimeout(() => {
-              onSwitchToLogin(); // Przekieruj do widoku logowania
-              setSuccess(false); // Reset success state
+              onSwitchToLogin();
+              setSuccess(false);
             }, 2000);
           }
         } else {
