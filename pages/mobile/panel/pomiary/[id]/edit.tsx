@@ -29,6 +29,11 @@ interface Measurement {
   analyses?: BreastAnalysis[];
 }
 
+interface LidarStatus {
+  status: "PENDING" | "COMPLETED" | "FAILED";
+  estimatedVolume?: number;
+}
+
 export default function MobileMeasurementEditPage() {
   const { data: session } = useSession();
   const router = useRouter();
@@ -37,6 +42,9 @@ export default function MobileMeasurementEditPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingManual, setIsEditingManual] = useState(false);
+  const [leftStatus, setLeftStatus] = useState<LidarStatus | null>(null);
+  const [rightStatus, setRightStatus] = useState<LidarStatus | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -51,8 +59,18 @@ export default function MobileMeasurementEditPage() {
   useEffect(() => {
     if (id) {
       fetchMeasurement();
+      fetchStatuses();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (!isPolling) return;
+    const t = setInterval(() => {
+      fetchStatuses();
+      fetchMeasurement();
+    }, 5000);
+    return () => clearInterval(t);
+  }, [isPolling]);
 
   const fetchMeasurement = async () => {
     try {
@@ -156,6 +174,42 @@ export default function MobileMeasurementEditPage() {
       mid
     )}&side=${side}`;
     window.location.href = url;
+    if (side === "left") setLeftStatus({ status: "PENDING" });
+    if (side === "right") setRightStatus({ status: "PENDING" });
+    setIsPolling(true);
+  };
+
+  const fetchStatuses = async () => {
+    const mid = Array.isArray(id) ? id[0] : (id as string);
+    if (!mid) return;
+    try {
+      const l = await fetch(
+        `/api/lidar-capture/status?measurementId=${encodeURIComponent(
+          mid
+        )}&side=left`
+      );
+      if (l.ok) {
+        const d = await l.json();
+        setLeftStatus({ status: d.status, estimatedVolume: d.estimatedVolume });
+      }
+    } catch {}
+    try {
+      const r = await fetch(
+        `/api/lidar-capture/status?measurementId=${encodeURIComponent(
+          mid
+        )}&side=right`
+      );
+      if (r.ok) {
+        const d = await r.json();
+        setRightStatus({
+          status: d.status,
+          estimatedVolume: d.estimatedVolume,
+        });
+      }
+    } catch {}
+    const pending =
+      leftStatus?.status === "PENDING" || rightStatus?.status === "PENDING";
+    setIsPolling(pending);
   };
 
   if (isLoading) {
@@ -303,6 +357,44 @@ export default function MobileMeasurementEditPage() {
                 className="rounded-xl w-full">
                 Zrób zdjęcie LiDAR (prawa)
               </Button>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-gray-50 rounded-xl">
+                <div className="text-sm text-text-muted mb-1">Lewa</div>
+                {leftStatus?.status === "PENDING" ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    <span>Przetwarzanie...</span>
+                  </div>
+                ) : (
+                  <div className="text-lg font-bold text-text-primary">
+                    {(
+                      measurement?.analyses?.find(
+                        (a) => a.measurementType === "AI"
+                      )?.leftVolumeMl ?? 0
+                    ).toFixed(1)}{" "}
+                    ml
+                  </div>
+                )}
+              </div>
+              <div className="text-center p-3 bg-gray-50 rounded-xl">
+                <div className="text-sm text-text-muted mb-1">Prawa</div>
+                {rightStatus?.status === "PENDING" ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    <span>Przetwarzanie...</span>
+                  </div>
+                ) : (
+                  <div className="text-lg font-bold text-text-primary">
+                    {(
+                      measurement?.analyses?.find(
+                        (a) => a.measurementType === "AI"
+                      )?.rightVolumeMl ?? 0
+                    ).toFixed(1)}{" "}
+                    ml
+                  </div>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
