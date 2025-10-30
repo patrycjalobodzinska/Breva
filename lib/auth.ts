@@ -83,7 +83,6 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/logowanie",
-    signUp: "/rejestracja",
   },
   debug: process.env.NODE_ENV === "development",
 };
