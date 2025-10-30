@@ -15,24 +15,33 @@ import {
 } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
+import { loginSchema, type LoginFormData } from "@/lib/validations";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState<LoginFormData>({
+    email: "",
+    password: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
+    setFormErrors({});
+
     try {
+      const validatedData = loginSchema.parse(formData);
+
       const result = await signIn("credentials", {
-        email,
-        password,
+        email: validatedData.email,
+        password: validatedData.password,
         redirect: false,
       });
+
       if (result?.error) {
         setError("Nieprawidłowy email lub hasło");
       } else {
@@ -47,8 +56,18 @@ export default function LoginPage() {
           router.push("/panel");
         }
       }
-    } catch (error) {
-      setError("Wystąpił błąd podczas logowania");
+    } catch (validationError: any) {
+      if (validationError.errors) {
+        const errors: Record<string, string> = {};
+        validationError.errors.forEach((err: any) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      } else {
+        setError("Wystąpił błąd podczas logowania");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -76,12 +95,19 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 placeholder="twoj@email.com"
                 required
-                className="rounded-2xl"
+                className={`rounded-2xl ${
+                  formErrors.email ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -93,12 +119,21 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 placeholder="••••••••"
                 required
-                className="rounded-2xl"
+                className={`rounded-2xl ${
+                  formErrors.password ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
 
             {error && (

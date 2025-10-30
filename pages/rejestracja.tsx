@@ -15,9 +15,10 @@ import {
 } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { toast } from "sonner";
+import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
 export default function RegisterPage() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
     password: "",
     confirmPassword: "",
@@ -25,6 +26,7 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
   const router = useRouter();
 
@@ -32,23 +34,20 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
     setError("");
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Hasła nie są identyczne");
-      setIsLoading(false);
-      return;
-    }
+    setFormErrors({});
 
     try {
+      const validatedData = registerSchema.parse(formData);
+
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-          name: formData.name,
+          email: validatedData.email,
+          password: validatedData.password,
+          name: validatedData.name,
         }),
       });
 
@@ -59,25 +58,22 @@ export default function RegisterPage() {
         // Automatyczne logowanie po rejestracji
         try {
           const result = await signIn("credentials", {
-            email: formData.email,
-            password: formData.password,
+            email: validatedData.email,
+            password: validatedData.password,
             redirect: false,
           });
 
           if (result?.ok) {
-            // Logowanie się powiodło - przekieruj do panelu
             setTimeout(() => {
               router.push("/panel");
             }, 1500);
           } else {
-            // Logowanie się nie powiodło - przekieruj do strony logowania
             setTimeout(() => {
               router.push("/logowanie");
             }, 2000);
           }
         } catch (loginError) {
           console.error("Błąd podczas automatycznego logowania:", loginError);
-          // W przypadku błędu, przekieruj do strony logowania
           setTimeout(() => {
             router.push("/logowanie");
           }, 2000);
@@ -86,8 +82,18 @@ export default function RegisterPage() {
         const data = await response.json();
         setError(data.error || "Wystąpił błąd podczas rejestracji");
       }
-    } catch (error) {
-      setError("Wystąpił błąd podczas rejestracji");
+    } catch (validationError: any) {
+      if (validationError.errors) {
+        const errors: Record<string, string> = {};
+        validationError.errors.forEach((err: any) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setFormErrors(errors);
+      } else {
+        setError("Wystąpił błąd podczas rejestracji");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -142,8 +148,13 @@ export default function RegisterPage() {
                   setFormData({ ...formData, name: e.target.value })
                 }
                 placeholder="Twoje imię"
-                className="rounded-2xl"
+                className={`rounded-2xl ${
+                  formErrors.name ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.name && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.name}</p>
+              )}
             </div>
 
             <div>
@@ -159,8 +170,13 @@ export default function RegisterPage() {
                 }
                 placeholder="twoj@email.com"
                 required
-                className="rounded-2xl"
+                className={`rounded-2xl ${
+                  formErrors.email ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -179,8 +195,15 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 required
                 minLength={6}
-                className="rounded-2xl"
+                className={`rounded-2xl ${
+                  formErrors.password ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
 
             <div>
@@ -199,8 +222,15 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 required
                 minLength={6}
-                className="rounded-2xl"
+                className={`rounded-2xl ${
+                  formErrors.confirmPassword ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.confirmPassword && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             {error && (

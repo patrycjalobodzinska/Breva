@@ -16,6 +16,7 @@ export interface Measurement {
   userId: string;
   aiAnalysis?: BreastAnalysis;
   manualAnalysis?: BreastAnalysis;
+  lidarCaptures?: LidarCapture[];
 }
 
 export interface BreastAnalysis {
@@ -34,6 +35,18 @@ export interface BreastAnalysis {
   rightFileSize?: number;
   leftMimeType?: string;
   rightMimeType?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LidarCapture {
+  id: string;
+  measurementId: string;
+  side: "LEFT" | "RIGHT";
+  requestId: number;
+  status: "PENDING" | "COMPLETED" | "FAILED";
+  estimatedVolume?: number;
+  metadata?: any;
   createdAt: string;
   updatedAt: string;
 }
