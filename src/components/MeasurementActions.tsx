@@ -35,25 +35,23 @@ export const MeasurementActions = ({
         Usuń
       </Button>
 
-      {measurement?.source === "AI" && (
-        <>
-          {hasManualMeasurement ? (
-            <Button
-              onClick={onEditManual}
-              className="rounded-2xl bg-primary hover:bg-primary-dark">
-              <Edit className="h-4 w-4 mr-2" />
-              Edytuj pomiar ręczny
-            </Button>
-          ) : (
-            <Button
-              onClick={onAddManual}
-              className="rounded-2xl bg-primary hover:bg-primary-dark">
-              <Plus className="h-4 w-4 mr-2" />
-              Dodaj pomiar ręczny
-            </Button>
-          )}
-        </>
-      )}
+      <div>
+        {measurement?.manualAnalysis ? (
+          <Button
+            onClick={onEditManual}
+            className="rounded-2xl bg-primary hover:bg-primary-dark">
+            <Edit className="h-4 w-4 mr-2" />
+            Edytuj pomiar ręczny
+          </Button>
+        ) : (
+          <Button
+            onClick={onAddManual}
+            className="rounded-2xl bg-primary hover:bg-primary-dark">
+            <Plus className="h-4 w-4 mr-2" />
+            Dodaj pomiar ręczny
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

@@ -46,6 +46,10 @@ export default async function handler(
             ],
           }),
         },
+        include: {
+          aiAnalysis: true,
+          manualAnalysis: true,
+        },
         orderBy: { [sort as string]: order },
       }),
       prisma.measurement?.count({

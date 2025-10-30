@@ -27,7 +27,7 @@ export default function MobilePanelLayout({
   useEffect(() => {
     if (status === "loading") return;
     if (!session) {
-      router.push("/mobile/logowanie");
+      router.push("/mobile");
     }
   }, [session, status, router]);
 

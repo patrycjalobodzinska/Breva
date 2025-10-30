@@ -31,7 +31,7 @@ interface Measurement {
   id: string;
   name: string;
   note?: string;
-  source: "AI" | "MANUAL";
+
   leftVolumeMl: number;
   rightVolumeMl: number;
   createdAt: string;

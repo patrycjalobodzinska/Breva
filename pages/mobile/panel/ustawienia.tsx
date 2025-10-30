@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import {
@@ -81,11 +81,11 @@ export default function MobileSettingsPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/signout", { method: "POST" });
-      router.push("/logowanie");
+      await signOut({ redirect: false });
+      router.push("/mobile");
     } catch (error) {
       console.error("Logout error:", error);
-      router.push("/logowanie");
+      router.push("/mobile");
     }
   };
 

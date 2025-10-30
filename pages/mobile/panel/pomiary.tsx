@@ -1,73 +1,31 @@
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, Calendar, TrendingUp, Filter } from "lucide-react";
-import { toast } from "sonner";
-
-interface Measurement {
-  id: string;
-  name: string;
-  note?: string;
-  createdAt: string;
-  analyses?: BreastAnalysis[];
-}
-
-interface BreastAnalysis {
-  id: string;
-  side: "LEFT" | "RIGHT";
-  source?: "AI" | "MANUAL";
-  volumeMl?: number;
-  filePath?: string;
-}
+import { Search, Calendar, TrendingUp } from "lucide-react";
+import { useGetMeasurements } from "@/hooks/useMeasurements";
+import { Measurement } from "@/types";
 
 export default function MobileMeasurementsPage() {
-  const { data: session } = useSession();
   const router = useRouter();
-  const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({
+
+  const { data, isLoading } = useGetMeasurements(currentPage, 10);
+  const measurements = data?.measurements || [];
+  const pagination = data?.pagination || {
     page: 1,
     limit: 10,
     totalCount: 0,
     totalPages: 0,
     hasNext: false,
     hasPrev: false,
-  });
-
-  const fetchMeasurements = async (page: number = currentPage) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `/api/measurements?page=${page}&pageSize=10`
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setMeasurements(data.measurements);
-        setPagination(data.pagination);
-        setCurrentPage(page);
-      } else {
-        toast.error("Nie udało się pobrać pomiarów");
-      }
-    } catch (error) {
-      toast.error("Wystąpił błąd podczas pobierania pomiarów");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  useEffect(() => {
-    fetchMeasurements();
-  }, []);
-
   const filteredMeasurements = measurements.filter(
-    (measurement) =>
+    (measurement: Measurement) =>
       measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       measurement?.note?.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -135,14 +93,8 @@ export default function MobileMeasurementsPage() {
         ) : (
           <div className="space-y-4">
             {filteredMeasurements.map((measurement) => {
-              const leftAnalysis = measurement?.analyses?.find(
-                (a) => a.side === "LEFT"
-              );
-              const rightAnalysis = measurement?.analyses?.find(
-                (a) => a.side === "RIGHT"
-              );
-              const leftVolume = leftAnalysis?.volumeMl || 0;
-              const rightVolume = rightAnalysis?.volumeMl || 0;
+              const leftVolume = measurement?.aiAnalysis?.leftVolumeMl || 0;
+              const rightVolume = measurement?.aiAnalysis?.rightVolumeMl || 0;
 
               const { diff, percentage } = getVolumeDifference(
                 leftVolume,
@@ -221,7 +173,7 @@ export default function MobileMeasurementsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => fetchMeasurements(currentPage - 1)}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={!pagination.hasPrev}
               className="rounded-xl">
               Poprzednia
@@ -232,7 +184,9 @@ export default function MobileMeasurementsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => fetchMeasurements(currentPage + 1)}
+              onClick={() =>
+                setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))
+              }
               disabled={!pagination.hasNext}
               className="rounded-xl">
               Następna

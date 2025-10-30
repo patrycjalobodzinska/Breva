@@ -346,53 +346,86 @@ export default function MobileMeasurementEditPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                onClick={() => triggerLidar("left")}
-                className="rounded-xl w-full">
-                Zrób zdjęcie LiDAR (lewa)
-              </Button>
-              <Button
-                onClick={() => triggerLidar("right")}
-                className="rounded-xl w-full">
-                Zrób zdjęcie LiDAR (prawa)
-              </Button>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              {/* Left side */}
               <div className="text-center p-3 bg-gray-50 rounded-xl">
                 <div className="text-sm text-text-muted mb-1">Lewa</div>
-                {leftStatus?.status === "PENDING" ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
-                    <span>Przetwarzanie...</span>
-                  </div>
+                {leftStatus ? (
+                  <>
+                    <div className="mb-2">
+                      <span className="text-green-600 font-medium">
+                        Przesłano
+                      </span>
+                    </div>
+                    {leftStatus.status === "PENDING" ? (
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                        <span>Przetwarzanie...</span>
+                      </div>
+                    ) : (
+                      <div className="text-lg font-bold text-text-primary mb-2">
+                        {(
+                          measurement?.analyses?.find(
+                            (a) => a.measurementType === "AI"
+                          )?.leftVolumeMl ?? 0
+                        ).toFixed(1)}{" "}
+                        ml
+                      </div>
+                    )}
+                    <Button
+                      onClick={() => router.push(`/mobile/panel/pomiary/${id}`)}
+                      className="rounded-xl w-full"
+                      variant="outline">
+                      Przejdź do analizy
+                    </Button>
+                  </>
                 ) : (
-                  <div className="text-lg font-bold text-text-primary">
-                    {(
-                      measurement?.analyses?.find(
-                        (a) => a.measurementType === "AI"
-                      )?.leftVolumeMl ?? 0
-                    ).toFixed(1)}{" "}
-                    ml
-                  </div>
+                  <Button
+                    onClick={() => triggerLidar("left")}
+                    className="rounded-xl w-full">
+                    Zrób zdjęcie LiDAR (lewa)
+                  </Button>
                 )}
               </div>
+
+              {/* Right side */}
               <div className="text-center p-3 bg-gray-50 rounded-xl">
                 <div className="text-sm text-text-muted mb-1">Prawa</div>
-                {rightStatus?.status === "PENDING" ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
-                    <span>Przetwarzanie...</span>
-                  </div>
+                {rightStatus ? (
+                  <>
+                    <div className="mb-2">
+                      <span className="text-green-600 font-medium">
+                        Przesłano
+                      </span>
+                    </div>
+                    {rightStatus.status === "PENDING" ? (
+                      <div className="flex items-center justify-center mb-2">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                        <span>Przetwarzanie...</span>
+                      </div>
+                    ) : (
+                      <div className="text-lg font-bold text-text-primary mb-2">
+                        {(
+                          measurement?.analyses?.find(
+                            (a) => a.measurementType === "AI"
+                          )?.rightVolumeMl ?? 0
+                        ).toFixed(1)}{" "}
+                        ml
+                      </div>
+                    )}
+                    <Button
+                      onClick={() => router.push(`/mobile/panel/pomiary/${id}`)}
+                      className="rounded-xl w-full"
+                      variant="outline">
+                      Przejdź do analizy
+                    </Button>
+                  </>
                 ) : (
-                  <div className="text-lg font-bold text-text-primary">
-                    {(
-                      measurement?.analyses?.find(
-                        (a) => a.measurementType === "AI"
-                      )?.rightVolumeMl ?? 0
-                    ).toFixed(1)}{" "}
-                    ml
-                  </div>
+                  <Button
+                    onClick={() => triggerLidar("right")}
+                    className="rounded-xl w-full">
+                    Zrób zdjęcie LiDAR (prawa)
+                  </Button>
                 )}
               </div>
             </div>

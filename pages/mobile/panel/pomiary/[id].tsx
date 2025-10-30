@@ -34,12 +34,25 @@ export default function MobileMeasurementDetailPage() {
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [leftStatus, setLeftStatus] = useState<string | null>(null);
+  const [rightStatus, setRightStatus] = useState<string | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
 
   useEffect(() => {
     if (id) {
       fetchMeasurement();
+      fetchStatuses();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (!isPolling) return;
+    const t = setInterval(() => {
+      fetchStatuses();
+      fetchMeasurement();
+    }, 5000);
+    return () => clearInterval(t);
+  }, [isPolling]);
 
   const fetchMeasurement = async () => {
     try {
@@ -115,9 +128,7 @@ export default function MobileMeasurementDetailPage() {
   const handleShare = async () => {
     if (!measurement) return;
 
-    const aiAnalysis = measurement?.analyses?.find(
-      (a) => a.measurementType === "AI"
-    );
+    const aiAnalysis = measurement?.aiAnalysis;
     const leftVolume = aiAnalysis?.leftVolumeMl || 0;
     const rightVolume = aiAnalysis?.rightVolumeMl || 0;
 
@@ -149,6 +160,34 @@ export default function MobileMeasurementDetailPage() {
     }
   };
 
+  const fetchStatuses = async () => {
+    const mid = Array.isArray(id) ? id[0] : (id as string);
+    if (!mid) return;
+    try {
+      const l = await fetch(
+        `/api/lidar-capture/status?measurementId=${encodeURIComponent(
+          mid
+        )}&side=left`
+      );
+      if (l.ok) {
+        const d = await l.json();
+        setLeftStatus(d.status);
+      }
+    } catch {}
+    try {
+      const r = await fetch(
+        `/api/lidar-capture/status?measurementId=${encodeURIComponent(
+          mid
+        )}&side=right`
+      );
+      if (r.ok) {
+        const d = await r.json();
+        setRightStatus(d.status);
+      }
+    } catch {}
+    setIsPolling(leftStatus === "PENDING" || rightStatus === "PENDING");
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pl-PL", {
       day: "2-digit",
@@ -165,15 +204,9 @@ export default function MobileMeasurementDetailPage() {
     return { diff, percentage };
   };
 
-  const hasManualMeasurement = measurement?.analyses?.some(
-    (a) => a.measurementType === "MANUAL"
-  );
-  const aiAnalysis = measurement?.analyses?.find(
-    (a) => a.measurementType === "AI"
-  );
-  const manualAnalysis = measurement?.analyses?.find(
-    (a) => a.measurementType === "MANUAL"
-  );
+  const hasManualMeasurement = measurement?.manualAnalysis;
+  const aiAnalysis = measurement?.aiAnalysis;
+  const manualAnalysis = measurement?.manualAnalysis;
 
   if (isLoading) {
     return (
@@ -254,8 +287,8 @@ export default function MobileMeasurementDetailPage() {
           </div>
         </div>
 
-        {/* AI Results */}
-        {aiAnalysis && (
+        {/* AI Results + status */}
+        {(aiAnalysis || leftStatus || rightStatus) && (
           <div className="grid grid-cols-2 gap-4">
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader className="pb-2">
@@ -265,9 +298,16 @@ export default function MobileMeasurementDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-text-primary">
-                  {aiAnalysis?.leftVolumeMl?.toFixed(1) || "Brak danych"} ml
-                </p>
+                {leftStatus === "PENDING" && !aiAnalysis?.leftVolumeMl ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    <span>Przetwarzanie...</span>
+                  </div>
+                ) : (
+                  <p className="text-2xl font-bold text-text-primary">
+                    {aiAnalysis?.leftVolumeMl?.toFixed(1) || "Brak danych"} ml
+                  </p>
+                )}
               </CardContent>
             </Card>
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
@@ -278,9 +318,16 @@ export default function MobileMeasurementDetailPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold text-text-primary">
-                  {aiAnalysis?.rightVolumeMl?.toFixed(1) || "Brak danych"} ml
-                </p>
+                {rightStatus === "PENDING" && !aiAnalysis?.rightVolumeMl ? (
+                  <div className="flex items-center">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    <span>Przetwarzanie...</span>
+                  </div>
+                ) : (
+                  <p className="text-2xl font-bold text-text-primary">
+                    {aiAnalysis?.rightVolumeMl?.toFixed(1) || "Brak danych"} ml
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>

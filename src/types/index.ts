@@ -14,13 +14,14 @@ export interface Measurement {
   createdAt: string;
   updatedAt: string;
   userId: string;
-  analyses?: BreastAnalysis[];
+  aiAnalysis?: BreastAnalysis;
+  manualAnalysis?: BreastAnalysis;
 }
 
 export interface BreastAnalysis {
   id: string;
-  measurementId: string;
-  measurementType: "AI" | "MANUAL";
+  aiMeasurementId?: string;
+  manualMeasurementId?: string;
   leftVolumeMl?: number;
   rightVolumeMl?: number;
   leftConfidence?: number;

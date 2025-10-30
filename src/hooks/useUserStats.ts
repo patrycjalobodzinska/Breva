@@ -1,60 +1,18 @@
-import { useState, useEffect } from "react";
-import { DashboardStats as DashboardStatsType } from "@/types";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { userService } from "@/services/user.service";
 
-interface UseUserStatsReturn {
-  stats: DashboardStatsType | null;
-  isLoading: boolean;
-  isRefreshing: boolean;
-  error: string | null;
-  refetch: () => Promise<void>;
-}
-
-export const useUserStats = (): UseUserStatsReturn => {
-  const [stats, setStats] = useState<DashboardStatsType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchStats = async () => {
-    try {
-      setIsRefreshing(true);
-      setError(null);
-
-      const response = await fetch("/api/user/stats");
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
-      } else {
-        const errorMessage = "Nie udało się pobrać statystyk";
-        setError(errorMessage);
-        toast.error(errorMessage);
+// Hook do pobierania statystyk użytkownika
+export function useUserStats() {
+  return useQuery({
+    queryKey: ["user-stats"],
+    queryFn: async () => {
+      const response = await userService.getUserStats();
+      if (!response.success || !response.data) {
+        throw new Error(
+          response.error || "Nie udało się pobrać statystyk użytkownika"
+        );
       }
-    } catch (error) {
-      console.error("Error fetching user stats:", error);
-      const errorMessage = "Wystąpił błąd podczas pobierania statystyk";
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-      setIsRefreshing(false);
-    }
-  };
-
-  const refetch = async () => {
-    await fetchStats();
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  return {
-    stats,
-    isLoading,
-    isRefreshing,
-    error,
-    refetch,
-  };
-};
+      return response.data;
+    },
+  });
+}

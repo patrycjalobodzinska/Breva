@@ -61,35 +61,31 @@ export const prepareChartData = (measurement: Measurement): ChartData[] => {
 
   const data: ChartData[] = [];
 
-  // Jeśli to pomiar AI, dodaj go jako "AI"
-  if (measurement?.source === "AI") {
+  // Pobierz analizę AI
+  if (
+    measurement.aiAnalysis &&
+    (measurement.aiAnalysis.leftVolumeMl ||
+      measurement.aiAnalysis.rightVolumeMl)
+  ) {
     data.push({
       name: "AI",
-      left: measurement?.leftVolumeMl,
-      right: measurement?.rightVolumeMl,
-      date: new Date(measurement?.createdAt).toLocaleDateString("pl-PL"),
+      left: measurement.aiAnalysis.leftVolumeMl || 0,
+      right: measurement.aiAnalysis.rightVolumeMl || 0,
+      date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
     });
   }
 
-  // Jeśli to pomiar ręczny, dodaj go jako "Ręczny"
-  if (measurement?.source === "MANUAL") {
+  // Pobierz analizę ręczną
+  if (
+    measurement.manualAnalysis &&
+    (measurement.manualAnalysis.leftVolumeMl ||
+      measurement.manualAnalysis.rightVolumeMl)
+  ) {
     data.push({
       name: "Ręczny",
-      left: measurement?.leftVolumeMl,
-      right: measurement?.rightVolumeMl,
-      date: new Date(measurement?.createdAt).toLocaleDateString("pl-PL"),
-    });
-  }
-
-  // Dodaj dodatkowe pomiary ręczne jeśli istnieją
-  if (measurement?.manualItems) {
-    measurement?.manualItems.forEach((item) => {
-      data.push({
-        name: item.name || "Ręczny",
-        left: item.leftVolumeMl,
-        right: item.rightVolumeMl,
-        date: new Date(item.createdAt).toLocaleDateString("pl-PL"),
-      });
+      left: measurement.manualAnalysis.leftVolumeMl || 0,
+      right: measurement.manualAnalysis.rightVolumeMl || 0,
+      date: new Date(measurement.createdAt).toLocaleDateString("pl-PL"),
     });
   }
 
@@ -99,22 +95,21 @@ export const prepareChartData = (measurement: Measurement): ChartData[] => {
 export const getMeasurementStats = (
   measurement: Measurement
 ): MeasurementStats => {
-  const asymmetry = getAsymmetryPercentage(
-    measurement?.leftVolumeMl,
-    measurement?.rightVolumeMl
-  );
+  const leftVol = measurement?.aiAnalysis?.leftVolumeMl || 0;
+  const rightVol = measurement?.aiAnalysis?.rightVolumeMl || 0;
+
+  const asymmetry = getAsymmetryPercentage(leftVol, rightVol);
 
   let accuracy;
-  if (measurement?.manualItems && measurement?.manualItems.length > 0) {
-    const manualMeasurement = measurement?.manualItems[0];
+  if (measurement.manualAnalysis && measurement.aiAnalysis) {
     accuracy = {
       left: getAccuracyPercentage(
-        measurement?.leftVolumeMl,
-        manualmeasurement?.leftVolumeMl
+        measurement.aiAnalysis.leftVolumeMl || 0,
+        measurement.manualAnalysis.leftVolumeMl || 0
       ),
       right: getAccuracyPercentage(
-        measurement?.rightVolumeMl,
-        manualmeasurement?.rightVolumeMl
+        measurement.aiAnalysis.rightVolumeMl || 0,
+        measurement.manualAnalysis.rightVolumeMl || 0
       ),
     };
   }

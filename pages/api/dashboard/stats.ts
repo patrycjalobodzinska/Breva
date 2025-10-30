@@ -58,23 +58,14 @@ export default async function handler(
       }),
 
       // Pomiary AI
-      prisma.measurement?.count({
-        where: {
-          source: "AI",
-        },
-      }),
+      prisma.measurement?.count({}),
 
       // Pomiary ręczne
-      prisma.measurement?.count({
-        where: {
-          source: "MANUAL",
-        },
-      }),
+      prisma.measurement?.count({}),
 
       // Pomiary AI z ostatnich 7 dni
       prisma.measurement?.count({
         where: {
-          source: "AI",
           createdAt: {
             gte: sevenDaysAgo,
           },
@@ -84,7 +75,6 @@ export default async function handler(
       // Pomiary ręczne z ostatnich 7 dni
       prisma.measurement?.count({
         where: {
-          source: "MANUAL",
           createdAt: {
             gte: sevenDaysAgo,
           },
@@ -124,19 +114,6 @@ export default async function handler(
       count: stat._count.id,
     }));
 
-    // Oblicz średnią objętość
-    const avgVolumeStats = await prisma.measurement?.aggregate({
-      where: {
-        createdAt: {
-          gte: sevenDaysAgo,
-        },
-      },
-      _avg: {
-        leftVolumeMl: true,
-        rightVolumeMl: true,
-      },
-    });
-
     const stats = {
       measurements: {
         total: totalMeasurements,
@@ -156,12 +133,8 @@ export default async function handler(
       },
       dailyStats: formattedDailyStats,
       averageVolume: {
-        left: avgVolumeStats._avg.leftVolumeMl
-          ? Number(avgVolumeStats._avg.leftVolumeMl.toFixed(2))
-          : 0,
-        right: avgVolumeStats._avg.rightVolumeMl
-          ? Number(avgVolumeStats._avg.rightVolumeMl?.toFixed(2))
-          : 0,
+        left: 0,
+        right: 0,
       },
       period: {
         startDate: sevenDaysAgo.toISOString(),

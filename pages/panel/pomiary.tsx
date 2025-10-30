@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/table";
 import { Search, Plus, Eye, Calendar, BarChart3, Trash2 } from "lucide-react";
 import PanelLayout from "@/components/PanelLayout";
-import { useMeasurements } from "@/hooks/useMeasurements";
 import { Pagination } from "@/components/ui/pagination";
 import {
   getAsymmetryPercentage,
@@ -30,24 +29,18 @@ import {
   getBadgeVariant,
 } from "@/utils/measurements";
 import { useRouter } from "next/router";
+import { useGetMeasurements } from "@/hooks/useMeasurements";
 
 export default function MeasurementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const {
-    measurements,
-    isLoading,
-    deletingId,
-    deleteMeasurement,
-    pagination,
-    handlePageChange,
-  } = useMeasurements();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data, isLoading } = useGetMeasurements(currentPage, 10);
+  const { measurements, pagination } = data || {};
   const router = useRouter();
-  const filteredMeasurements = measurements.filter(
-    (measurement) =>
-      measurement?.source !== "MANUAL" && // Wyklucz pomiary ręczne
-      (measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        measurement?.note?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   if (isLoading) {
     return (
@@ -96,7 +89,7 @@ export default function MeasurementsPage() {
         </Card>
 
         {/* Measurements List */}
-        {filteredMeasurements.length === 0 ? (
+        {measurements?.length === 0 ? (
           <Card className="rounded-2xl bg-white">
             <CardContent className="p-8 text-center">
               <BarChart3 className="h-12 w-12 text-text-muted mx-auto mb-4" />
@@ -129,7 +122,7 @@ export default function MeasurementsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMeasurements.map((measurement) => (
+                {measurements?.map((measurement) => (
                   <TableRow
                     onClick={() =>
                       router.push(`/panel/pomiary/${measurement?.id}`)
@@ -149,41 +142,22 @@ export default function MeasurementsPage() {
 
                     <TableCell>
                       <div className="text-sm">
-                        <p>Lewa: {measurement?.leftVolumeMl?.toFixed(1)} ml</p>
                         <p>
-                          Prawa: {measurement?.rightVolumeMl?.toFixed(1)} ml
+                          Lewa:{" "}
+                          {measurement?.aiAnalysis?.leftVolumeMl?.toFixed(1)} ml
+                        </p>
+                        <p>
+                          Prawa:{" "}
+                          {measurement?.aiAnalysis?.rightVolumeMl?.toFixed(1)}{" "}
+                          ml
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {measurement?.manualItems &&
-                      measurement?.manualItems.length > 0 ? (
-                        <div className="space-y-1">
-                          {measurement?.manualItems.map((manual) => (
-                            <div
-                              key={manual.id}
-                              className="text-xs text-text-muted">
-                              <div className="font-medium">{manual.name}</div>
-                              <div>
-                                {manual.leftVolumeMl.toFixed(1)}ml /{" "}
-                                {manual.rightVolumeMl?.toFixed(1)}ml
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-text-muted">Brak</span>
-                      )}
+                      {measurement?.manualAnalysis?.leftVolumeMl}{" "}
+                      {measurement?.manualAnalysis?.rightVolumeMl}
                     </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-medium">
-                        {getAsymmetryPercentage(
-                          measurement?.leftVolumeMl,
-                          measurement?.rightVolumeMl
-                        )}
-                        %
-                      </span>
-                    </TableCell>
+
                     <TableCell>
                       <div className="flex items-center text-sm text-text-muted">
                         <Calendar className="h-4 w-4 mr-1" />
@@ -198,7 +172,7 @@ export default function MeasurementsPage() {
         )}
 
         {/* Pagination */}
-        {pagination.totalPages > 1 && (
+        {pagination && pagination?.totalPages > 1 && (
           <div className="mt-6">
             <Pagination
               currentPage={pagination.page}

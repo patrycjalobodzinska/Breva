@@ -1,87 +1,135 @@
-import { useState, useEffect } from "react";
-import { Measurement } from "@/types";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { measurementsService } from "@/services/measurements.service";
 import { toast } from "sonner";
 
-export const useMeasurements = () => {
-  const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 10,
-    totalCount: 0,
-    totalPages: 0,
-    hasNext: false,
-    hasPrev: false,
-  });
-
-  const fetchMeasurements = async (page: number = currentPage) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `/api/measurements?page=${page}&pageSize=10`
+// Hook do pobierania listy pomiarów z paginacją
+export function useGetMeasurements(page: number = 1, pageSize: number = 10) {
+  return useQuery({
+    queryKey: ["measurements", page, pageSize],
+    queryFn: async () => {
+      const response = await measurementsService.getMeasurements(
+        page,
+        pageSize
       );
-      if (response.ok) {
-        const data = await response.json();
-        setMeasurements(data.measurements);
-        setPagination(data.pagination);
-        setCurrentPage(page);
-      } else {
-        toast.error("Nie udało się pobrać pomiarów");
+      if (!response.success || !response.data) {
+        throw new Error(response.error || "Nie udało się pobrać pomiarów");
       }
-    } catch (error) {
-      toast.error("Wystąpił błąd podczas pobierania pomiarów");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      return response.data;
+    },
+    enabled: true,
+  });
+}
 
-  const deleteMeasurement = async (id: string) => {
-    if (
-      !confirm(
-        "Czy na pewno chcesz usunąć ten pomiar? Ta operacja jest nieodwracalna."
-      )
-    ) {
-      return;
-    }
+// Hook do pobierania pojedynczego pomiaru
+export function useGetMeasurement(id: string | undefined) {
+  return useQuery({
+    queryKey: ["measurement", id],
+    queryFn: async () => {
+      if (!id) throw new Error("Brak ID pomiaru");
+      const response = await measurementsService.getMeasurement(id);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || "Nie udało się pobrać pomiaru");
+      }
+      return response.data;
+    },
+    enabled: !!id,
+  });
+}
 
-    setDeletingId(id);
-    try {
-      const response = await fetch(`/api/measurements/${id}`, {
-        method: "DELETE",
+// Hook do tworzenia pomiaru
+export function useCreateMeasurement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { name: string; note?: string }) => {
+      const response = await measurementsService.createMeasurement(data);
+      if (!response.success || !response.data) {
+        throw new Error(response.error || "Nie udało się utworzyć pomiaru");
+      }
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+      toast.success("Pomiar został utworzony");
+    },
+  });
+}
+
+// Hook do aktualizacji pomiaru
+export function useUpdateMeasurement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { name?: string; note?: string };
+    }) => {
+      const response = await measurementsService.updateMeasurement(id, data);
+      if (!response.success || !response.data) {
+        throw new Error(
+          response.error || "Nie udało się zaktualizować pomiaru"
+        );
+      }
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+      queryClient.invalidateQueries({
+        queryKey: ["measurement", variables.id],
       });
+      toast.success("Pomiar został zaktualizowany");
+    },
+  });
+}
 
-      if (response.ok) {
-        setMeasurements(measurements.filter((m) => m.id !== id));
-        toast.success("Pomiar został usunięty");
-      } else {
-        const error = await response.json();
-        toast.error(error.error || "Wystąpił błąd podczas usuwania pomiaru");
+// Hook do usuwania pomiaru
+export function useDeleteMeasurement() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await measurementsService.deleteMeasurement(id);
+      if (!response.success) {
+        throw new Error(response.error || "Nie udało się usunąć pomiaru");
       }
-    } catch (error) {
-      toast.error("Wystąpił błąd podczas usuwania pomiaru");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+      toast.success("Pomiar został usunięty");
+    },
+  });
+}
 
-  const handlePageChange = (page: number) => {
-    fetchMeasurements(page);
-  };
+// Hook do dodawania pomiaru ręcznego
+export function useAddManualMeasurement() {
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    fetchMeasurements();
-  }, []);
-
-  return {
-    measurements,
-    isLoading,
-    deletingId,
-    pagination,
-    currentPage,
-    fetchMeasurements,
-    deleteMeasurement,
-    handlePageChange,
-  };
-};
+  return useMutation({
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: { leftVolumeMl: number; rightVolumeMl: number; note?: string };
+    }) => {
+      const response = await measurementsService.addManualMeasurement(id, data);
+      if (!response.success || !response.data) {
+        throw new Error(
+          response.error || "Nie udało się dodać pomiaru ręcznego"
+        );
+      }
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+      queryClient.invalidateQueries({
+        queryKey: ["measurement", variables.id],
+      });
+      toast.success("Pomiar ręczny został dodany");
+    },
+  });
+}

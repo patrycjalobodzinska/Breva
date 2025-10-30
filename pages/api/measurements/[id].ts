@@ -17,13 +17,10 @@ export default async function handler(
 
   if (req.method === "GET") {
     try {
-      const measurement = await prisma.measurement?.findFirst({
+      const measurement = await prisma.measurement.findFirst({
         where: {
           id: id as string,
           userId: session.user.id,
-        },
-        include: {
-          analyses: true,
         },
       });
 
@@ -44,7 +41,7 @@ export default async function handler(
     try {
       const { name, note } = measurementUpdateSchema.parse(req.body);
 
-      const measurement = await prisma.measurement?.findFirst({
+      const measurement = await prisma.measurement.findFirst({
         where: {
           id: id as string,
           userId: session.user.id,
@@ -55,7 +52,7 @@ export default async function handler(
         return res.status(404).json({ error: "Pomiar nie został znaleziony" });
       }
 
-      const updatedMeasurement = await prisma.measurement?.update({
+      const updatedMeasurement = await prisma.measurement.update({
         where: { id: id as string },
         data: {
           ...(name && { name }),
@@ -74,7 +71,7 @@ export default async function handler(
 
   if (req.method === "DELETE") {
     try {
-      const measurement = await prisma.measurement?.findFirst({
+      const measurement = await prisma.measurement.findFirst({
         where: {
           id: id as string,
           userId: session.user.id,
@@ -85,13 +82,11 @@ export default async function handler(
         return res.status(404).json({ error: "Pomiar nie został znaleziony" });
       }
 
-      await prisma.measurement?.deleteMany({
-        where: {
-          baselineId: id as string,
-        },
+      await prisma.measurement.deleteMany({
+        where: { id: id as string },
       });
 
-      await prisma.measurement?.delete({
+      await prisma.measurement.delete({
         where: { id: id as string },
       });
 

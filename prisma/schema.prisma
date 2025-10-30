@@ -25,57 +25,54 @@ enum Role {
 }
 
 model Measurement {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
-  name          String   // measurement name
-  note          String?  // optional note
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  analyses      BreastAnalysis[]
-  lidarCaptures LidarCapture[]
+  id              String          @id @default(cuid())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+  name            String          // measurement name
+  note            String?         // optional note
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  aiAnalysis      BreastAnalysis? @relation("AiToMeasurement")
+  manualAnalysis  BreastAnalysis? @relation("ManualToMeasurement")
+  lidarCaptures   LidarCapture[]
 }
 
 model LidarCapture {
-  id            String   @id @default(cuid())
-  measurementId String
-  measurement   Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
-  side          BreastSide
-  requestId     Int      @unique
-  status        String   // PENDING, COMPLETED, FAILED
+  id              String      @id @default(cuid())
+  measurementId   String
+  measurement     Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  side            BreastSide
+  requestId       Int         @unique
+  status          String      // PENDING, COMPLETED, FAILED
   estimatedVolume Float?
-  metadata      Json?    // Device info, camera intrinsics, etc.
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  metadata        Json?       // Device info, camera intrinsics, etc.
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 }
 
 model BreastAnalysis {
-  id              String   @id @default(cuid())
-  measurementId   String
-  measurement     Measurement @relation(fields: [measurementId], references: [id], onDelete: Cascade)
-  measurementType MeasurementType
-  leftVolumeMl    Float?   // null until analysis is complete
-  rightVolumeMl   Float?   // null until analysis is complete
-  leftConfidence  Float?   // AI confidence score for left
-  rightConfidence Float?   // AI confidence score for right
-  leftFilePath    String?  // path to uploaded file for left
-  rightFilePath   String?  // path to uploaded file for right
-  leftFileName    String?  // original file name for left
-  rightFileName   String?  // original file name for right
-  leftFileSize    Int?     // file size in bytes for left
-  rightFileSize   Int?     // file size in bytes for right
-  leftMimeType    String?  // file mime type for left
-  rightMimeType   String?  // file mime type for right
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                 String       @id @default(cuid())
+  aiMeasurementId    String?      @unique
+  aiMeasurement      Measurement? @relation("AiToMeasurement", fields: [aiMeasurementId], references: [id], onDelete: Cascade)
+  manualMeasurementId String?     @unique
+  manualMeasurement  Measurement? @relation("ManualToMeasurement", fields: [manualMeasurementId], references: [id], onDelete: Cascade)
+  leftVolumeMl       Float?       // null until analysis is complete
+  rightVolumeMl      Float?       // null until analysis is complete
+  leftConfidence     Float?       // AI confidence score for left
+  rightConfidence    Float?       // AI confidence score for right
+  leftFilePath       String?      // path to uploaded file for left
+  rightFilePath      String?      // path to uploaded file for right
+  leftFileName       String?      // original file name for left
+  rightFileName      String?      // original file name for right
+  leftFileSize       Int?         // file size in bytes for left
+  rightFileSize      Int?         // file size in bytes for right
+  leftMimeType       String?      // file mime type for left
+  rightMimeType      String?      // file mime type for right
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 }
 
 enum BreastSide {
   LEFT
   RIGHT
-}
-
-enum MeasurementType {
-  AI
-  MANUAL
 }

@@ -41,7 +41,8 @@ export default function Document() {
         />
         <meta name="twitter:image" content="/og-image.png" />
 
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="alternate icon" href="/favicon.ico" />
       </Head>
       <body>
         <Main />
