@@ -9,25 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, X, Edit3 } from "lucide-react";
 import { toast } from "sonner";
-
-interface BreastAnalysis {
-  measurementType: "AI" | "MANUAL";
-  leftVolumeMl?: number;
-  rightVolumeMl?: number;
-}
-
-interface Measurement {
-  id: string;
-  name: string;
-  note?: string;
-  createdAt: string;
-  user: {
-    id: string;
-    email: string;
-    name?: string;
-  };
-  analyses?: BreastAnalysis[];
-}
+import { useMeasurementDetail } from "@/hooks/useMeasurementDetail";
+import { Measurement } from "@/types";
 
 interface LidarStatus {
   status: "PENDING" | "COMPLETED" | "FAILED";
@@ -38,8 +21,9 @@ export default function MobileMeasurementEditPage() {
   const { data: session } = useSession();
   const router = useRouter();
   const { id } = router.query;
-  const [measurement, setMeasurement] = useState<Measurement | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { measurement, isLoading, fetchMeasurement } = useMeasurementDetail(
+    id as string
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [isEditingManual, setIsEditingManual] = useState(false);
   const [leftStatus, setLeftStatus] = useState<LidarStatus | null>(null);
@@ -57,8 +41,16 @@ export default function MobileMeasurementEditPage() {
   });
 
   useEffect(() => {
+    if (measurement) {
+      setEditForm({
+        name: measurement.name,
+        note: measurement.note || "",
+      });
+    }
+  }, [measurement]);
+
+  useEffect(() => {
     if (id) {
-      fetchMeasurement();
       fetchStatuses();
     }
   }, [id]);
@@ -70,30 +62,7 @@ export default function MobileMeasurementEditPage() {
       fetchMeasurement();
     }, 5000);
     return () => clearInterval(t);
-  }, [isPolling]);
-
-  const fetchMeasurement = async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/measurements/${id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setMeasurement(data);
-        setEditForm({
-          name: data.name,
-          note: data.note || "",
-        });
-      } else {
-        toast.error("Nie udało się pobrać pomiaru");
-        router.push("/mobile/panel/pomiary");
-      }
-    } catch (error) {
-      toast.error("Wystąpił błąd podczas pobierania pomiaru");
-      router.push("/mobile/panel/pomiary");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [isPolling, fetchMeasurement]);
 
   const handleSaveEdit = async () => {
     if (!measurement) return;
@@ -153,13 +122,14 @@ export default function MobileMeasurementEditPage() {
   };
 
   const startEditManual = () => {
-    const manual = measurement?.analyses?.find(
-      (a) => a.measurementType === "MANUAL"
-    );
-    if (manual) {
+    if (measurement?.manualAnalysis) {
       setManualForm({
-        leftVolumeMl: (manual.leftVolumeMl ?? "").toString(),
-        rightVolumeMl: (manual.rightVolumeMl ?? "").toString(),
+        leftVolumeMl: (
+          measurement.manualAnalysis.leftVolumeMl ?? ""
+        ).toString(),
+        rightVolumeMl: (
+          measurement.manualAnalysis.rightVolumeMl ?? ""
+        ).toString(),
       });
     } else {
       setManualForm({ leftVolumeMl: "", rightVolumeMl: "" });
@@ -211,7 +181,7 @@ export default function MobileMeasurementEditPage() {
       leftStatus?.status === "PENDING" || rightStatus?.status === "PENDING";
     setIsPolling(pending);
   };
-
+  console.log(measurement);
   if (isLoading) {
     return (
       <MobilePanelLayout>
@@ -312,22 +282,13 @@ export default function MobileMeasurementEditPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
                 <div className="text-lg font-bold text-text-primary">
-                  {(
-                    measurement?.analyses?.find(
-                      (a) => a.measurementType === "AI"
-                    )?.leftVolumeMl ?? 0
-                  ).toFixed(1)}
-                  ml
+                  {measurement?.aiAnalysis?.leftVolumeMl?.toFixed(1) ?? "0.0"}ml
                 </div>
                 <div className="text-sm text-text-muted">Lewa pierś</div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-bold text-text-primary">
-                  {(
-                    measurement?.analyses?.find(
-                      (a) => a.measurementType === "AI"
-                    )?.rightVolumeMl ?? 0
-                  ).toFixed(1)}
+                  {measurement?.aiAnalysis?.rightVolumeMl?.toFixed(1) ?? "0.0"}
                   ml
                 </div>
                 <div className="text-sm text-text-muted">Prawa pierś</div>
@@ -346,7 +307,7 @@ export default function MobileMeasurementEditPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-4">
               {/* Left side */}
               <div className="text-center p-3 bg-gray-50 rounded-xl">
                 <div className="text-sm text-text-muted mb-1">Lewa</div>
@@ -364,11 +325,8 @@ export default function MobileMeasurementEditPage() {
                       </div>
                     ) : (
                       <div className="text-lg font-bold text-text-primary mb-2">
-                        {(
-                          measurement?.analyses?.find(
-                            (a) => a.measurementType === "AI"
-                          )?.leftVolumeMl ?? 0
-                        ).toFixed(1)}{" "}
+                        {measurement?.aiAnalysis?.leftVolumeMl?.toFixed(1) ??
+                          "0.0"}{" "}
                         ml
                       </div>
                     )}
@@ -405,11 +363,8 @@ export default function MobileMeasurementEditPage() {
                       </div>
                     ) : (
                       <div className="text-lg font-bold text-text-primary mb-2">
-                        {(
-                          measurement?.analyses?.find(
-                            (a) => a.measurementType === "AI"
-                          )?.rightVolumeMl ?? 0
-                        ).toFixed(1)}{" "}
+                        {measurement?.aiAnalysis?.rightVolumeMl?.toFixed(1) ??
+                          "0.0"}{" "}
                         ml
                       </div>
                     )}
@@ -445,11 +400,7 @@ export default function MobileMeasurementEditPage() {
                 onClick={startEditManual}
                 className="rounded-xl">
                 <Edit3 className="h-4 w-4 mr-2" />
-                {measurement?.analyses?.some(
-                  (a) => a.measurementType === "MANUAL"
-                )
-                  ? "Edytuj"
-                  : "Dodaj"}
+                {measurement?.manualAnalysis ? "Edytuj" : "Dodaj"}
               </Button>
             </div>
           </CardHeader>
@@ -516,24 +467,17 @@ export default function MobileMeasurementEditPage() {
               </div>
             )}
 
-            {measurement?.analyses?.some(
-              (a) => a.measurementType === "MANUAL"
-            ) ? (
+            {measurement?.manualAnalysis ? (
               <div className="p-3 bg-gray-50 rounded-xl">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm text-text-muted">
-                      {(
-                        measurement?.analyses?.find(
-                          (a) => a.measurementType === "MANUAL"
-                        )?.leftVolumeMl ?? 0
-                      ).toFixed(1)}
-                      ml /{" "}
-                      {(
-                        measurement?.analyses?.find(
-                          (a) => a.measurementType === "MANUAL"
-                        )?.rightVolumeMl ?? 0
-                      ).toFixed(1)}
+                      {measurement.manualAnalysis.leftVolumeMl?.toFixed(1) ??
+                        "0.0"}
+                      ml
+                      {" / "}
+                      {measurement.manualAnalysis.rightVolumeMl?.toFixed(1) ??
+                        "0.0"}
                       ml
                     </div>
                   </div>

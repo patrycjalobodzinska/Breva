@@ -25,7 +25,7 @@ import { useUserStats } from "@/hooks/useUserStats";
 export default function MobilePanelDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { stats } = useUserStats();
+  const { data: stats } = useUserStats();
 
   useEffect(() => {
     if (status === "loading") return;

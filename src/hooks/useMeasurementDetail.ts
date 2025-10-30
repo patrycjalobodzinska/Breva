@@ -33,6 +33,7 @@ export const useMeasurementDetail = (measurementId: string) => {
   });
 
   const fetchMeasurement = async () => {
+    if (!measurementId) return;
     setIsLoading(true);
     try {
       const response = await fetch(`/api/measurements/${measurementId}`);

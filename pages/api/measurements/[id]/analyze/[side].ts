@@ -78,8 +78,7 @@ export default async function handler(
       // Sprawdź czy analiza AI już istnieje
       const existingAnalysis = await prisma.breastAnalysis?.findFirst({
         where: {
-          measurementId: measurementId as string,
-          measurementType: "AI",
+          aiMeasurementId: measurementId as string,
         },
       });
 
@@ -101,8 +100,8 @@ export default async function handler(
         // Utwórz nową analizę AI
         breastAnalysis = await prisma.breastAnalysis?.create({
           data: {
-            measurementId: measurementId as string,
-            measurementType: "AI",
+            aiMeasurementId: measurementId as string,
+
             [`${side}VolumeMl`]: aiResult.volumeMl,
             [`${side}Confidence`]: aiResult.confidence,
             [`${side}FilePath`]: `lidar_data_${side}_${Date.now()}.json`,
@@ -116,9 +115,6 @@ export default async function handler(
       // Zwróć zaktualizowany pomiar z analizami
       const updatedMeasurement = await prisma.measurement?.findUnique({
         where: { id: measurementId as string },
-        include: {
-          analyses: true,
-        },
       });
 
       return res.status(200).json(updatedMeasurement);
@@ -171,8 +167,7 @@ export default async function handler(
       // Sprawdź czy analiza AI już istnieje
       const existingAnalysis = await prisma.breastAnalysis.findFirst({
         where: {
-          measurementId: measurementId as string,
-          measurementType: "AI",
+          aiMeasurementId: measurementId as string,
         },
       });
 
@@ -182,7 +177,6 @@ export default async function handler(
         breastAnalysis = await prisma.breastAnalysis.update({
           where: { id: existingAnalysis.id },
           data: {
-            measurementType: "AI",
             [`${side}VolumeMl`]: aiResult.volumeMl,
             [`${side}Confidence`]: aiResult.confidence,
             [`${side}FilePath`]: file.filepath,
@@ -195,8 +189,7 @@ export default async function handler(
         // Utwórz nową analizę AI
         breastAnalysis = await prisma.breastAnalysis.create({
           data: {
-            measurementId: measurementId as string,
-            measurementType: "AI",
+            aiMeasurementId: measurementId as string,
             [`${side}VolumeMl`]: aiResult.volumeMl,
             [`${side}Confidence`]: aiResult.confidence,
             [`${side}FilePath`]: file.filepath,
@@ -213,9 +206,6 @@ export default async function handler(
       // Zwróć zaktualizowany pomiar z analizami
       const updatedMeasurement = await prisma.measurement?.findUnique({
         where: { id: measurementId as string },
-        include: {
-          analyses: true,
-        },
       });
 
       return res.status(200).json(updatedMeasurement);

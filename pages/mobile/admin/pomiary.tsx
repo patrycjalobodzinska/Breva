@@ -85,18 +85,6 @@ export default function AdminMeasurementsPage() {
     }
   };
 
-  const filteredMeasurements = measurements.filter(
-    (measurement) =>
-      measurement?.source !== "MANUAL" && // Wyklucz pomiary ręczne
-      (measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        measurement?.user.email
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        measurement?.user.name
-          ?.toLowerCase()
-          .includes(searchTerm.toLowerCase()))
-  );
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pl-PL", {
       year: "numeric",
@@ -156,7 +144,7 @@ export default function AdminMeasurementsPage() {
         </Card>
 
         {/* Measurements List */}
-        {filteredMeasurements.length === 0 ? (
+        {measurements?.length === 0 ? (
           <Card className="rounded-2xl">
             <CardContent className="p-8 text-center">
               <BarChart3 className="h-12 w-12 text-text-muted mx-auto mb-4" />
@@ -182,7 +170,7 @@ export default function AdminMeasurementsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMeasurements.map((measurement) => (
+                {measurements?.map((measurement) => (
                   <TableRow
                     onClick={() =>
                       router.push(`/admin/pomiary/${measurement?.id}`)

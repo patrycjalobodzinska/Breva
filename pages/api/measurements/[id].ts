@@ -22,6 +22,11 @@ export default async function handler(
           id: id as string,
           userId: session.user.id,
         },
+        include: {
+          aiAnalysis: true,
+          manualAnalysis: true,
+          lidarCaptures: true,
+        },
       });
 
       if (!measurement) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useQueryClient } from "@tanstack/react-query";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ interface BreastAnalysis {
 
 export default function MobileUploadPage() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
   const [measurementId, setMeasurementId] = useState<string | null>(null);
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
@@ -77,6 +79,7 @@ export default function MobileUploadPage() {
         const measurement = await response.json();
         setMeasurementId(measurement?.id);
         setMeasurement(measurement);
+        queryClient.invalidateQueries({ queryKey: ["measurements"] });
         toast.success("Pomiar został utworzony!");
       } else {
         const error = await response.json();

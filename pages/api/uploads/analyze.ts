@@ -81,9 +81,8 @@ export default async function handler(
         userId: session.user.id,
         name: (file.originalFilename || "").replace(/\.[^/.]+$/, ""),
         note: note || null,
-        analyses: {
+        aiAnalysis: {
           create: {
-            measurementType: "AI",
             leftVolumeMl: aiResult.leftVolumeMl,
             rightVolumeMl: aiResult.rightVolumeMl,
           },

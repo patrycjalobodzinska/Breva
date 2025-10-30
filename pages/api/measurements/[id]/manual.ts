@@ -36,37 +36,48 @@ export default async function handler(
         .json({ error: "Pomiar bazowy nie został znaleziony" });
     }
 
-    // Zapisz analizę MANUAL do istniejącego pomiaru
-    const manualAnalysis = await prisma.breastAnalysis?.upsert({
-      where: {
-        // unikalność logiczna: jedna analiza MANUAL na measurement
-        // tworzymy sztuczny klucz przez wyszukanie wcześniej, bo Prisma upsert wymaga unique
-        id:
-          (
-            await prisma.breastAnalysis?.findFirst({
-              where: { measurementId: id as string, measurementType: "MANUAL" },
-            })
-          )?.id || "",
-      },
-      update: {
-        leftVolumeMl,
-        rightVolumeMl,
-      },
-      create: {
-        measurementId: id as string,
-        measurementType: "MANUAL",
-        leftVolumeMl,
-        rightVolumeMl,
+    // Find or create manual analysis for this measurement
+    const existingManualAnalysis = await prisma.breastAnalysis?.findUnique({
+      where: { manualMeasurementId: id as string },
+    });
+
+    let manualAnalysis;
+    if (existingManualAnalysis) {
+      manualAnalysis = await prisma.breastAnalysis?.update({
+        where: { id: existingManualAnalysis.id },
+        data: {
+          leftVolumeMl,
+          rightVolumeMl,
+        },
+      });
+    } else {
+      manualAnalysis = await prisma.breastAnalysis?.create({
+        data: {
+          manualMeasurementId: id as string,
+          leftVolumeMl,
+          rightVolumeMl,
+        },
+      });
+    }
+
+    // Update the measurement's note if provided
+    if (note !== undefined) {
+      await prisma.measurement?.update({
+        where: { id: id as string },
+        data: { note },
+      });
+    }
+
+    // Return the updated measurement with its analyses
+    const updatedMeasurement = await prisma.measurement?.findUnique({
+      where: { id: id as string },
+      include: {
+        aiAnalysis: true,
+        manualAnalysis: true,
       },
     });
 
-    // Zwróć zaktualizowany pomiar
-    const updatedMeasurement = await prisma.measurement?.findFirst({
-      where: { id: id as string, userId: session.user.id },
-      include: { analyses: true },
-    });
-
-    return res.status(201).json(updatedMeasurement);
+    return res.status(200).json(updatedMeasurement);
   } catch (error) {
     console.error("Error creating manual measurement:", error);
     return res.status(500).json({
