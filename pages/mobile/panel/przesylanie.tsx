@@ -115,6 +115,23 @@ export default function MobileUploadPage() {
     return capture && capture.status === "COMPLETED" && capture.estimatedVolume;
   };
 
+  const isProcessing = (side: "left" | "right") => {
+    const capture = getLidarStatusForSide(side);
+    const aiAnalysis = measurement?.aiAnalysis;
+    const volumeField = side === "left" ? "leftVolumeMl" : "rightVolumeMl";
+
+    // Przetwarzanie jeśli capture istnieje ale nie ma jeszcze wyniku w aiAnalysis
+    return (
+      capture && capture.status === "PENDING" && !aiAnalysis?.[volumeField]
+    );
+  };
+
+  const getVolumeResult = (side: "left" | "right") => {
+    const aiAnalysis = measurement?.aiAnalysis;
+    const volumeField = side === "left" ? "leftVolumeMl" : "rightVolumeMl";
+    return aiAnalysis?.[volumeField];
+  };
+
   if (measurementId) {
     return (
       <MobilePanelLayout>
@@ -146,7 +163,17 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                {isLidarSent("left") ? (
+                {isProcessing("left") ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-sm font-medium text-text-primary">
+                      Przetwarzanie...
+                    </p>
+                    <p className="text-xs text-text-muted mt-1">
+                      Analiza danych LiDAR w toku
+                    </p>
+                  </div>
+                ) : isLidarSent("left") ? (
                   <div className="text-center py-4">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <CheckCircle className="h-6 w-6 text-green-600" />
@@ -154,6 +181,11 @@ export default function MobileUploadPage() {
                     <p className="text-sm font-medium text-text-primary">
                       Przesłano pomyślnie
                     </p>
+                    {getVolumeResult("left") && (
+                      <p className="text-lg font-bold text-primary mt-2">
+                        {getVolumeResult("left")?.toFixed(1)} ml
+                      </p>
+                    )}
                     <Button
                       onClick={() =>
                         router.push(`/mobile/panel/pomiary/${measurementId}`)
@@ -192,7 +224,17 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                {isLidarSent("right") ? (
+                {isProcessing("right") ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-sm font-medium text-text-primary">
+                      Przetwarzanie...
+                    </p>
+                    <p className="text-xs text-text-muted mt-1">
+                      Analiza danych LiDAR w toku
+                    </p>
+                  </div>
+                ) : isLidarSent("right") ? (
                   <div className="text-center py-4">
                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
                       <CheckCircle className="h-6 w-6 text-green-600" />
@@ -200,6 +242,11 @@ export default function MobileUploadPage() {
                     <p className="text-sm font-medium text-text-primary">
                       Przesłano pomyślnie
                     </p>
+                    {getVolumeResult("right") && (
+                      <p className="text-lg font-bold text-primary mt-2">
+                        {getVolumeResult("right")?.toFixed(1)} ml
+                      </p>
+                    )}
                     <Button
                       onClick={() =>
                         router.push(`/mobile/panel/pomiary/${measurementId}`)
@@ -219,12 +266,7 @@ export default function MobileUploadPage() {
               </div>
             </CardContent>
           </Card>
-          {isLidarSent("left")
-            ? "lidar left przesalny"
-            : "lidar left nie przesalny"}
-          {isLidarSent("right")
-            ? "lidar right przesalny"
-            : "lidar right nie przesalny"}
+
           <div className="flex space-x-3 pb-2">
             <Button
               type="button"
