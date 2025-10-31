@@ -47,7 +47,16 @@ export const MobileLoginForm = ({
         });
 
         if (result?.error) {
-          setError(result.error);
+          // Mapowanie błędów NextAuth na polskie komunikaty
+          const errorMessages: Record<string, string> = {
+            CredentialsSignin: "Nieprawidłowy email lub hasło",
+            Default: "Wystąpił błąd podczas logowania. Spróbuj ponownie.",
+          };
+
+          const errorMessage =
+            errorMessages[result.error] || errorMessages.Default;
+          setError(errorMessage);
+          toast.error(errorMessage);
         } else {
           toast.success("Zalogowano pomyślnie!");
           router.push("/mobile/loading");

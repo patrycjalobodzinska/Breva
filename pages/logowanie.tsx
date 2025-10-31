@@ -43,7 +43,14 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Nieprawidłowy email lub hasło");
+        // Mapowanie błędów NextAuth na polskie komunikaty
+        const errorMessages: Record<string, string> = {
+          CredentialsSignin: "Nieprawidłowy email lub hasło",
+          Default: "Wystąpił błąd podczas logowania. Spróbuj ponownie.",
+        };
+
+        setError(errorMessages[result.error] || errorMessages.Default);
+        toast.error(errorMessages[result.error] || errorMessages.Default);
       } else {
         toast.success("Zalogowano pomyślnie!");
 

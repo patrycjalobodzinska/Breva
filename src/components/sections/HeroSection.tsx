@@ -68,13 +68,6 @@ export const HeroSection = () => {
               </Link>
             </div>
           </div>
-
-          <div className="absolute -bottom-15 -right-15 bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-lg z-20">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">99.2%</div>
-              <div className="text-xs text-text-muted">Dokładności</div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

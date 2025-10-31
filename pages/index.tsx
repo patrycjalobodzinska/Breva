@@ -56,9 +56,10 @@ export default function Home() {
               <div className="mx-auto w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mb-4">
                 <Upload className="h-8 w-8 text-primary" />
               </div>
-              <CardTitle className="text-xl">Łatwe przesyłanie</CardTitle>
+              <CardTitle className="text-xl">Technologia LiDAR</CardTitle>
               <CardDescription>
-                Wsparcie dla wideo, zdjęć i plików LiDAR w różnych formatach
+                Zaawansowane skanowanie 3D z wykorzystaniem czujnika LiDAR w
+                urządzeniach iOS
               </CardDescription>
             </CardHeader>
           </Card>
@@ -107,9 +108,10 @@ export default function Home() {
               <div className="mx-auto w-20 h-20 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mb-6">
                 1
               </div>
-              <h3 className="text-xl font-semibold mb-4">Prześlij plik</h3>
+              <h3 className="text-xl font-semibold mb-4">Skanowanie LiDAR</h3>
               <p className="text-text-muted">
-                Załaduj wideo, zdjęcie lub plik LiDAR z pomiaru piersi
+                Wykonaj precyzyjny skan 3D za pomocą technologii LiDAR w
+                aplikacji iOS
               </p>
             </div>
 
@@ -119,7 +121,7 @@ export default function Home() {
               </div>
               <h3 className="text-xl font-semibold mb-4">Analiza AI</h3>
               <p className="text-text-muted">
-                Nasze algorytmy analizują objętość i asymetrię piersi
+                Nasze algorytmy analizują objętość
               </p>
             </div>
 
@@ -128,9 +130,7 @@ export default function Home() {
                 3
               </div>
               <h3 className="text-xl font-semibold mb-4">Otrzymaj wyniki</h3>
-              <p className="text-text-muted">
-                Precyzyjne pomiary z wykresami i rekomendacjami
-              </p>
+              <p className="text-text-muted">Precyzyjne pomiary</p>
             </div>
           </div>
         </div>
@@ -151,13 +151,13 @@ export default function Home() {
             <Card className="rounded-2xl border-0 shadow-lg bg-white/80 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="text-lg">
-                  Jakie formaty plików są obsługiwane?
+                  Jakie urządzenia są obsługiwane?
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-text-muted">
-                  Obsługujemy wideo (MP4, MOV), zdjęcia (JPG, PNG, HEIC) oraz
-                  pliki LiDAR (PLY, LAS).
+                  Aplikacja wymaga urządzenia iOS z czujnikiem LiDAR (iPhone 12
+                  Pro i nowsze, iPad Pro z LiDAR).
                 </p>
               </CardContent>
             </Card>
@@ -184,8 +184,9 @@ export default function Home() {
               </CardHeader>
               <CardContent>
                 <p className="text-text-muted">
-                  Tak, wszystkie dane są szyfrowane i przechowywane zgodnie z
-                  najwyższymi standardami bezpieczeństwa.
+                  Tak, dane skanów LiDAR są analizowane przez AI i następnie
+                  automatycznie usuwane. Przechowujemy wyłącznie wyniki
+                  pomiarów.
                 </p>
               </CardContent>
             </Card>

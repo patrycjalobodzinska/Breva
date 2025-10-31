@@ -30,6 +30,36 @@ export default function MobileUploadPage() {
     fetchMeasurement,
   } = useMeasurementDetail(measurementId as string);
 
+  // Odśwież pomiar po powrocie do widoku (np. po zamknięciu deep linku)
+  useEffect(() => {
+    if (measurementId) {
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === "visible") {
+          console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
+          fetchMeasurement();
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+
+      // Odśwież też gdy użytkownik wróci przez fokus (dla WebView)
+      const handleFocus = () => {
+        console.log("🔄 Odświeżanie pomiaru po focus");
+        fetchMeasurement();
+      };
+
+      window.addEventListener("focus", handleFocus);
+
+      return () => {
+        document.removeEventListener(
+          "visibilitychange",
+          handleVisibilityChange
+        );
+        window.removeEventListener("focus", handleFocus);
+      };
+    }
+  }, [measurementId, fetchMeasurement]);
+
   const handleCreateMeasurement = async () => {
     if (!formData.name.trim()) {
       toast.error("Nazwa pomiaru jest wymagana");
@@ -186,7 +216,12 @@ export default function MobileUploadPage() {
               </div>
             </CardContent>
           </Card>
-
+          {isLidarSent("left")
+            ? "lidar left przesalny"
+            : "lidar left nie przesalny"}
+          {isLidarSent("right")
+            ? "lidar right przesalny"
+            : "lidar right nie przesalny"}
           <div className="flex space-x-3 pb-2">
             <Button
               type="button"
@@ -199,7 +234,7 @@ export default function MobileUploadPage() {
               onClick={() =>
                 router.push(`/mobile/panel/pomiary/${measurementId}`)
               }
-              disabled={!isLidarSent("left") && !isLidarSent("right")}
+              // disabled={!isLidarSent("left") && !isLidarSent("right")}
               className="flex-1 rounded-xl">
               <CheckCircle className="h-4 w-4 mr-2" />
               Przejdź do analizy
