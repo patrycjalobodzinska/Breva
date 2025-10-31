@@ -13,6 +13,7 @@ import { Measurement } from "@/types";
 
 import { AlertCircle, CheckCircle, Camera, Upload, Heart } from "lucide-react";
 import { toast } from "sonner";
+import { Loader } from "@/components/ui/loader";
 
 export default function MobileUploadPage() {
   const router = useRouter();
@@ -61,6 +62,26 @@ export default function MobileUploadPage() {
       };
     }
   }, [measurementId, fetchMeasurement]);
+
+  // Automatyczne odświeżanie co 3 sekundy gdy pomiar jest w trakcie przetwarzania
+  useEffect(() => {
+    if (!measurementId || !measurement) return;
+
+    const hasProcessing = isProcessing("left") || isProcessing("right");
+
+    if (hasProcessing) {
+      console.log("⏱️ Start pollingu - przetwarzanie LiDAR");
+      const interval = setInterval(() => {
+        console.log("🔄 Polling - odświeżanie pomiaru");
+        fetchMeasurement();
+      }, 3000); // Co 3 sekundy
+
+      return () => {
+        console.log("⏱️ Stop pollingu");
+        clearInterval(interval);
+      };
+    }
+  }, [measurementId, measurement, fetchMeasurement]);
 
   const handleCreateMeasurement = async () => {
     if (!formData.name.trim()) {
@@ -165,8 +186,8 @@ export default function MobileUploadPage() {
               <div className="space-y-2">
                 {isProcessing("left") ? (
                   <div className="text-center py-4">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-sm font-medium text-text-primary">
+                    <Loader variant="default" size="md" message="" />
+                    <p className="text-sm font-medium text-text-primary mt-2">
                       Przetwarzanie...
                     </p>
                     <p className="text-xs text-text-muted mt-1">
@@ -181,18 +202,18 @@ export default function MobileUploadPage() {
                     <p className="text-sm font-medium text-text-primary">
                       Przesłano pomyślnie
                     </p>
-                    {getVolumeResult("left") && (
+                    {/* {getVolumeResult("left") && (
                       <p className="text-lg font-bold text-primary mt-2">
                         {getVolumeResult("left")?.toFixed(1)} ml
                       </p>
-                    )}
-                    <Button
+                    )} */}
+                    {/* <Button
                       onClick={() =>
                         router.push(`/mobile/panel/pomiary/${measurementId}`)
                       }
                       className="w-full rounded-xl mt-3">
                       Przejdź do analizy
-                    </Button>
+                    </Button> */}
                   </div>
                 ) : (
                   <Button
@@ -226,8 +247,8 @@ export default function MobileUploadPage() {
               <div className="space-y-2">
                 {isProcessing("right") ? (
                   <div className="text-center py-4">
-                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-sm font-medium text-text-primary">
+                    <Loader variant="default" size="md" message="" />
+                    <p className="text-sm font-medium text-text-primary mt-2">
                       Przetwarzanie...
                     </p>
                     <p className="text-xs text-text-muted mt-1">
@@ -242,18 +263,18 @@ export default function MobileUploadPage() {
                     <p className="text-sm font-medium text-text-primary">
                       Przesłano pomyślnie
                     </p>
-                    {getVolumeResult("right") && (
+                    {/* {getVolumeResult("right") && (
                       <p className="text-lg font-bold text-primary mt-2">
                         {getVolumeResult("right")?.toFixed(1)} ml
                       </p>
-                    )}
-                    <Button
+                    )} */}
+                    {/* <Button
                       onClick={() =>
                         router.push(`/mobile/panel/pomiary/${measurementId}`)
                       }
                       className="w-full rounded-xl mt-3">
                       Przejdź do analizy
-                    </Button>
+                    </Button> */}
                   </div>
                 ) : (
                   <Button
@@ -360,7 +381,12 @@ export default function MobileUploadPage() {
             className="flex-1 rounded-xl">
             {isCreating ? (
               <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                <Loader
+                  variant="default"
+                  size="sm"
+                  message=""
+                  className="mr-2"
+                />
                 Tworzenie...
               </>
             ) : (

@@ -24,6 +24,7 @@ import { Search, Eye, Calendar, BarChart3, User, Edit } from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import { useRouter } from "next/router";
 import { Pagination } from "@/components/ui/pagination";
+import { Loader } from "@/components/ui/loader";
 
 interface Measurement {
   id: string;
@@ -142,8 +143,7 @@ export default function AdminMeasurementsPage() {
           </div>
           <Card className="rounded-2xl bg-white backdrop-blur-sm">
             <CardContent className="p-8 text-center">
-              <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-              <p className="text-text-muted">Ładowanie pomiarów...</p>
+              <Loader message="Ładowanie pomiarów..." variant="spinner" />
             </CardContent>
           </Card>
         </div>

@@ -1,15 +1,9 @@
 import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAdminStats } from "@/hooks/useAdminStats";
-import {
-  Users,
-  BarChart3,
-  Shield,
-  TrendingUp,
-  Activity,
-  Loader2,
-} from "lucide-react";
+import { Users, BarChart3, Shield, TrendingUp, Activity } from "lucide-react";
 import Link from "next/link";
+import { Loader } from "@/components/ui/loader";
 
 export default function MobileAdminPage() {
   const { data: stats, isLoading } = useAdminStats();
@@ -26,18 +20,11 @@ export default function MobileAdminPage() {
 
         {/* Quick Stats */}
         {isLoading ? (
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-4 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardContent className="p-4 flex items-center justify-center">
-                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-              </CardContent>
-            </Card>
-          </div>
+          <Loader
+            message="Ładowanie statystyk..."
+            variant="spinner"
+            size="md"
+          />
         ) : (
           <div className="grid grid-cols-2 gap-3">
             <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">

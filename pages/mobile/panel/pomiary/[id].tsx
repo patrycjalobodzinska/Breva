@@ -26,6 +26,7 @@ import {
   getBadgeVariant,
 } from "@/utils/measurements";
 import { Measurement } from "@/types";
+import { Loader } from "@/components/ui/loader";
 
 export default function MobileMeasurementDetailPage() {
   const { data: session } = useSession();
@@ -243,12 +244,11 @@ export default function MobileMeasurementDetailPage() {
   if (isLoading) {
     return (
       <MobilePanelLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-text-muted">Ładowanie pomiaru...</p>
-          </div>
-        </div>
+        <Loader
+          message="Ładowanie pomiaru..."
+          variant="spinner"
+          className="h-64"
+        />
       </MobilePanelLayout>
     );
   }
@@ -332,7 +332,12 @@ export default function MobileMeasurementDetailPage() {
               <CardContent>
                 {leftStatus === "PENDING" && !aiAnalysis?.leftVolumeMl ? (
                   <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    <Loader
+                      variant="default"
+                      size="sm"
+                      message=""
+                      className="mr-2"
+                    />
                     <span>Przetwarzanie...</span>
                   </div>
                 ) : (
@@ -352,7 +357,12 @@ export default function MobileMeasurementDetailPage() {
               <CardContent>
                 {rightStatus === "PENDING" && !aiAnalysis?.rightVolumeMl ? (
                   <div className="flex items-center">
-                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    <Loader
+                      variant="default"
+                      size="sm"
+                      message=""
+                      className="mr-2"
+                    />
                     <span>Przetwarzanie...</span>
                   </div>
                 ) : (
@@ -435,7 +445,12 @@ export default function MobileMeasurementDetailPage() {
             className="flex-1 rounded-xl text-red-600 border-red-200 hover:bg-red-50">
             {isDeleting ? (
               <>
-                <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin mr-2" />
+                <Loader
+                  variant="default"
+                  size="sm"
+                  message=""
+                  className="mr-2"
+                />
                 Usuwanie...
               </>
             ) : (

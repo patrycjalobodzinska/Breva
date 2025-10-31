@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Calendar, TrendingUp } from "lucide-react";
 import { useGetMeasurements } from "@/hooks/useMeasurements";
 import { Measurement } from "@/types";
+import { Loader } from "@/components/ui/loader";
 
 export default function MobileMeasurementsPage() {
   const router = useRouter();
@@ -64,12 +65,11 @@ export default function MobileMeasurementsPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-center">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-text-muted">Ładowanie pomiarów...</p>
-            </div>
-          </div>
+          <Loader
+            message="Ładowanie pomiarów..."
+            variant="spinner"
+            className="h-64"
+          />
         ) : measurements.length === 0 ? (
           <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-8 text-center">

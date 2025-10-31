@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
-import { Heart } from "lucide-react";
+import { PageLoader } from "@/components/ui/loader";
 
 export default function MobileLoading() {
   const router = useRouter();
@@ -32,12 +32,5 @@ export default function MobileLoading() {
     }
   }, [session, status, router]);
 
-  return (
-    <div className="min-h-screen  flex items-center justify-center">
-      <div className="text-center">
-        <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-        <p className="text-text-muted">Ładowanie...</p>
-      </div>
-    </div>
-  );
+  return <PageLoader message="Logowanie..." variant="heart" />;
 }

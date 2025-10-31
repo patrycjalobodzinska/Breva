@@ -23,6 +23,7 @@ import {
 import { Search, Plus, Eye, Calendar, BarChart3, Trash2 } from "lucide-react";
 import PanelLayout from "@/components/PanelLayout";
 import { Pagination } from "@/components/ui/pagination";
+import { Loader } from "@/components/ui/loader";
 import {
   getAsymmetryPercentage,
   formatDate,
@@ -53,8 +54,7 @@ export default function MeasurementsPage() {
           </div>
           <Card white className="rounded-2xl">
             <CardContent className="p-8 text-center">
-              <BarChart3 className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-              <p className="text-text-muted">Ładowanie pomiarów...</p>
+              <Loader message="Ładowanie pomiarów..." variant="spinner" />
             </CardContent>
           </Card>
         </div>

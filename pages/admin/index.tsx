@@ -5,6 +5,7 @@ import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, Shield } from "lucide-react";
 import Link from "next/link";
+import { Loader } from "@/components/ui/loader";
 
 export default function AdminPage() {
   const { data: session, status } = useSession();
@@ -21,8 +22,7 @@ export default function AdminPage() {
       <AdminLayout>
         <Card className="rounded-2xl">
           <CardContent className="p-8 text-center">
-            <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-            <p className="text-text-muted">Ładowanie...</p>
+            <Loader message="Ładowanie..." variant="heart" />
           </CardContent>
         </Card>
       </AdminLayout>

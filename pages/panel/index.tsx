@@ -2,6 +2,7 @@ import PanelLayout from "@/components/PanelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useUserStats } from "@/hooks/useUserStats";
 import { BarChart3, TrendingUp, Brain, Hand, Activity } from "lucide-react";
+import { Loader } from "@/components/ui/loader";
 
 export default function PanelPage() {
   const { data: stats, isLoading } = useUserStats();
@@ -9,12 +10,7 @@ export default function PanelPage() {
   if (isLoading) {
     return (
       <PanelLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-text-muted">Ładowanie statystyk...</p>
-          </div>
-        </div>
+        <Loader message="Ładowanie statystyk..." variant="spinner" />
       </PanelLayout>
     );
   }

@@ -21,6 +21,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useUserStats } from "@/hooks/useUserStats";
+import { Loader } from "@/components/ui/loader";
 
 export default function MobilePanelDashboard() {
   const { data: session, status } = useSession();
@@ -41,12 +42,7 @@ export default function MobilePanelDashboard() {
   if (status === "loading" || isLoadingStats) {
     return (
       <MobilePanelLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-            <p className="text-text-muted">Ładowanie...</p>
-          </div>
-        </div>
+        <Loader message="Ładowanie..." variant="heart" />
       </MobilePanelLayout>
     );
   }
