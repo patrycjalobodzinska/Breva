@@ -184,7 +184,14 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                {isProcessing("left") ? (
+                {isMeasurementLoading ? (
+                  <div className="text-center py-4">
+                    <Loader variant="default" size="md" message="" />
+                    <p className="text-sm font-medium text-text-muted mt-2">
+                      Ładowanie...
+                    </p>
+                  </div>
+                ) : isProcessing("left") ? (
                   <div className="text-center py-4">
                     <Loader variant="default" size="md" message="" />
                     <p className="text-sm font-medium text-text-primary mt-2">
@@ -245,7 +252,14 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                {isProcessing("right") ? (
+                {isMeasurementLoading ? (
+                  <div className="text-center py-4">
+                    <Loader variant="default" size="md" message="" />
+                    <p className="text-sm font-medium text-text-muted mt-2">
+                      Ładowanie...
+                    </p>
+                  </div>
+                ) : isProcessing("right") ? (
                   <div className="text-center py-4">
                     <Loader variant="default" size="md" message="" />
                     <p className="text-sm font-medium text-text-primary mt-2">
