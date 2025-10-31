@@ -229,11 +229,10 @@ async function saveVolumeResult(
   volume: number
 ) {
   try {
-    // Sprawdź czy analiza AI już istnieje
-    const existingAnalysis = await prisma.breastAnalysis?.findFirst({
+    // Sprawdź czy analiza AI już istnieje dla tego pomiaru
+    const existingAnalysis = await prisma.breastAnalysis?.findUnique({
       where: {
-        measurementId,
-        measurementType: "AI",
+        aiMeasurementId: measurementId,
       },
     });
 
@@ -246,19 +245,18 @@ async function saveVolumeResult(
           [`${side}Confidence`]: 0.95, // Mock confidence
         },
       });
+      console.log(`💾 Updated AI analysis: ${side} breast = ${volume}ml`);
     } else {
       // Utwórz nową analizę AI
       await prisma.breastAnalysis?.create({
         data: {
-          measurementId,
-          measurementType: "AI",
+          aiMeasurementId: measurementId,
           [`${side}VolumeMl`]: volume,
           [`${side}Confidence`]: 0.95, // Mock confidence
         },
       });
+      console.log(`💾 Created AI analysis: ${side} breast = ${volume}ml`);
     }
-
-    console.log(`💾 Volume result saved: ${side} breast = ${volume}ml`);
   } catch (error) {
     console.error("❌ Error saving volume result:", error);
   }

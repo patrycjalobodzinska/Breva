@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shield } from "lucide-react";
+import { Heart, Shield } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminPage() {
@@ -21,7 +21,7 @@ export default function AdminPage() {
       <AdminLayout>
         <Card className="rounded-2xl">
           <CardContent className="p-8 text-center">
-            <Shield className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+            <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
             <p className="text-text-muted">Ładowanie...</p>
           </CardContent>
         </Card>

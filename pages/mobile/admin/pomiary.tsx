@@ -176,7 +176,7 @@ export default function AdminMeasurementsPage() {
                 {measurements?.map((measurement) => (
                   <TableRow
                     onClick={() =>
-                      router.push(`/admin/pomiary/${measurement?.id}`)
+                      router.push(`/mobile/admin/pomiary/${measurement?.id}`)
                     }
                     className="cursor-pointer "
                     key={measurement?.id}>
@@ -206,10 +206,24 @@ export default function AdminMeasurementsPage() {
 
                     <TableCell>
                       <div className="text-sm">
-                        <p>Lewa: {measurement?.leftVolumeMl?.toFixed(1)} ml</p>
                         <p>
-                          Prawa: {measurement?.rightVolumeMl?.toFixed(1)} ml
+                          {measurement?.leftVolumeMl
+                            ? "Lewa: " +
+                              measurement?.leftVolumeMl?.toFixed(1) +
+                              " ml"
+                            : ""}{" "}
                         </p>
+                        <p>
+                          {measurement?.rightVolumeMl
+                            ? "Prawa: " +
+                              measurement?.rightVolumeMl?.toFixed(1) +
+                              " ml"
+                            : ""}{" "}
+                        </p>
+                        {(!measurement?.rightVolumeMl ||
+                          !measurement?.leftVolumeMl) && (
+                          <span className="text-xs text-text-muted">Brak</span>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -232,15 +246,7 @@ export default function AdminMeasurementsPage() {
                         <span className="text-xs text-text-muted">Brak</span>
                       )}
                     </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-medium">
-                        {getAsymmetryPercentage(
-                          measurement?.leftVolumeMl,
-                          measurement?.rightVolumeMl
-                        )}
-                        %
-                      </span>
-                    </TableCell>
+
                     <TableCell>
                       <div className="flex items-center text-sm text-text-muted">
                         <Calendar className="h-4 w-4 mr-1" />

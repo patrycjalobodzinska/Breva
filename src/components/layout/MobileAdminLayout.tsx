@@ -34,7 +34,7 @@ export default function MobileAdminLayout({
     return (
       <div className="max-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center">
         <div className="text-center">
-          <Shield className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+          <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
           <p className="text-text-muted">Ładowanie...</p>
         </div>
       </div>

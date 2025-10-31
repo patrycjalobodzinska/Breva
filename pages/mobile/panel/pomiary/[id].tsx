@@ -38,6 +38,11 @@ export default function MobileMeasurementDetailPage() {
   const [rightStatus, setRightStatus] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
 
+  const isAdmin = session?.user?.role === "ADMIN";
+  const measurementsListPath = isAdmin
+    ? "/mobile/admin/pomiary"
+    : "/mobile/panel/pomiary";
+
   useEffect(() => {
     if (id) {
       fetchMeasurement();
@@ -63,11 +68,11 @@ export default function MobileMeasurementDetailPage() {
         setMeasurement(data);
       } else {
         toast.error("Nie udało się pobrać pomiaru");
-        router.push("/mobile/panel/pomiary");
+        router.push(measurementsListPath);
       }
     } catch (error) {
       toast.error("Wystąpił błąd podczas pobierania pomiaru");
-      router.push("/mobile/panel/pomiary");
+      router.push(measurementsListPath);
     } finally {
       setIsLoading(false);
     }
@@ -88,7 +93,7 @@ export default function MobileMeasurementDetailPage() {
 
       if (response.ok) {
         toast.success("Pomiar został usunięty");
-        router.push("/mobile/panel/pomiary");
+        router.push(measurementsListPath);
       } else {
         toast.error("Nie udało się usunąć pomiaru");
       }
@@ -236,7 +241,7 @@ export default function MobileMeasurementDetailPage() {
               Ten pomiar może nie istnieć lub nie masz do niego dostępu
             </p>
             <Button
-              onClick={() => router.push("/mobile/panel/pomiary")}
+              onClick={() => router.push(measurementsListPath)}
               className="rounded-xl">
               Wróć do listy pomiarów
             </Button>

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
+import { Heart } from "lucide-react";
 
 export default function MobileLoading() {
   const router = useRouter();
@@ -32,39 +33,10 @@ export default function MobileLoading() {
   }, [session, status, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center space-y-6">
-        {/* Logo/Icon */}
-        <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto backdrop-blur-sm">
-          <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-            <span className="text-2xl">📱</span>
-          </div>
-        </div>
-
-        {/* Loading Animation */}
-        <div className="space-y-4">
-          <div className="flex justify-center">
-            <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-          </div>
-
-          <div className="space-y-2">
-            <h2 className="text-xl font-semibold text-white">Logowanie...</h2>
-            <p className="text-white/80 text-sm">
-              Sprawdzamy Twoje dane logowania
-            </p>
-          </div>
-        </div>
-
-        {/* Progress Dots */}
-        <div className="flex justify-center space-x-2">
-          <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
-          <div
-            className="w-2 h-2 bg-white/60 rounded-full animate-pulse"
-            style={{ animationDelay: "0.2s" }}></div>
-          <div
-            className="w-2 h-2 bg-white/60 rounded-full animate-pulse"
-            style={{ animationDelay: "0.4s" }}></div>
-        </div>
+    <div className="min-h-screen  flex items-center justify-center">
+      <div className="text-center">
+        <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
+        <p className="text-text-muted">Ładowanie...</p>
       </div>
     </div>
   );
