@@ -18,11 +18,13 @@ export default function MobileUploadPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isCreating, setIsCreating] = useState(false);
-  const [measurementId, setMeasurementId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     note: "",
   });
+
+  // Pobierz ID z URL jeśli istnieje
+  const measurementId = router.query.id as string | undefined;
 
   const {
     measurement,
@@ -78,9 +80,10 @@ export default function MobileUploadPage() {
 
       if (response.ok) {
         const createdMeasurement = await response.json();
-        setMeasurementId(createdMeasurement?.id);
         queryClient.invalidateQueries({ queryKey: ["measurements"] });
         toast.success("Pomiar został utworzony!");
+        // Przekieruj na URL z ID pomiaru
+        router.push(`/mobile/panel/przesylanie/${createdMeasurement?.id}`);
       } else {
         const error = await response.json();
         toast.error(error.error || "Błąd podczas tworzenia pomiaru");
