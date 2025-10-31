@@ -297,7 +297,7 @@ export default function MobileMeasurementEditPage() {
           </CardContent>
         </Card>
 
-        {/* <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
@@ -314,7 +314,7 @@ export default function MobileMeasurementEditPage() {
                   <>
                     <div className="mb-2">
                       <span className="text-green-600 font-medium">
-                        Przesłano
+                        Juz przesłano
                       </span>
                     </div>
                     {leftStatus.status === "PENDING" ? (
@@ -329,12 +329,6 @@ export default function MobileMeasurementEditPage() {
                         ml
                       </div>
                     )}
-                    <Button
-                      onClick={() => router.push(`/mobile/panel/pomiary/${id}`)}
-                      className="rounded-xl w-full"
-                      variant="outline">
-                      Przejdź do analizy
-                    </Button>
                   </>
                 ) : (
                   <Button
@@ -350,7 +344,7 @@ export default function MobileMeasurementEditPage() {
                   <>
                     <div className="mb-2">
                       <span className="text-green-600 font-medium">
-                        Przesłano
+                        Juz przesłano
                       </span>
                     </div>
                     {rightStatus.status === "PENDING" ? (
@@ -365,12 +359,6 @@ export default function MobileMeasurementEditPage() {
                         ml
                       </div>
                     )}
-                    <Button
-                      onClick={() => router.push(`/mobile/panel/pomiary/${id}`)}
-                      className="rounded-xl w-full"
-                      variant="outline">
-                      Przejdź do analizy
-                    </Button>
                   </>
                 ) : (
                   <Button
@@ -382,7 +370,7 @@ export default function MobileMeasurementEditPage() {
               </div>
             </div>
           </CardContent>
-        </Card> */}
+        </Card>
 
         <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
