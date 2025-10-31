@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import {
@@ -34,7 +34,7 @@ export const useMeasurementDetail = (measurementId: string) => {
     note: "",
   });
 
-  const fetchMeasurement = async () => {
+  const fetchMeasurement = useCallback(async () => {
     if (!measurementId) return;
     setIsLoading(true);
     try {
@@ -50,7 +50,7 @@ export const useMeasurementDetail = (measurementId: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [measurementId]);
 
   const handleEdit = () => {
     if (measurement) {

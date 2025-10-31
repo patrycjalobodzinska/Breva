@@ -50,6 +50,33 @@ export default function MobileMeasurementDetailPage() {
     }
   }, [id]);
 
+  // Odśwież pomiar po powrocie do widoku (np. po zamknięciu deep linku Swift)
+  useEffect(() => {
+    if (!id) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
+        fetchMeasurement();
+        fetchStatuses();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log("🔄 Odświeżanie pomiaru po focus");
+      fetchMeasurement();
+      fetchStatuses();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [id]);
+
   useEffect(() => {
     if (!isPolling) return;
     const t = setInterval(() => {
