@@ -61,12 +61,21 @@ export default function UsersPage() {
   const router = useRouter();
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [searchTerm]); // Odśwież gdy zmieni się searchTerm
 
-  const fetchUsers = async (page: number = currentPage) => {
+  const fetchUsers = async (page: number = 1) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/admin/users?page=${page}&limit=10`);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+      });
+
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+
+      const response = await fetch(`/api/admin/users?${params.toString()}`);
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users);
@@ -81,12 +90,6 @@ export default function UsersPage() {
       setIsLoading(false);
     }
   };
-
-  const filteredUsers = users.filter(
-    (user) =>
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pl-PL", {
@@ -137,7 +140,7 @@ export default function UsersPage() {
         </div>
 
         {/* Users List */}
-        {filteredUsers.length === 0 ? (
+        {users.length === 0 ? (
           <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-8 text-center">
               <Users className="h-12 w-12 text-text-muted mx-auto mb-4" />
@@ -151,7 +154,7 @@ export default function UsersPage() {
           </Card>
         ) : (
           <div className="space-y-2">
-            {filteredUsers.map((user) => (
+            {users.map((user) => (
               <Card
                 key={user.id}
                 onClick={() =>
@@ -165,13 +168,6 @@ export default function UsersPage() {
                         <p className="font-semibold text-text-primary">
                           {user.name || "Brak imienia"}
                         </p>
-                        <Badge
-                          variant={
-                            user.role === "ADMIN" ? "destructive" : "default"
-                          }
-                          className="rounded-full text-xs">
-                          {user.role === "ADMIN" ? "Admin" : "User"}
-                        </Badge>
                       </div>
                       <p className="text-sm text-text-muted mb-2">
                         {user.email}

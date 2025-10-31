@@ -25,7 +25,7 @@ import { useUserStats } from "@/hooks/useUserStats";
 export default function MobilePanelDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { data: stats } = useUserStats();
+  const { data: stats, isLoading: isLoadingStats } = useUserStats();
 
   useEffect(() => {
     if (status === "loading") return;
@@ -38,7 +38,7 @@ export default function MobilePanelDashboard() {
     }
   }, [session, status, router]);
 
-  if (status === "loading") {
+  if (status === "loading" || isLoadingStats) {
     return (
       <MobilePanelLayout>
         <div className="flex items-center justify-center h-64">

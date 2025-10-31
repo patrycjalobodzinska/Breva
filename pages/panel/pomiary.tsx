@@ -34,7 +34,9 @@ import { useGetMeasurements } from "@/hooks/useMeasurements";
 export default function MeasurementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading } = useGetMeasurements(currentPage, 10);
+  const { data, isLoading } = useGetMeasurements(currentPage, 10, {
+    search: searchTerm,
+  });
   const { measurements, pagination } = data || {};
   const router = useRouter();
 

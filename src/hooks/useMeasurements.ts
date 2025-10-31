@@ -2,14 +2,23 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { measurementsService } from "@/services/measurements.service";
 import { toast } from "sonner";
 
+interface UseGetMeasurementsOptions {
+  search?: string;
+}
+
 // Hook do pobierania listy pomiarów z paginacją
-export function useGetMeasurements(page: number = 1, pageSize: number = 10) {
+export function useGetMeasurements(
+  page: number = 1,
+  pageSize: number = 10,
+  options?: UseGetMeasurementsOptions
+) {
   return useQuery({
-    queryKey: ["measurements", page, pageSize],
+    queryKey: ["measurements", page, pageSize, options?.search],
     queryFn: async () => {
       const response = await measurementsService.getMeasurements(
         page,
-        pageSize
+        pageSize,
+        options?.search
       );
       if (!response.success || !response.data) {
         throw new Error(response.error || "Nie udało się pobrać pomiarów");

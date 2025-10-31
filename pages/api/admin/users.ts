@@ -20,9 +20,31 @@ export default async function handler(
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
+    const search = req.query.search as string;
+
+    // Warunki wyszukiwania
+    const whereClause = search
+      ? {
+          OR: [
+            {
+              email: {
+                contains: search,
+                mode: "insensitive" as const,
+              },
+            },
+            {
+              name: {
+                contains: search,
+                mode: "insensitive" as const,
+              },
+            },
+          ],
+        }
+      : {};
 
     const [users, totalCount] = await Promise.all([
       prisma.user.findMany({
+        where: whereClause,
         select: {
           id: true,
           email: true,
@@ -42,7 +64,9 @@ export default async function handler(
         skip,
         take: limit,
       }),
-      prisma.user.count(),
+      prisma.user.count({
+        where: whereClause,
+      }),
     ]);
 
     const totalPages = Math.ceil(totalCount / limit);

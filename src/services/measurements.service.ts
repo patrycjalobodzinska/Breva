@@ -3,9 +3,22 @@ import { Measurement } from "@/types";
 
 export const measurementsService = {
   // GET /api/measurements - lista pomiarów z paginacją
-  getMeasurements: async (page: number = 1, pageSize: number = 10) => {
+  getMeasurements: async (
+    page: number = 1,
+    pageSize: number = 10,
+    search?: string
+  ) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    if (search) {
+      params.append("search", search);
+    }
+
     return apiClient.get<PaginatedResponse<Measurement>>(
-      `/api/measurements?page=${page}&pageSize=${pageSize}`
+      `/api/measurements?${params.toString()}`
     );
   },
 

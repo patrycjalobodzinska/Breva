@@ -18,7 +18,6 @@ import {
   Legend,
 } from "recharts";
 import { ChartData } from "@/types";
-import { cn } from "@/lib/utils copy";
 
 const data = [
   {

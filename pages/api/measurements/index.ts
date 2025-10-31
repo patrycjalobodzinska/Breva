@@ -28,78 +28,57 @@ export default async function handler(
       pageSize = "10",
     } = req.query;
 
-    const [allMeasurements, totalCount] = await Promise.all([
-      prisma.measurement?.findMany({
-        where: {
-          userId: session.user.id,
-          ...(search && {
-            OR: [
-              {
-                name: {
-                  contains: search as string,
-                  mode: "insensitive" as const,
-                },
-              },
-              {
-                note: {
-                  contains: search as string,
-                  mode: "insensitive" as const,
-                },
-              },
-            ],
-          }),
+    const skip = (parseInt(page as string) - 1) * parseInt(pageSize as string);
+    const take = parseInt(pageSize as string);
+
+    const whereClause: any = {
+      userId: session.user.id,
+    };
+
+    if (search) {
+      whereClause.OR = [
+        {
+          name: {
+            contains: search as string,
+            mode: "insensitive" as const,
+          },
         },
+        {
+          note: {
+            contains: search as string,
+            mode: "insensitive" as const,
+          },
+        },
+      ];
+    }
+
+    const [measurements, totalCount] = await Promise.all([
+      prisma.measurement.findMany({
+        where: whereClause,
         include: {
           aiAnalysis: true,
           manualAnalysis: true,
         },
         orderBy: { [sort as string]: order },
+        skip,
+        take,
       }),
-      prisma.measurement?.count({
-        where: {
-          userId: session.user.id,
-          ...(search && {
-            OR: [
-              {
-                name: {
-                  contains: search as string,
-                  mode: "insensitive" as const,
-                },
-              },
-              {
-                note: {
-                  contains: search as string,
-                  mode: "insensitive" as const,
-                },
-              },
-            ],
-          }),
-        },
+      prisma.measurement.count({
+        where: whereClause,
       }),
     ]);
 
-    // Na razie zwracamy wszystkie pomiary - filtrowanie będzie działać gdy Prisma będzie zaktualizowane
-    const measurements = allMeasurements || [];
+    const totalPages = Math.ceil(totalCount / take);
 
-    // Paginacja na poziomie aplikacji
-    const skip = (parseInt(page as string) - 1) * parseInt(pageSize as string);
-    const take = parseInt(pageSize as string);
-    const paginatedMeasurements = measurements.slice(skip, skip + take);
-    const filteredTotalCount = measurements.length;
-
-    const totalPages = Math.ceil(
-      filteredTotalCount / parseInt(pageSize as string)
-    );
-
-    console.log("📊 Total measurements found:", measurements.length);
-    console.log("📊 Paginated measurements:", paginatedMeasurements.length);
+    console.log("📊 Total measurements found:", totalCount);
+    console.log("📊 Paginated measurements:", measurements.length);
 
     return res.status(200).json({
-      measurements: paginatedMeasurements,
+      measurements,
       pagination: {
         page: parseInt(page as string),
-        limit: parseInt(pageSize as string),
-        totalCount: filteredTotalCount,
+        limit: take,
+        totalCount,
         totalPages,
         hasNext: parseInt(page as string) < totalPages,
         hasPrev: parseInt(page as string) > 1,

@@ -13,7 +13,9 @@ export default function MobileMeasurementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading } = useGetMeasurements(currentPage, 10);
+  const { data, isLoading } = useGetMeasurements(currentPage, 10, {
+    search: searchTerm,
+  });
   const measurements = data?.measurements || [];
   const pagination = data?.pagination || {
     page: 1,
@@ -23,12 +25,6 @@ export default function MobileMeasurementsPage() {
     hasNext: false,
     hasPrev: false,
   };
-
-  const filteredMeasurements = measurements.filter(
-    (measurement: Measurement) =>
-      measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      measurement?.note?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pl-PL", {
@@ -74,7 +70,7 @@ export default function MobileMeasurementsPage() {
               <p className="text-text-muted">Ładowanie pomiarów...</p>
             </div>
           </div>
-        ) : filteredMeasurements.length === 0 ? (
+        ) : measurements.length === 0 ? (
           <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-8 text-center">
               <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -92,7 +88,7 @@ export default function MobileMeasurementsPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {filteredMeasurements.map((measurement) => {
+            {measurements.map((measurement) => {
               const leftVolume = measurement?.aiAnalysis?.leftVolumeMl || 0;
               const rightVolume = measurement?.aiAnalysis?.rightVolumeMl || 0;
 

@@ -297,7 +297,7 @@ export default function MobileMeasurementEditPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+        {/* <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center">
@@ -308,7 +308,6 @@ export default function MobileMeasurementEditPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4">
-              {/* Left side */}
               <div className="text-center p-3 bg-gray-50 rounded-xl">
                 <div className="text-sm text-text-muted mb-1">Lewa</div>
                 {leftStatus ? (
@@ -345,8 +344,6 @@ export default function MobileMeasurementEditPage() {
                   </Button>
                 )}
               </div>
-
-              {/* Right side */}
               <div className="text-center p-3 bg-gray-50 rounded-xl">
                 <div className="text-sm text-text-muted mb-1">Prawa</div>
                 {rightStatus ? (
@@ -385,7 +382,7 @@ export default function MobileMeasurementEditPage() {
               </div>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
           <CardHeader>

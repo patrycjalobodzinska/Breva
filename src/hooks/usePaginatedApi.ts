@@ -9,13 +9,27 @@ interface Pagination {
   hasPrev: boolean;
 }
 
+interface UsePaginatedApiOptions {
+  search?: string;
+}
+
 export function usePaginatedApi<T = any>(
   endpoint: string,
   page: number = 1,
-  pageSize: number = 10
+  pageSize: number = 10,
+  options?: UsePaginatedApiOptions
 ) {
   const queryFn = async (): Promise<{ data: T; pagination: Pagination }> => {
-    const url = `${endpoint}?page=${page}&pageSize=${pageSize}`;
+    const params = new URLSearchParams({
+      page: page.toString(),
+      pageSize: pageSize.toString(),
+    });
+
+    if (options?.search) {
+      params.append("search", options.search);
+    }
+
+    const url = `${endpoint}?${params.toString()}`;
     const res = await fetch(url);
     if (!res.ok) throw new Error("Błąd pobierania danych z " + endpoint);
     const json = await res.json();
@@ -32,7 +46,7 @@ export function usePaginatedApi<T = any>(
     };
   };
   const { data, isLoading, error } = useQuery({
-    queryKey: [endpoint, page, pageSize],
+    queryKey: [endpoint, page, pageSize, options?.search],
     queryFn,
     enabled: !!endpoint,
   });

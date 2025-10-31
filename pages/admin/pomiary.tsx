@@ -60,15 +60,22 @@ export default function AdminMeasurementsPage() {
     hasPrev: false,
   });
 
-  useEffect(() => {
-    fetchMeasurements();
-  }, []);
   const router = useRouter();
+
   const fetchMeasurements = async (page: number = currentPage) => {
     try {
       setIsLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+      });
+
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+
       const response = await fetch(
-        `/api/admin/measurements?page=${page}&limit=10`
+        `/api/admin/measurements?${params.toString()}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -85,14 +92,9 @@ export default function AdminMeasurementsPage() {
     }
   };
 
-  const filteredMeasurements = measurements.filter(
-    (measurement) =>
-      measurement?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      measurement?.user.email
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      measurement?.user.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchMeasurements(1);
+  }, [searchTerm]);
 
   const getAnalysisForSide = (
     measurement: Measurement,
@@ -170,7 +172,7 @@ export default function AdminMeasurementsPage() {
         </Card>
 
         {/* Measurements List */}
-        {filteredMeasurements.length === 0 ? (
+        {measurements.length === 0 ? (
           <Card className="rounded-2xl">
             <CardContent className="p-8 text-center">
               <BarChart3 className="h-12 w-12 text-text-muted mx-auto mb-4" />
@@ -195,7 +197,7 @@ export default function AdminMeasurementsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMeasurements.map((measurement) => (
+                {measurements.map((measurement) => (
                   <TableRow
                     onClick={() =>
                       router.push(`/admin/pomiary/${measurement?.id}`)

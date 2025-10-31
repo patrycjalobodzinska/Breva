@@ -14,9 +14,17 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Key, BarChart3, Calendar, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Key,
+  BarChart3,
+  Calendar,
+  User,
+  Target,
+} from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
+import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 
 interface User {
   id: string;
@@ -138,7 +146,7 @@ export default function UserDetailPage() {
 
   if (isLoading) {
     return (
-      <AdminLayout>
+      <MobileAdminLayout>
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
             <Button
@@ -158,13 +166,13 @@ export default function UserDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </MobileAdminLayout>
     );
   }
 
   if (!user) {
     return (
-      <AdminLayout>
+      <MobileAdminLayout>
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
             <Button
@@ -186,36 +194,31 @@ export default function UserDetailPage() {
             </CardContent>
           </Card>
         </div>
-      </AdminLayout>
+      </MobileAdminLayout>
     );
   }
 
   return (
-    <AdminLayout>
+    <MobileAdminLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              onClick={() => router.back()}
-              className="rounded-2xl">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Wróć
-            </Button>
+          <div className="flex flex-col  gap-3">
             <div>
-              <h1 className="text-3xl font-bold text-text-primary">
+              <Button
+                variant="outline"
+                onClick={() => router.back()}
+                className="rounded-2xl">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Wróć
+              </Button>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-text-primary">
                 {user.name || "Brak imienia"}
               </h1>
               <p className="text-text-muted">{user.email}</p>
             </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge
-              variant={user.role === "ADMIN" ? "destructive" : "default"}
-              className="rounded-full">
-              {user.role === "ADMIN" ? "Admin" : "Użytkownik"}
-            </Badge>
           </div>
         </div>
 
@@ -314,7 +317,10 @@ export default function UserDetailPage() {
                     className="border border-primary/20 rounded-2xl p-4">
                     <div className="flex items-center justify-between mb-3">
                       <div>
-                        <h4 className="font-medium">{measurement?.name}</h4>
+                        <h4 className="font-medium flex items-center gap-2">
+                          <Target className="h-4 w-4 text-primary" />
+                          {measurement?.name}
+                        </h4>
                         {measurement?.note && (
                           <p className="text-sm text-text-muted">
                             {measurement?.note}
@@ -328,27 +334,26 @@ export default function UserDetailPage() {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-text-muted">Lewa pierś</p>
+                        <div className="text-sm text-text-muted ">
+                          Lewa pierś
+                        </div>
                         <p className="font-medium">
-                          {measurement?.leftVolumeMl?.toFixed(1)} ml
+                          {" "}
+                          {measurement?.leftVolumeMl
+                            ? measurement?.leftVolumeMl?.toFixed(1) + " ml"
+                            : "-"}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-text-muted">Prawa pierś</p>
+                        <div className="text-sm text-text-muted ">
+                          Prawa pierś
+                        </div>
                         <p className="font-medium">
-                          {measurement?.rightVolumeMl?.toFixed(1)} ml
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-text-muted">Asymetria</p>
-                        <p className="font-medium">
-                          {getAsymmetryPercentage(
-                            measurement?.leftVolumeMl,
-                            measurement?.rightVolumeMl
-                          )}
-                          %
+                          {measurement?.rightVolumeMl
+                            ? measurement?.rightVolumeMl?.toFixed(1) + " ml"
+                            : "-"}
                         </p>
                       </div>
                     </div>
@@ -359,6 +364,6 @@ export default function UserDetailPage() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </MobileAdminLayout>
   );
 }

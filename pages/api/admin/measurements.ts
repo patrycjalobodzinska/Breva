@@ -17,12 +17,50 @@ export default async function handler(
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
+    const { search, page = "1", limit = "10" } = req.query;
 
-    const [allMeasurements, totalCount] = await Promise.all([
-      prisma.measurement?.findMany({
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
+    const whereClause: any = {};
+
+    if (search) {
+      whereClause.OR = [
+        {
+          name: {
+            contains: search as string,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          note: {
+            contains: search as string,
+            mode: "insensitive" as const,
+          },
+        },
+        {
+          user: {
+            email: {
+              contains: search as string,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+        {
+          user: {
+            name: {
+              contains: search as string,
+              mode: "insensitive" as const,
+            },
+          },
+        },
+      ];
+    }
+
+    const [measurements, totalCount] = await Promise.all([
+      prisma.measurement.findMany({
+        where: whereClause,
         include: {
           user: {
             select: {
@@ -31,30 +69,29 @@ export default async function handler(
               name: true,
             },
           },
+          aiAnalysis: true,
+          manualAnalysis: true,
         },
         orderBy: { createdAt: "desc" },
+        skip,
+        take: limitNum,
       }),
-      prisma.measurement?.count(),
+      prisma.measurement.count({
+        where: whereClause,
+      }),
     ]);
 
-    // Na razie zwracamy wszystkie pomiary - filtrowanie będzie działać gdy Prisma będzie zaktualizowane
-    const measurements = allMeasurements || [];
-
-    // Paginacja na poziomie aplikacji
-    const paginatedMeasurements = measurements.slice(skip, skip + limit);
-    const filteredTotalCount = measurements.length;
-
-    const totalPages = Math.ceil(filteredTotalCount / limit);
+    const totalPages = Math.ceil(totalCount / limitNum);
 
     return res.status(200).json({
-      measurements: paginatedMeasurements,
+      measurements,
       pagination: {
-        page,
-        limit,
-        totalCount: filteredTotalCount,
+        page: pageNum,
+        limit: limitNum,
+        totalCount,
         totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1,
       },
     });
   } catch (error) {

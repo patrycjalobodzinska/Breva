@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { Heart, BarChart3, Users, Shield, Settings } from "lucide-react";
+import { Heart, BarChart3, Users, Shield, Settings, User } from "lucide-react";
 import { useEffect } from "react";
 
 const navigation = [
@@ -56,12 +56,7 @@ export default function MobileAdminLayout({
               <Shield className="h-5 w-5 text-amber-600" />
             </div>
             <Link href="/mobile/admin" className="flex items-center space-x-3">
-              <div className="text-right">
-                <p className="text-xs font-medium text-text-primary">
-                  {session?.user?.name || session?.user?.email}
-                </p>
-                <p className="text-xs text-amber-600">Admin</p>
-              </div>
+              <User className="h-6 w-6 text-primary" />
             </Link>
           </div>
         </header>

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, BarChart3, Target, TrendingUp } from "lucide-react";
+import { ArrowLeft, BarChart3, Edit, Target, TrendingUp } from "lucide-react";
 import PanelLayout from "@/components/PanelLayout";
 import AdminLayout from "@/components/AdminLayout";
 import { useSession } from "next-auth/react";
@@ -25,6 +25,7 @@ import {
   getAsymmetryPercentage,
   getBadgeVariant,
 } from "@/utils/measurements";
+import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 
 export default function MeasurementDetailPage() {
   const router = useRouter();
@@ -98,7 +99,7 @@ export default function MeasurementDetailPage() {
   const hasAiMeasurement = !!measurement?.aiAnalysis;
   console.log(measurement);
   return (
-    <Layout>
+    <MobileAdminLayout>
       <div className="space-y-6">
         {/* Header */}{" "}
         <Button
@@ -108,121 +109,127 @@ export default function MeasurementDetailPage() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Wróć
         </Button>
-        <div className="flex flex-col md:flex-row md:items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-3xl font-bold text-text-primary">
-              {measurement?.name}
-            </h1>
+        <div className="space-y-2">
+          {" "}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-3xl font-bold text-text-primary">
+                {measurement?.name}
+              </h1>
+            </div>
+            <MeasurementActions
+              measurement={measurement}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onEditManual={handleEditManual}
+              onAddManual={() => setIsAddingManual(true)}
+            />
           </div>
-          <MeasurementActions
-            measurement={measurement}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            onEditManual={handleEditManual}
-            onAddManual={() => setIsAddingManual(true)}
+          {/* Edit Dialog */}
+          <MeasurementEditDialog
+            isOpen={isEditing}
+            onClose={() => setIsEditing(false)}
+            formData={editForm}
+            onFormChange={setEditForm}
+            onSave={handleSaveEdit}
+            title="Edytuj pomiar"
+            description="Zmień nazwę i notatkę pomiaru"
           />
-        </div>
-        {/* Edit Dialog */}
-        <MeasurementEditDialog
-          isOpen={isEditing}
-          onClose={() => setIsEditing(false)}
-          formData={editForm}
-          onFormChange={setEditForm}
-          onSave={handleSaveEdit}
-          title="Edytuj pomiar"
-          description="Zmień nazwę i notatkę pomiaru"
-        />
-        {/* Edit Manual Dialog */}
-        <ManualMeasurementDialog
-          isOpen={isEditingManual}
-          onClose={() => setIsEditingManual(false)}
-          formData={editManualForm}
-          onFormChange={setEditManualForm}
-          onSave={handleSaveEditManual}
-          title="Edytuj pomiar ręczny"
-          description="Zmień wartości objętości pomiaru ręcznego"
-          isEdit={true}
-        />
-        {/* Add Manual Dialog */}
-        <ManualMeasurementDialog
-          isOpen={isAddingManual}
-          onClose={() => setIsAddingManual(false)}
-          formData={manualForm}
-          onFormChange={(data) => setManualForm(data)}
-          onSave={handleAddManual}
-          title="Dodaj pomiar ręczny"
-          description="Porównaj swój pomiar z wynikiem AI"
-          isEdit={false}
-        />
-        {/* AI Results */}
-        {measurement?.aiAnalysis && (
-          <div className="grid md:grid-cols-2 gap-6">
-            <Card white>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Lewa pierś (AI)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-5xl font-bold text-text-primary">
-                  {measurement?.aiAnalysis?.leftVolumeMl} ml
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl bg-white/80">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Prawa pierś (AI)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-5xl font-bold text-text-primary">
-                  {measurement?.aiAnalysis?.rightVolumeMl} ml
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-        {/* Manual Measurements */}
-        {!!measurement?.manualAnalysis && (
-          <div className="space-y-4 grid md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold text-text-primary">
-                Pomiar ręczny
-              </h2>
-              <Card className="rounded-2xl bg-white/80">
-                <CardContent className="p-6">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
-                      <p className="text-xl font-semibold text-text-primary">
-                        {measurement?.manualAnalysis?.leftVolumeMl} ml
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-text-muted text-sm">
-                        Prawa pierś (ml)
-                      </p>
-                      <p className="text-xl font-semibold text-text-primary">
-                        {measurement?.manualAnalysis?.rightVolumeMl} ml
-                      </p>
-                    </div>
-                  </div>
+          {/* Edit Manual Dialog */}
+          <ManualMeasurementDialog
+            isOpen={isEditingManual}
+            onClose={() => setIsEditingManual(false)}
+            formData={editManualForm}
+            onFormChange={setEditManualForm}
+            onSave={handleSaveEditManual}
+            title="Edytuj pomiar ręczny"
+            description="Zmień wartości objętości pomiaru ręcznego"
+            isEdit={true}
+          />
+          {/* Add Manual Dialog */}
+          <ManualMeasurementDialog
+            isOpen={isAddingManual}
+            onClose={() => setIsAddingManual(false)}
+            formData={manualForm}
+            onFormChange={(data) => setManualForm(data)}
+            onSave={handleAddManual}
+            title="Dodaj pomiar ręczny"
+            description="Porównaj swój pomiar z wynikiem AI"
+            isEdit={false}
+          />
+          {/* AI Results */}
+          {measurement?.aiAnalysis && (
+            <div className="grid  grid-cols-2 gap-3">
+              <Card white>
+                <CardHeader>
+                  <CardTitle className="flex text-base items-center space-x-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    <span>Lewa pierś </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-text-primary">
+                    {measurement?.aiAnalysis?.leftVolumeMl} ml
+                  </p>
+                </CardContent>
+              </Card>
+              <Card className="rounded-xl bg-white/80">
+                <CardHeader>
+                  <CardTitle className="flex text-base items-center space-x-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    <span>Prawa pierś</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold text-text-primary">
+                    {measurement?.aiAnalysis?.rightVolumeMl} ml
+                  </p>
                 </CardContent>
               </Card>
             </div>
-            {hasAiMeasurement && <AccuracyDisplay measurement={measurement} />}
+          )}
+        </div>
+        {/* Manual Measurements */}
+        <div className="space-y-4 grid md:grid-cols-2 gap-6">
+          <div className="space-y-2">
+            <h2 className="text-2xl flex justify-between items-center font-bold text-text-primary">
+              Pomiar ręczny
+              <Button
+                variant="outline"
+                onClick={() => setIsEditingManual(true)}
+                className="rounded-2xl">
+                <Edit className="h-5 w-5 " />
+              </Button>
+            </h2>
+            <Card className="rounded-lg bg-white/80">
+              <CardContent className="p-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
+                    <p className="text-lg font-semibold text-text-primary">
+                      {measurement?.manualAnalysis?.leftVolumeMl + " ml" || "-"}{" "}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-text-muted text-sm">Prawa pierś (ml)</p>
+                    <p className="text-lg font-semibold text-text-primary">
+                      {measurement?.manualAnalysis?.rightVolumeMl + " ml" ||
+                        "-"}{" "}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
+          {hasAiMeasurement && <AccuracyDisplay measurement={measurement} />}
+        </div>
+        {prepareChartData(measurement)?.length > 0 && (
+          <MeasurementChart
+            data={prepareChartData(measurement)}
+            title="Porównanie AI vs Pomiary ręczne"
+            description="Wykres porównujący wyniki AI z pomiarami ręcznymi"
+          />
         )}
-        <MeasurementChart
-          data={prepareChartData(measurement)}
-          title="Porównanie AI vs Pomiary ręczne"
-          description="Wykres porównujący wyniki AI z pomiarami ręcznymi"
-        />
-        {/* Accuracy */}
-        {/* Note */}
         {measurement?.note && (
           <div className="space-y-4">
             <h2 className="text-2xl font-bold text-text-primary">Notatka</h2>
@@ -232,6 +239,6 @@ export default function MeasurementDetailPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </MobileAdminLayout>
   );
 }

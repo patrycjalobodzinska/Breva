@@ -68,15 +68,22 @@ export default function AdminMeasurementsPage() {
     hasPrev: false,
   });
 
-  useEffect(() => {
-    fetchMeasurements();
-  }, []);
   const router = useRouter();
+
   const fetchMeasurements = async (page: number = currentPage) => {
     try {
       setIsLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: "10",
+      });
+
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+
       const response = await fetch(
-        `/api/admin/measurements?page=${page}&limit=10`
+        `/api/admin/measurements?${params.toString()}`
       );
       if (response.ok) {
         const data = await response.json();
@@ -92,6 +99,10 @@ export default function AdminMeasurementsPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchMeasurements(1);
+  }, [searchTerm]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pl-PL", {
