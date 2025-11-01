@@ -59,7 +59,7 @@ export const MobileLoginForm = ({
           toast.error(errorMessage);
         } else {
           toast.success("Zalogowano pomyślnie!");
-          router.push("/mobile/loading");
+          router.push("/mobile/panel");
         }
       } catch (error) {
         setError("Wystąpił błąd podczas logowania");

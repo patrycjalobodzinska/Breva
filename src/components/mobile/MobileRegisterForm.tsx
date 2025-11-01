@@ -77,7 +77,7 @@ export const MobileRegisterForm = ({
               toast.success("Logowanie udane!");
               // Użyj window.location.href aby wymusić pełne przeładowanie z nową sesją
               setTimeout(() => {
-                window.location.href = "/mobile/loading";
+                window.location.href = "/mobile/panel";
               }, 500);
             } else {
               console.error("❌ Błąd logowania:", result?.error);
