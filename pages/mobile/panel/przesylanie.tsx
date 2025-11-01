@@ -11,7 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMeasurementDetail } from "@/hooks/useMeasurementDetail";
 import { Measurement } from "@/types";
 
-import { AlertCircle, CheckCircle, Camera, Upload, Heart, XCircle } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  Camera,
+  Upload,
+  Heart,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
 
@@ -82,9 +89,11 @@ export default function MobileUploadPage() {
     );
 
     const leftHasResult = leftPending && measurement?.aiAnalysis?.leftVolumeMl;
-    const rightHasResult = rightPending && measurement?.aiAnalysis?.rightVolumeMl;
+    const rightHasResult =
+      rightPending && measurement?.aiAnalysis?.rightVolumeMl;
 
-    const hasProcessing = hasPendingCaptures && (!leftHasResult || !rightHasResult);
+    const hasProcessing =
+      hasPendingCaptures && (!leftHasResult || !rightHasResult);
 
     if (hasProcessing) {
       console.log("⏱️ Start pollingu - przetwarzanie LiDAR");
@@ -98,7 +107,9 @@ export default function MobileUploadPage() {
         clearInterval(interval);
       };
     } else {
-      console.log("🛑 Brak przetwarzających się captureów - polling zatrzymany");
+      console.log(
+        "🛑 Brak przetwarzających się captureów - polling zatrzymany"
+      );
     }
   }, [measurementId, measurement, fetchMeasurement]);
 
@@ -166,6 +177,11 @@ export default function MobileUploadPage() {
     );
   };
 
+  const isFailed = (side: "left" | "right") => {
+    const capture = getLidarStatusForSide(side);
+    return capture && capture.status === "FAILED";
+  };
+
   const getVolumeResult = (side: "left" | "right") => {
     const aiAnalysis = measurement?.aiAnalysis;
     const volumeField = side === "left" ? "leftVolumeMl" : "rightVolumeMl";
@@ -223,8 +239,7 @@ export default function MobileUploadPage() {
                     </p>
                     <button
                       onClick={() => handleLiDARCapture("left")}
-                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium"
-                    >
+                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium">
                       Wyślij ponownie
                     </button>
                   </div>
@@ -309,8 +324,7 @@ export default function MobileUploadPage() {
                     </p>
                     <button
                       onClick={() => handleLiDARCapture("right")}
-                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium"
-                    >
+                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium">
                       Wyślij ponownie
                     </button>
                   </div>
