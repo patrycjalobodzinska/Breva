@@ -52,15 +52,17 @@ Cookie: next-auth.session-token=<token>  // Wymagana autoryzacja
 ```json
 {
   "success": true,
-  "message": "LiDAR data received successfully",
+  "message": "LiDAR data sent to Python backend for processing",
   "captureId": "clxxx...",
   "requestId": 123456,
   "side": "left",
   "measurementId": "clxxx...",
-  "estimatedVolume": 450.5,
+  "status": "pending",
   "timestamp": "2025-11-01T14:30:02.000Z"
 }
 ```
+
+**UWAGA:** Endpoint teraz wysyła dane do Python backendu i zwraca status `"pending"`. Volume będzie dostępne po zakończeniu przetwarzania (sprawdź przez `/api/lidar-capture/status` lub sprawdź pomiar w bazie danych).
 
 ### Response (Error 400 - Validation)
 ```json
@@ -79,6 +81,17 @@ Cookie: next-auth.session-token=<token>  // Wymagana autoryzacja
 ```json
 {
   "error": "Unauthorized"
+}
+```
+
+### Response (Error 500 - Python Backend Error)
+```json
+{
+  "success": false,
+  "error": "Python Backend Error (500): Internal Server Error",
+  "details": "Error details from Python...",
+  "source": "Python Backend",
+  "backendUrl": "https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net"
 }
 ```
 
@@ -159,7 +172,9 @@ Content-Type: application/json
 | **Naming convention** | camelCase | snake_case |
 | **Side field** | ✅ Wymagane | ❌ Brak |
 | **MeasurementId** | ✅ Wymagane | ❌ Brak |
-| **Zapis do DB** | ✅ Tak | ❌ Nie (tylko proxy do Python) |
+| **Zapis do DB** | ✅ Tak (LidarCapture + polling) | ❌ Nie (tylko proxy do Python) |
+| **Polling** | ✅ Auto-polling dla wyniku | ❌ Nie ma pollingu |
+| **Backend Python** | ✅ Wysyła do `/enqueue-volume-estimation` | ✅ Wysyła do `/enqueue-volume-estimation` |
 
 ---
 

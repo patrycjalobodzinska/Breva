@@ -88,18 +88,73 @@ export default async function handler(
     console.log("📱 Camera Intrinsics:", data.cameraIntrinsics);
     console.log("📱 Device:", data.metadata.deviceModel);
 
-    // Tymczasowo bez Python API: generuj losową objętość i zapisuj od razu
-    const mockRequestId = Math.floor(100000 + Math.random() * 900000);
-    const mockVolume = Math.round((Math.random() * 800 + 200) * 10) / 10; // 200–1000 ml, 0.1
+    // Przygotuj dane dla Python API (konwersja do snake_case)
+    const pythonPayload = {
+      background: {
+        depth: data.background.depth,
+        timestamp: data.background.timestamp,
+      },
+      object: {
+        depth: data.object.depth,
+        mask: data.object.mask,
+        timestamp: data.object.timestamp,
+      },
+      camera_intrinsics: {
+        fx: data.cameraIntrinsics.fx,
+        fy: data.cameraIntrinsics.fy,
+        cx: data.cameraIntrinsics.cx,
+        cy: data.cameraIntrinsics.cy,
+        width: data.cameraIntrinsics.width,
+        height: data.cameraIntrinsics.height,
+      },
+      metadata: {
+        device_model: data.metadata.deviceModel,
+      },
+    };
 
-    // Zapisz capture jako COMPLETED z oszacowaniem
+    // Wyślij do backendu Python
+    const backendUrl = process.env.BACKEND_URL || 'https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net';
+
+    console.log("📤 Sending to Python backend:", backendUrl);
+
+    const pythonResponse = await fetch(`${backendUrl}/enqueue-volume-estimation`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(pythonPayload),
+    });
+
+    if (!pythonResponse.ok) {
+      const errorText = await pythonResponse.text();
+      console.error('❌ Python Backend Error:', pythonResponse.status, errorText);
+
+      let pythonError;
+      try {
+        pythonError = JSON.parse(errorText);
+      } catch {
+        pythonError = errorText;
+      }
+
+      return res.status(pythonResponse.status).json({
+        success: false,
+        error: `Python Backend Error (${pythonResponse.status}): ${pythonResponse.statusText}`,
+        details: pythonError,
+        source: 'Python Backend',
+        backendUrl: backendUrl
+      });
+    }
+
+    const pythonResult = await pythonResponse.json();
+    console.log("✅ Python Backend response:", pythonResult);
+
+    // Zapisz capture jako PENDING z request_id z Pythona
     const captureRecord = await prisma.lidarCapture?.create({
       data: {
         measurementId: data.measurementId,
         side: data.side.toUpperCase(),
-        requestId: mockRequestId,
-        status: "COMPLETED",
-        estimatedVolume: mockVolume,
+        requestId: pythonResult.request_id,
+        status: "PENDING",
         metadata: {
           deviceModel: data.metadata.deviceModel,
           iosVersion: data.metadata.iosVersion,
@@ -109,17 +164,21 @@ export default async function handler(
       },
     });
 
-    // Zapisz wynik do analizy AI
-    await saveVolumeResult(data.measurementId, data.side, mockVolume);
+    // Start polling dla statusu volume estimation
+    pollVolumeEstimation(
+      pythonResult.request_id,
+      data.measurementId,
+      data.side
+    );
 
     const response = {
       success: true,
-      message: "LiDAR data received successfully (mocked processing)",
+      message: "LiDAR data sent to Python backend for processing",
       captureId: captureRecord?.id,
-      requestId: mockRequestId,
+      requestId: pythonResult.request_id,
       side: data.side,
       measurementId: data.measurementId,
-      estimatedVolume: mockVolume,
+      status: pythonResult.status || "pending",
       timestamp: new Date().toISOString(),
     };
 
