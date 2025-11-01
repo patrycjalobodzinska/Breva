@@ -52,6 +52,106 @@ export default async function handler(
       return res.status(404).json({ error: "Measurement not found" });
     }
 
+    // Jeśli status jest PENDING, sprawdź aktualny status w Python API
+    if (lidarCapture.status === "PENDING") {
+      try {
+        const backendUrl = process.env.BACKEND_URL || 'https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net';
+
+        console.log(`📡 Sprawdzanie statusu w Python API: requestId=${lidarCapture.requestId}`);
+
+        const pythonResponse = await fetch(
+          `${backendUrl}/volume-estimation/${lidarCapture.requestId}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          }
+        );
+
+        console.log(`📡 Python Status Response Status:`, pythonResponse.status);
+        console.log(`📡 Python Status Response Headers:`, Object.fromEntries(pythonResponse.headers.entries()));
+
+        if (pythonResponse.ok) {
+          const pythonData = await pythonResponse.json();
+          console.log(`✅ Python API response:`, JSON.stringify(pythonData, null, 2));
+          console.log(`✅ Python API response - request_id:`, pythonData.request_id);
+          console.log(`✅ Python API response - status:`, pythonData.status);
+          console.log(`✅ Python API response - estimated_volume:`, pythonData.estimated_volume);
+
+          // Zaktualizuj status w bazie jeśli się zmienił
+          if (pythonData.status === "completed" && pythonData.estimated_volume) {
+            await prisma.lidarCapture?.update({
+              where: { id: lidarCapture.id },
+              data: {
+                status: "COMPLETED",
+                estimatedVolume: pythonData.estimated_volume,
+                updatedAt: new Date(),
+              },
+            });
+
+            // Zapisz wynik do analizy AI
+            const sideKey = (side as string).toLowerCase();
+            const aiAnalysis = await prisma.breastAnalysis?.findUnique({
+              where: { aiMeasurementId: measurementId as string },
+            });
+
+            const updateData: any = {};
+            updateData[`${sideKey}VolumeMl`] = pythonData.estimated_volume;
+            updateData[`${sideKey}Confidence`] = 0.95;
+
+            if (aiAnalysis) {
+              await prisma.breastAnalysis?.update({
+                where: { id: aiAnalysis.id },
+                data: updateData,
+              });
+            } else {
+              const createData: any = { aiMeasurementId: measurementId as string };
+              createData[`${sideKey}VolumeMl`] = pythonData.estimated_volume;
+              createData[`${sideKey}Confidence`] = 0.95;
+
+              await prisma.breastAnalysis?.create({
+                data: createData,
+              });
+            }
+
+            console.log(`✅ Status zaktualizowany: COMPLETED, volume=${pythonData.estimated_volume}ml`);
+
+            return res.status(200).json({
+              requestId: lidarCapture.requestId,
+              status: "COMPLETED",
+              estimatedVolume: pythonData.estimated_volume,
+              createdAt: lidarCapture.createdAt,
+              updatedAt: new Date(),
+            });
+          } else if (pythonData.status === "failed") {
+            await prisma.lidarCapture?.update({
+              where: { id: lidarCapture.id },
+              data: {
+                status: "FAILED",
+                updatedAt: new Date(),
+              },
+            });
+
+            console.log(`❌ Status zaktualizowany: FAILED`);
+
+            return res.status(200).json({
+              requestId: lidarCapture.requestId,
+              status: "FAILED",
+              estimatedVolume: null,
+              createdAt: lidarCapture.createdAt,
+              updatedAt: new Date(),
+            });
+          }
+        } else {
+          console.error(`❌ Python API error: ${pythonResponse.status}`);
+        }
+      } catch (pythonError) {
+        console.error("❌ Error checking Python API:", pythonError);
+        // Kontynuuj z danymi z bazy danych
+      }
+    }
+
     return res.status(200).json({
       requestId: lidarCapture.requestId,
       status: lidarCapture.status,

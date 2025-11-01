@@ -309,7 +309,6 @@ export default function MobileMeasurementDetailPage() {
             </Button>
           </div> */}
         </div>
-
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
@@ -318,63 +317,91 @@ export default function MobileMeasurementDetailPage() {
             </h1>
           </div>
         </div>
-
         {/* AI Results + status */}
-        {(aiAnalysis || leftStatus || rightStatus) && (
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center space-x-2 text-sm">
+        <div className="grid grid-cols-2 gap-4">
+          <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
                   <Target className="h-4 w-4 text-primary" />
                   <span>Lewa pierś (AI)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {leftStatus === "PENDING" && !aiAnalysis?.leftVolumeMl ? (
-                  <div className="flex items-center">
-                    <Loader
-                      variant="default"
-                      size="sm"
-                      message=""
-                      className="mr-2"
-                    />
-                    <span>Przetwarzanie...</span>
-                  </div>
-                ) : (
-                  <p className="text-2xl font-bold text-text-primary">
-                    {aiAnalysis?.leftVolumeMl?.toFixed(1) || "Brak danych"} ml
-                  </p>
+                </div>
+                {leftStatus === "FAILED" && (
+                  <Badge variant="destructive" className="text-xs">
+                    Błąd
+                  </Badge>
                 )}
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center space-x-2 text-sm">
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {leftStatus === "PENDING" && !aiAnalysis?.leftVolumeMl ? (
+                <div className="flex items-center">
+                  <Loader
+                    variant="default"
+                    size="sm"
+                    message=""
+                    className="mr-2"
+                  />
+                  <span>Przetwarzanie...</span>
+                </div>
+              ) : leftStatus === "FAILED" ? (
+                <div className="text-sm text-red-600">
+                  <p className="font-medium">Przetwarzanie nie powiodło się</p>
+                  <p className="text-xs text-text-muted mt-1">
+                    Wyślij skan ponownie
+                  </p>
+                </div>
+              ) : (
+                <p className="text-2xl font-bold text-text-primary">
+                  {aiAnalysis?.leftVolumeMl
+                    ? aiAnalysis?.leftVolumeMl?.toFixed(1) + " ml"
+                    : "Brak danych"}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center justify-between text-sm">
+                <div className="flex items-center space-x-2">
                   <Target className="h-4 w-4 text-primary" />
                   <span>Prawa pierś (AI)</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {rightStatus === "PENDING" && !aiAnalysis?.rightVolumeMl ? (
-                  <div className="flex items-center">
-                    <Loader
-                      variant="default"
-                      size="sm"
-                      message=""
-                      className="mr-2"
-                    />
-                    <span>Przetwarzanie...</span>
-                  </div>
-                ) : (
-                  <p className="text-2xl font-bold text-text-primary">
-                    {aiAnalysis?.rightVolumeMl?.toFixed(1) || "Brak danych"} ml
-                  </p>
+                </div>
+                {rightStatus === "FAILED" && (
+                  <Badge variant="destructive" className="text-xs">
+                    Błąd
+                  </Badge>
                 )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {rightStatus === "PENDING" && !aiAnalysis?.rightVolumeMl ? (
+                <div className="flex items-center">
+                  <Loader
+                    variant="default"
+                    size="sm"
+                    message=""
+                    className="mr-2"
+                  />
+                  <span>Przetwarzanie...</span>
+                </div>
+              ) : rightStatus === "FAILED" ? (
+                <div className="text-sm text-red-600">
+                  <p className="font-medium">Przetwarzanie nie powiodło się</p>
+                  <p className="text-xs text-text-muted mt-1">
+                    Wyślij skan ponownie
+                  </p>
+                </div>
+              ) : (
+                <p className="text-2xl font-bold text-text-primary">
+                  {aiAnalysis?.rightVolumeMl
+                    ? aiAnalysis?.rightVolumeMl?.toFixed(1) + " ml"
+                    : "Brak danych"}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
         {/* Manual Measurements */}
         {hasManualMeasurement && (
           <div className="space-y-4">
@@ -387,17 +414,17 @@ export default function MobileMeasurementDetailPage() {
                   <div>
                     <p className="text-text-muted text-sm">Lewa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
-                      {manualAnalysis?.leftVolumeMl?.toFixed(1) ||
-                        "Brak danych"}{" "}
-                      ml
+                      {manualAnalysis?.leftVolumeMl
+                        ? manualAnalysis?.leftVolumeMl?.toFixed(1) + " ml"
+                        : "Brak danych"}{" "}
                     </p>
                   </div>
                   <div>
                     <p className="text-text-muted text-sm">Prawa pierś (ml)</p>
                     <p className="text-xl font-semibold text-text-primary">
-                      {manualAnalysis?.rightVolumeMl?.toFixed(1) ||
-                        "Brak danych"}{" "}
-                      ml
+                      {manualAnalysis?.rightVolumeMl
+                        ? manualAnalysis?.rightVolumeMl?.toFixed(1) + " ml"
+                        : "Brak danych"}{" "}
                     </p>
                   </div>
                 </div>
@@ -405,7 +432,6 @@ export default function MobileMeasurementDetailPage() {
             </Card>
           </div>
         )}
-
         {/* Chart */}
         {(() => {
           const chartData = prepareChartData(measurement);
@@ -417,7 +443,6 @@ export default function MobileMeasurementDetailPage() {
             />
           );
         })()}
-
         {/* Note */}
         {measurement?.note && (
           <div className="space-y-4">
@@ -429,7 +454,6 @@ export default function MobileMeasurementDetailPage() {
             </Card>
           </div>
         )}
-
         <div className="flex space-x-3">
           <Button
             variant="outline"

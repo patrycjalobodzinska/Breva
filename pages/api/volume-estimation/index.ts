@@ -73,9 +73,13 @@ export default async function handler(
       body: JSON.stringify(data),
     });
 
+    console.log('📡 Python Response Status:', response.status);
+    console.log('📡 Python Response Headers:', Object.fromEntries(response.headers.entries()));
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('❌ Python Backend Error:', response.status, errorText);
+      console.error('❌ Python Error Response Body:', errorText);
 
       let pythonError;
       try {
@@ -93,7 +97,10 @@ export default async function handler(
     }
 
     const result: VolumeEstimationResponse = await response.json();
-    console.log('✅ Python Backend response:', result);
+    console.log('✅ Python Backend response:', JSON.stringify(result, null, 2));
+    console.log('✅ Python Backend response - request_id:', result.request_id);
+    console.log('✅ Python Backend response - status:', result.status);
+    console.log('✅ Python Backend response - message:', result.message);
 
     return res.status(200).json(result);
 

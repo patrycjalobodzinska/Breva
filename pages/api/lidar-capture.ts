@@ -125,9 +125,13 @@ export default async function handler(
       body: JSON.stringify(pythonPayload),
     });
 
+    console.log('📡 Python Response Status:', pythonResponse.status);
+    console.log('📡 Python Response Headers:', Object.fromEntries(pythonResponse.headers.entries()));
+
     if (!pythonResponse.ok) {
       const errorText = await pythonResponse.text();
       console.error('❌ Python Backend Error:', pythonResponse.status, errorText);
+      console.error('❌ Python Error Response Body:', errorText);
 
       let pythonError;
       try {
@@ -146,7 +150,10 @@ export default async function handler(
     }
 
     const pythonResult = await pythonResponse.json();
-    console.log("✅ Python Backend response:", pythonResult);
+    console.log("✅ Python Backend response:", JSON.stringify(pythonResult, null, 2));
+    console.log("✅ Python Backend response - request_id:", pythonResult.request_id);
+    console.log("✅ Python Backend response - status:", pythonResult.status);
+    console.log("✅ Python Backend response - message:", pythonResult.message);
 
     // Zapisz capture jako PENDING z request_id z Pythona
     const captureRecord = await prisma.lidarCapture?.create({

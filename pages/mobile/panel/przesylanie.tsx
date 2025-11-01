@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMeasurementDetail } from "@/hooks/useMeasurementDetail";
 import { Measurement } from "@/types";
 
-import { AlertCircle, CheckCircle, Camera, Upload, Heart } from "lucide-react";
+import { AlertCircle, CheckCircle, Camera, Upload, Heart, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Loader } from "@/components/ui/loader";
 
@@ -81,8 +81,10 @@ export default function MobileUploadPage() {
         console.log("⏱️ Stop pollingu");
         clearInterval(interval);
       };
+    } else {
+      console.log("🛑 Brak przetwarzających się captureów - polling zatrzymany");
     }
-  }, [measurementId, measurement, fetchMeasurement]);
+  }, [measurementId, measurement, fetchMeasurement, isProcessing]);
 
   const handleCreateMeasurement = async () => {
     if (!formData.name.trim()) {
@@ -192,6 +194,24 @@ export default function MobileUploadPage() {
                       Ładowanie...
                     </p>
                   </div>
+                ) : isFailed("left") ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <XCircle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <p className="text-sm font-medium text-red-600">
+                      Przetwarzanie nie powiodło się
+                    </p>
+                    <p className="text-xs text-text-muted mt-1">
+                      Spróbuj ponownie przesłać skan
+                    </p>
+                    <button
+                      onClick={() => handleLiDARCapture("left")}
+                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    >
+                      Wyślij ponownie
+                    </button>
+                  </div>
                 ) : isProcessing("left") ? (
                   <div className="text-center py-4">
                     <Loader variant="default" size="md" message="" />
@@ -259,6 +279,24 @@ export default function MobileUploadPage() {
                     <p className="text-sm font-medium text-text-muted mt-2">
                       Ładowanie...
                     </p>
+                  </div>
+                ) : isFailed("right") ? (
+                  <div className="text-center py-4">
+                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                      <XCircle className="h-6 w-6 text-red-600" />
+                    </div>
+                    <p className="text-sm font-medium text-red-600">
+                      Przetwarzanie nie powiodło się
+                    </p>
+                    <p className="text-xs text-text-muted mt-1">
+                      Spróbuj ponownie przesłać skan
+                    </p>
+                    <button
+                      onClick={() => handleLiDARCapture("right")}
+                      className="mt-3 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                    >
+                      Wyślij ponownie
+                    </button>
                   </div>
                 ) : isProcessing("right") ? (
                   <div className="text-center py-4">
