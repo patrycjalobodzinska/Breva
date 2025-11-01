@@ -68,7 +68,23 @@ export default function MobileUploadPage() {
   useEffect(() => {
     if (!measurementId || !measurement) return;
 
-    const hasProcessing = isProcessing("left") || isProcessing("right");
+    // Sprawdź czy któryś z captureów jest w statusie PENDING
+    const hasPendingCaptures = measurement.lidarCaptures?.some(
+      (c) => c.status === "PENDING"
+    );
+
+    // Sprawdź czy nie ma jeszcze wyników w aiAnalysis dla PENDING captureów
+    const leftPending = measurement.lidarCaptures?.find(
+      (c) => c.side === "LEFT" && c.status === "PENDING"
+    );
+    const rightPending = measurement.lidarCaptures?.find(
+      (c) => c.side === "RIGHT" && c.status === "PENDING"
+    );
+
+    const leftHasResult = leftPending && measurement?.aiAnalysis?.leftVolumeMl;
+    const rightHasResult = rightPending && measurement?.aiAnalysis?.rightVolumeMl;
+
+    const hasProcessing = hasPendingCaptures && (!leftHasResult || !rightHasResult);
 
     if (hasProcessing) {
       console.log("⏱️ Start pollingu - przetwarzanie LiDAR");
@@ -84,7 +100,7 @@ export default function MobileUploadPage() {
     } else {
       console.log("🛑 Brak przetwarzających się captureów - polling zatrzymany");
     }
-  }, [measurementId, measurement, fetchMeasurement, isProcessing]);
+  }, [measurementId, measurement, fetchMeasurement]);
 
   const handleCreateMeasurement = async () => {
     if (!formData.name.trim()) {
