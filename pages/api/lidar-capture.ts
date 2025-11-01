@@ -12,19 +12,18 @@ export const config = {
   },
 };
 
+// UWAGA: RGB zostało USUNIĘTE z API zgodnie z FRONTEND_RECOMMENDATIONS.md
 const lidarCaptureSchema = z.object({
   side: z.enum(["left", "right"]),
   measurementId: z.string(),
   background: z.object({
-    rgb: z.string(),
-    depth: z.string(),
-    timestamp: z.string(),
+    depth: z.string(), // Base64 encoded depth map (uint16 array)
+    timestamp: z.string(), // ISO 8601 format
   }),
   object: z.object({
-    rgb: z.string(),
-    depth: z.string(),
-    mask: z.string(),
-    timestamp: z.string(),
+    depth: z.string(), // Base64 encoded depth map (uint16 array)
+    mask: z.string(), // JSON string with points array [{"x": number, "y": number}, ...]
+    timestamp: z.string(), // ISO 8601 format
   }),
   cameraIntrinsics: z.object({
     fx: z.number(),
@@ -36,8 +35,8 @@ const lidarCaptureSchema = z.object({
   }),
   metadata: z.object({
     deviceModel: z.string(),
-    iosVersion: z.string(),
-    appVersion: z.string(),
+    iosVersion: z.string().optional(),
+    appVersion: z.string().optional(),
   }),
 });
 
@@ -81,11 +80,12 @@ export default async function handler(
     console.log("📱 LiDAR Capture Request:");
     console.log("📱 Side:", data.side);
     console.log("📱 Measurement ID:", data.measurementId);
-    console.log("📱 Background RGB size:", data.background.rgb.length);
     console.log("📱 Background Depth size:", data.background.depth.length);
-    console.log("📱 Object RGB size:", data.object.rgb.length);
+    console.log("📱 Background Timestamp:", data.background.timestamp);
     console.log("📱 Object Depth size:", data.object.depth.length);
     console.log("📱 Mask size:", data.object.mask.length);
+    console.log("📱 Object Timestamp:", data.object.timestamp);
+    console.log("📱 Camera Intrinsics:", data.cameraIntrinsics);
     console.log("📱 Device:", data.metadata.deviceModel);
 
     // Tymczasowo bez Python API: generuj losową objętość i zapisuj od razu
@@ -126,15 +126,19 @@ export default async function handler(
     return res.status(200).json(response);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      const firstError = error.errors?.[0]?.message || "Validation error";
-      return res.status(400).json({ error: firstError });
+      console.error("❌ Validation error:", error.errors);
+      const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      return res.status(400).json({
+        error: `Next.js Validation Error: ${errorMessages}`,
+        validationErrors: error.errors
+      });
     }
 
     console.error("❌ Error processing LiDAR data:", error);
 
     return res.status(500).json({
       success: false,
-      message: error?.message || "Failed to process LiDAR data",
+      message: `Next.js Server Error: ${error?.message || "Failed to process LiDAR data"}`,
       side: "",
       measurementId: "",
       timestamp: new Date().toISOString(),

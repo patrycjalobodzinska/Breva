@@ -14,26 +14,44 @@ export default async function handler(
     // Walidacja danych
     const data: VolumeEstimationRequest = req.body;
 
+    console.log('📊 Volume Estimation Request received');
+    console.log('📊 Data structure:', {
+      hasBackground: !!data.background,
+      hasObject: !!data.object,
+      hasCameraIntrinsics: !!data.camera_intrinsics,
+      hasMetadata: !!data.metadata,
+    });
+
     // Sprawdź wymagane pola
     if (!validateVolumeEstimationRequest(data)) {
-      return res.status(400).json({ error: 'Invalid request data format' });
+      console.error('❌ Next.js Validation Error: Invalid request data format');
+      return res.status(400).json({
+        error: 'Next.js Validation Error: Invalid request data format. Check FRONTEND_RECOMMENDATIONS.md for required structure.',
+        source: 'Next.js'
+      });
     }
 
     // Dodatkowa walidacja mask
     try {
       const maskPoints = JSON.parse(data.object.mask);
       if (!Array.isArray(maskPoints) || maskPoints.length === 0) {
-        return res.status(400).json({ error: 'Invalid mask format' });
+        return res.status(400).json({
+          error: 'Next.js Validation Error: Invalid mask format - must be non-empty array',
+          source: 'Next.js'
+        });
       }
-    } catch {
-      return res.status(400).json({ error: 'Invalid mask JSON format' });
+    } catch (maskError) {
+      return res.status(400).json({
+        error: 'Next.js Validation Error: Invalid mask JSON format',
+        source: 'Next.js'
+      });
     }
 
     // Wyślij do backendu Python
     const backendUrl = process.env.BACKEND_URL || 'https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net';
 
-    console.log('Sending request to backend:', backendUrl);
-    console.log('Request data:', {
+    console.log('📤 Sending request to Python backend:', backendUrl);
+    console.log('📤 Request data summary:', {
       background: {
         depthLength: data.background.depth.length,
         timestamp: data.background.timestamp
@@ -57,21 +75,34 @@ export default async function handler(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Backend error:', errorText);
+      console.error('❌ Python Backend Error:', response.status, errorText);
+
+      let pythonError;
+      try {
+        pythonError = JSON.parse(errorText);
+      } catch {
+        pythonError = errorText;
+      }
+
       return res.status(response.status).json({
-        error: `Backend error: ${response.statusText}`
+        error: `Python Backend Error (${response.status}): ${response.statusText}`,
+        details: pythonError,
+        source: 'Python Backend',
+        backendUrl: backendUrl
       });
     }
 
     const result: VolumeEstimationResponse = await response.json();
-    console.log('Backend response:', result);
+    console.log('✅ Python Backend response:', result);
 
     return res.status(200).json(result);
 
-  } catch (error) {
-    console.error('Error processing request:', error);
+  } catch (error: any) {
+    console.error('❌ Next.js Server Error:', error);
     return res.status(500).json({
-      error: 'Internal server error'
+      error: `Next.js Server Error: ${error?.message || 'Internal server error'}`,
+      source: 'Next.js',
+      stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
     });
   }
 }
