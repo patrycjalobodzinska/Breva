@@ -18,16 +18,9 @@ export default function MobileHome() {
     }
   }, [session, status, router]);
 
-  // Jeśli sesja się ładuje, pokaż loader
+  // Jeśli sesja się ładuje, nie pokazuj loadera - przekierowanie jest szybkie
   if (status === "loading") {
-    return (
-      <div className="max-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto"></div>
-          <p className="text-white/80 text-sm">Sprawdzanie sesji...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // Jeśli użytkownik nie jest zalogowany, pokaż stronę główną

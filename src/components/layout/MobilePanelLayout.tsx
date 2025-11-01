@@ -31,18 +31,8 @@ export default function MobilePanelLayout({
     }
   }, [session, status, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="max-h-screen bg-gradient-to-br from-accent-1 to-accent-2 flex items-center justify-center">
-        <div className="text-center">
-          <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-text-muted">Ładowanie...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session) {
+  // Don't show loader in layout - let child components handle their own loading states
+  if (status === "loading" || !session) {
     return null;
   }
 

@@ -36,18 +36,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     }
   }, [session, status, router]);
 
-  if (status === "loading") {
-    return (
-      <div className="min-h-screen  flex items-center justify-center">
-        <div className="text-center">
-          <Heart className="h-12 w-12 text-primary mx-auto mb-4 animate-pulse" />
-          <p className="text-text-muted">Ładowanie...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!session || session.user?.role !== "ADMIN") {
+  // Don't show loader in layout - let child components handle their own loading states
+  if (status === "loading" || !session || session.user?.role !== "ADMIN") {
     return null;
   }
 

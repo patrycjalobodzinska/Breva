@@ -52,12 +52,12 @@ interface PageLoaderProps {
 export function PageLoader({
   message = "Ładowanie...",
   variant = "spinner",
-  fullHeight = true,
+  fullHeight = false,
 }: PageLoaderProps) {
   return (
     <div
       className={`flex items-center justify-center ${
-        fullHeight ? "h-64 min-h-screen" : "h-64"
+        fullHeight ? "min-h-screen" : "h-64"
       }`}>
       <Loader message={message} variant={variant} size="lg" />
     </div>

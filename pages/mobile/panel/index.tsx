@@ -39,15 +39,16 @@ export default function MobilePanelDashboard() {
     }
   }, [session, status, router]);
 
-  if (status === "loading" || isLoadingStats) {
+  // Layout handles session loading, only show loader for data
+  if (isLoadingStats) {
     return (
       <MobilePanelLayout>
-        <Loader message="Ładowanie..." variant="heart" />
+        <Loader message="Ładowanie statystyk..." variant="heart" />
       </MobilePanelLayout>
     );
   }
 
-  if (!session) {
+  if (status === "loading" || !session) {
     return null;
   }
 

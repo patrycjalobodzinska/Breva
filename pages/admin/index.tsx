@@ -14,22 +14,12 @@ export default function AdminPage() {
   useEffect(() => {
     if (status === "loading") return;
     if (!session || session.user?.role !== "ADMIN") {
+      router.push("/logowanie");
     }
   }, [session, status, router]);
 
-  if (status === "loading") {
-    return (
-      <AdminLayout>
-        <Card className="rounded-2xl">
-          <CardContent className="p-8 text-center">
-            <Loader message="Ładowanie..." variant="heart" />
-          </CardContent>
-        </Card>
-      </AdminLayout>
-    );
-  }
-
-  if (!session || session.user?.role !== "ADMIN") {
+  // Layout handles session loading
+  if (status === "loading" || !session || session.user?.role !== "ADMIN") {
     return null;
   }
 
