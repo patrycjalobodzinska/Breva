@@ -126,14 +126,15 @@ export default async function handler(
     return res.status(200).json(response);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ error: error.errors[0].message });
+      const firstError = error.errors?.[0]?.message || "Validation error";
+      return res.status(400).json({ error: firstError });
     }
 
     console.error("❌ Error processing LiDAR data:", error);
 
     return res.status(500).json({
       success: false,
-      message: "Failed to process LiDAR data",
+      message: error?.message || "Failed to process LiDAR data",
       side: "",
       measurementId: "",
       timestamp: new Date().toISOString(),
@@ -229,6 +230,9 @@ async function saveVolumeResult(
   volume: number
 ) {
   try {
+    // Upewnij się że side jest lowercase dla kluczy bazy danych
+    const sideKey = side.toLowerCase();
+
     // Sprawdź czy analiza AI już istnieje dla tego pomiaru
     const existingAnalysis = await prisma.breastAnalysis?.findUnique({
       where: {
@@ -238,24 +242,27 @@ async function saveVolumeResult(
 
     if (existingAnalysis) {
       // Aktualizuj istniejącą analizę AI
+      const updateData: any = {};
+      updateData[`${sideKey}VolumeMl`] = volume;
+      updateData[`${sideKey}Confidence`] = 0.95;
+
       await prisma.breastAnalysis?.update({
         where: { id: existingAnalysis.id },
-        data: {
-          [`${side}VolumeMl`]: volume,
-          [`${side}Confidence`]: 0.95, // Mock confidence
-        },
+        data: updateData,
       });
-      console.log(`💾 Updated AI analysis: ${side} breast = ${volume}ml`);
+      console.log(`💾 Updated AI analysis: ${sideKey} breast = ${volume}ml`);
     } else {
       // Utwórz nową analizę AI
+      const createData: any = {
+        aiMeasurementId: measurementId,
+      };
+      createData[`${sideKey}VolumeMl`] = volume;
+      createData[`${sideKey}Confidence`] = 0.95;
+
       await prisma.breastAnalysis?.create({
-        data: {
-          aiMeasurementId: measurementId,
-          [`${side}VolumeMl`]: volume,
-          [`${side}Confidence`]: 0.95, // Mock confidence
-        },
+        data: createData,
       });
-      console.log(`💾 Created AI analysis: ${side} breast = ${volume}ml`);
+      console.log(`💾 Created AI analysis: ${sideKey} breast = ${volume}ml`);
     }
   } catch (error) {
     console.error("❌ Error saving volume result:", error);

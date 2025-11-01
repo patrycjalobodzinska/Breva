@@ -85,32 +85,36 @@ export default async function handler(
       });
 
       let breastAnalysis;
+      const sideKey = side.toLowerCase();
+
       if (existingAnalysis) {
         // Aktualizuj istniejącą analizę AI
+        const updateData: any = {};
+        updateData[`${sideKey}VolumeMl`] = aiResult.volumeMl;
+        updateData[`${sideKey}Confidence`] = aiResult.confidence;
+        updateData[`${sideKey}FilePath`] = `lidar_data_${sideKey}_${Date.now()}.json`;
+        updateData[`${sideKey}FileName`] = `lidar_scan_${sideKey}.json`;
+        updateData[`${sideKey}FileSize`] = JSON.stringify(lidarData).length;
+        updateData[`${sideKey}MimeType`] = "application/json";
+
         breastAnalysis = await prisma.breastAnalysis?.update({
           where: { id: existingAnalysis.id },
-          data: {
-            [`${side}VolumeMl`]: aiResult.volumeMl,
-            [`${side}Confidence`]: aiResult.confidence,
-            [`${side}FilePath`]: `lidar_data_${side}_${Date.now()}.json`,
-            [`${side}FileName`]: `lidar_scan_${side}.json`,
-            [`${side}FileSize`]: JSON.stringify(lidarData).length,
-            [`${side}MimeType`]: "application/json",
-          },
+          data: updateData,
         });
       } else {
         // Utwórz nową analizę AI
-        breastAnalysis = await prisma.breastAnalysis?.create({
-          data: {
-            aiMeasurementId: measurementId as string,
+        const createData: any = {
+          aiMeasurementId: measurementId as string,
+        };
+        createData[`${sideKey}VolumeMl`] = aiResult.volumeMl;
+        createData[`${sideKey}Confidence`] = aiResult.confidence;
+        createData[`${sideKey}FilePath`] = `lidar_data_${sideKey}_${Date.now()}.json`;
+        createData[`${sideKey}FileName`] = `lidar_scan_${sideKey}.json`;
+        createData[`${sideKey}FileSize`] = JSON.stringify(lidarData).length;
+        createData[`${sideKey}MimeType`] = "application/json";
 
-            [`${side}VolumeMl`]: aiResult.volumeMl,
-            [`${side}Confidence`]: aiResult.confidence,
-            [`${side}FilePath`]: `lidar_data_${side}_${Date.now()}.json`,
-            [`${side}FileName`]: `lidar_scan_${side}.json`,
-            [`${side}FileSize`]: JSON.stringify(lidarData).length,
-            [`${side}MimeType`]: "application/json",
-          },
+        breastAnalysis = await prisma.breastAnalysis?.create({
+          data: createData,
         });
       }
 
@@ -174,31 +178,36 @@ export default async function handler(
       });
 
       let breastAnalysis;
+      const sideKey = side.toLowerCase();
+
       if (existingAnalysis) {
         // Aktualizuj istniejącą analizę AI
+        const updateData: any = {};
+        updateData[`${sideKey}VolumeMl`] = aiResult.volumeMl;
+        updateData[`${sideKey}Confidence`] = aiResult.confidence;
+        updateData[`${sideKey}FilePath`] = file.filepath;
+        updateData[`${sideKey}FileName`] = file.originalFilename;
+        updateData[`${sideKey}FileSize`] = file.size;
+        updateData[`${sideKey}MimeType`] = file.mimetype;
+
         breastAnalysis = await prisma.breastAnalysis.update({
           where: { id: existingAnalysis.id },
-          data: {
-            [`${side}VolumeMl`]: aiResult.volumeMl,
-            [`${side}Confidence`]: aiResult.confidence,
-            [`${side}FilePath`]: file.filepath,
-            [`${side}FileName`]: file.originalFilename,
-            [`${side}FileSize`]: file.size,
-            [`${side}MimeType`]: file.mimetype,
-          },
+          data: updateData,
         });
       } else {
         // Utwórz nową analizę AI
+        const createData: any = {
+          aiMeasurementId: measurementId as string,
+        };
+        createData[`${sideKey}VolumeMl`] = aiResult.volumeMl;
+        createData[`${sideKey}Confidence`] = aiResult.confidence;
+        createData[`${sideKey}FilePath`] = file.filepath;
+        createData[`${sideKey}FileName`] = file.originalFilename;
+        createData[`${sideKey}FileSize`] = file.size;
+        createData[`${sideKey}MimeType`] = file.mimetype;
+
         breastAnalysis = await prisma.breastAnalysis.create({
-          data: {
-            aiMeasurementId: measurementId as string,
-            [`${side}VolumeMl`]: aiResult.volumeMl,
-            [`${side}Confidence`]: aiResult.confidence,
-            [`${side}FilePath`]: file.filepath,
-            [`${side}FileName`]: file.originalFilename,
-            [`${side}FileSize`]: file.size,
-            [`${side}MimeType`]: file.mimetype,
-          },
+          data: createData,
         });
       }
 
