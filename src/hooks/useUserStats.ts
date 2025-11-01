@@ -6,7 +6,12 @@ export function useUserStats() {
   return useQuery({
     queryKey: ["user-stats"],
     queryFn: async () => {
-      const response = await userService.getUserStats();
+      // Minimalne opóźnienie dla lepszego UX (zapobiega "miganiu" loadera)
+      const [response] = await Promise.all([
+        userService.getUserStats(),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
+
       if (!response.success || !response.data) {
         throw new Error(
           response.error || "Nie udało się pobrać statystyk użytkownika"

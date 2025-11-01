@@ -15,11 +15,12 @@ export function useGetMeasurements(
   return useQuery({
     queryKey: ["measurements", page, pageSize, options?.search],
     queryFn: async () => {
-      const response = await measurementsService.getMeasurements(
-        page,
-        pageSize,
-        options?.search
-      );
+      // Minimalne opóźnienie dla lepszego UX (zapobiega "miganiu" loadera)
+      const [response] = await Promise.all([
+        measurementsService.getMeasurements(page, pageSize, options?.search),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
+
       if (!response.success || !response.data) {
         throw new Error(response.error || "Nie udało się pobrać pomiarów");
       }
@@ -35,7 +36,13 @@ export function useGetMeasurement(id: string | undefined) {
     queryKey: ["measurement", id],
     queryFn: async () => {
       if (!id) throw new Error("Brak ID pomiaru");
-      const response = await measurementsService.getMeasurement(id);
+
+      // Minimalne opóźnienie dla lepszego UX (zapobiega "miganiu" loadera)
+      const [response] = await Promise.all([
+        measurementsService.getMeasurement(id),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
+
       if (!response.success || !response.data) {
         throw new Error(response.error || "Nie udało się pobrać pomiaru");
       }

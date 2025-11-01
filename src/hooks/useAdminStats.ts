@@ -25,7 +25,12 @@ export const useAdminStats = () => {
   return useQuery<AdminStats>({
     queryKey: ["adminStats"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/stats");
+      // Minimalne opóźnienie dla lepszego UX (zapobiega "miganiu" loadera)
+      const [response] = await Promise.all([
+        fetch("/api/admin/stats"),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
+
       if (!response.ok) {
         throw new Error("Failed to fetch admin stats");
       }

@@ -13,6 +13,7 @@ export const useMeasurementDetail = (measurementId: string) => {
   const { data: session } = useSession();
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingManual, setIsEditingManual] = useState(false);
   const [isAddingManual, setIsAddingManual] = useState(false);
@@ -34,21 +35,39 @@ export const useMeasurementDetail = (measurementId: string) => {
     note: "",
   });
 
-  const fetchMeasurement = useCallback(async () => {
+  const fetchMeasurement = useCallback(async (isInitialLoad = false) => {
     if (!measurementId) return;
-    setIsLoading(true);
+
+    // Tylko przy pierwszym ładowaniu ustawiamy isLoading
+    // Przy odświeżaniu (polling) używamy isRefreshing
+    if (isInitialLoad) {
+      setIsLoading(true);
+    } else {
+      setIsRefreshing(true);
+    }
+
     try {
-      const response = await fetch(`/api/measurements/${measurementId}`);
+      // Minimalne opóźnienie tylko przy pierwszym ładowaniu
+      const fetchPromise = fetch(`/api/measurements/${measurementId}`);
+      const response = isInitialLoad
+        ? await Promise.all([fetchPromise, new Promise(resolve => setTimeout(resolve, 300))]).then(([r]) => r)
+        : await fetchPromise;
+
       if (response.ok) {
         const data = await response.json();
         setMeasurement(data);
       } else {
-        toast.error("Nie udało się pobrać pomiaru");
+        if (isInitialLoad) {
+          toast.error("Nie udało się pobrać pomiaru");
+        }
       }
     } catch (error) {
-      toast.error("Wystąpił błąd podczas pobierania pomiaru");
+      if (isInitialLoad) {
+        toast.error("Wystąpił błąd podczas pobierania pomiaru");
+      }
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [measurementId]);
 
@@ -207,9 +226,9 @@ export const useMeasurementDetail = (measurementId: string) => {
 
   useEffect(() => {
     if (measurementId) {
-      fetchMeasurement();
+      fetchMeasurement(true); // Pierwsze ładowanie
     }
-  }, [measurementId]);
+  }, [measurementId, fetchMeasurement]);
 
   const handleManualFormChange = (data: any) => {
     setManualForm(data);
@@ -218,6 +237,7 @@ export const useMeasurementDetail = (measurementId: string) => {
   return {
     measurement,
     isLoading,
+    isRefreshing,
     isEditing,
     isEditingManual,
     isAddingManual,

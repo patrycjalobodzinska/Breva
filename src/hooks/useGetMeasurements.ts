@@ -21,9 +21,16 @@ export function useGetMeasurements(
         params.append("search", options.search);
       }
 
-      const res = await fetch(`/api/measurements?${params.toString()}`);
-      if (!res.ok) throw new Error("Nie udało się pobrać pomiarów");
-      return res.json();
+      // Minimalne opóźnienie dla lepszego UX (zapobiega "miganiu" loadera)
+      const [data] = await Promise.all([
+        fetch(`/api/measurements?${params.toString()}`).then(res => {
+          if (!res.ok) throw new Error("Nie udało się pobrać pomiarów");
+          return res.json();
+        }),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
+
+      return data;
     },
   });
 }

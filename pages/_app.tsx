@@ -34,7 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <SessionProvider session={session}>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <Component {...restPageProps} />
-            <Toaster position="top-center" offset="120px" />
+            <Toaster position="top-center" offset="180px" />
           </ThemeProvider>
         </SessionProvider>
       </QueryClientProvider>

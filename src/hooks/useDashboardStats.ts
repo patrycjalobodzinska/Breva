@@ -21,7 +21,11 @@ export const useDashboardStats = (): UseDashboardStatsReturn => {
       setIsRefreshing(true);
       setError(null);
 
-      const response = await fetch("/api/dashboard/stats");
+      // Minimalne opóźnienie dla lepszego UX (zapobiega "miganiu" loadera)
+      const [response] = await Promise.all([
+        fetch("/api/dashboard/stats"),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
 
       if (response.ok) {
         const data = await response.json();

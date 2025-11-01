@@ -30,6 +30,7 @@ export default function MobileUploadPage() {
   const {
     measurement,
     isLoading: isMeasurementLoading,
+    isRefreshing,
     fetchMeasurement,
   } = useMeasurementDetail(measurementId as string);
 
@@ -39,7 +40,7 @@ export default function MobileUploadPage() {
       const handleVisibilityChange = () => {
         if (document.visibilityState === "visible") {
           console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
-          fetchMeasurement();
+          fetchMeasurement(false); // false = odświeżanie (nie pokaże loaderów)
         }
       };
 
@@ -48,7 +49,7 @@ export default function MobileUploadPage() {
       // Odśwież też gdy użytkownik wróci przez fokus (dla WebView)
       const handleFocus = () => {
         console.log("🔄 Odświeżanie pomiaru po focus");
-        fetchMeasurement();
+        fetchMeasurement(false); // false = odświeżanie (nie pokaże loaderów)
       };
 
       window.addEventListener("focus", handleFocus);
@@ -73,7 +74,7 @@ export default function MobileUploadPage() {
       console.log("⏱️ Start pollingu - przetwarzanie LiDAR");
       const interval = setInterval(() => {
         console.log("🔄 Polling - odświeżanie pomiaru");
-        fetchMeasurement();
+        fetchMeasurement(false); // false = odświeżanie (nie pokaże loaderów)
       }, 3000); // Co 3 sekundy
 
       return () => {
@@ -184,7 +185,7 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                {isMeasurementLoading ? (
+                {isMeasurementLoading && !measurement ? (
                   <div className="text-center py-4">
                     <Loader variant="default" size="md" message="" />
                     <p className="text-sm font-medium text-text-muted mt-2">
@@ -252,7 +253,7 @@ export default function MobileUploadPage() {
               </div>
 
               <div className="space-y-2">
-                {isMeasurementLoading ? (
+                {isMeasurementLoading && !measurement ? (
                   <div className="text-center py-4">
                     <Loader variant="default" size="md" message="" />
                     <p className="text-sm font-medium text-text-muted mt-2">
