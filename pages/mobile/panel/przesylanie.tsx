@@ -47,7 +47,13 @@ export default function MobileUploadPage() {
       const handleVisibilityChange = () => {
         if (document.visibilityState === "visible") {
           console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
+          // Odśwież natychmiast, aby zobaczyć nowe capture'y
           fetchMeasurement(false); // false = odświeżanie (nie pokaże loaderów)
+
+          // Odśwież jeszcze raz po krótkiej chwili, aby mieć pewność że dane są aktualne
+          setTimeout(() => {
+            fetchMeasurement(false);
+          }, 1000);
         }
       };
 
@@ -57,9 +63,20 @@ export default function MobileUploadPage() {
       const handleFocus = () => {
         console.log("🔄 Odświeżanie pomiaru po focus");
         fetchMeasurement(false); // false = odświeżanie (nie pokaże loaderów)
+
+        // Odśwież jeszcze raz po krótkiej chwili
+        setTimeout(() => {
+          fetchMeasurement(false);
+        }, 1000);
       };
 
       window.addEventListener("focus", handleFocus);
+
+      // Odśwież również gdy komponent się mountuje (dla przypadku gdy użytkownik wraca na stronę)
+      fetchMeasurement(false);
+      setTimeout(() => {
+        fetchMeasurement(false);
+      }, 1000);
 
       return () => {
         document.removeEventListener(
@@ -71,13 +88,18 @@ export default function MobileUploadPage() {
     }
   }, [measurementId, fetchMeasurement]);
 
-  // Automatyczne odświeżanie co 3 sekundy gdy pomiar jest w trakcie przetwarzania
+  // Automatyczne odświeżanie co 3 sekundy gdy pomiar jest w trakcie przetwarzania lub gdy są FAILED
   useEffect(() => {
     if (!measurementId || !measurement) return;
 
     // Sprawdź czy któryś z captureów jest w statusie PENDING
     const hasPendingCaptures = measurement.lidarCaptures?.some(
       (c) => c.status === "PENDING"
+    );
+
+    // Sprawdź czy któryś z captureów jest w statusie FAILED (może się zmienić z PENDING na FAILED)
+    const hasFailedCaptures = measurement.lidarCaptures?.some(
+      (c) => c.status === "FAILED"
     );
 
     // Sprawdź czy nie ma jeszcze wyników w aiAnalysis dla PENDING captureów
@@ -95,8 +117,15 @@ export default function MobileUploadPage() {
     const hasProcessing =
       hasPendingCaptures && (!leftHasResult || !rightHasResult);
 
-    if (hasProcessing) {
-      console.log("⏱️ Start pollingu - przetwarzanie LiDAR");
+    // Polling jest aktywny gdy:
+    // 1. Są PENDING capture'y bez wyników
+    // 2. Są FAILED capture'y (sprawdzamy czy może zostały poprawione przez ponowne przesłanie)
+    const shouldPoll = hasProcessing || hasFailedCaptures;
+
+    if (shouldPoll) {
+      console.log(
+        "⏱️ Start pollingu - przetwarzanie LiDAR lub sprawdzanie FAILED"
+      );
       const interval = setInterval(() => {
         console.log("🔄 Polling - odświeżanie pomiaru");
         fetchMeasurement(false); // false = odświeżanie (nie pokaże loaderów)
@@ -153,7 +182,18 @@ export default function MobileUploadPage() {
 
   const getLidarStatusForSide = (side: "left" | "right") => {
     if (!measurement?.lidarCaptures) return null;
-    return measurement.lidarCaptures.find((c) => c.side === side.toUpperCase());
+    // Znajdź wszystkie capture'y dla tej strony i zwróć najnowszy (najpóźniejszy createdAt)
+    const captures = measurement.lidarCaptures.filter(
+      (c) => c.side === side.toUpperCase()
+    );
+    if (captures.length === 0) return null;
+
+    // Sortuj po createdAt (najnowszy pierwszy) i zwróć pierwszy
+    return captures.sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+      return dateB - dateA; // Najnowszy pierwszy
+    })[0];
   };
 
   const isLidarSent = (side: "left" | "right") => {
@@ -171,9 +211,12 @@ export default function MobileUploadPage() {
     const aiAnalysis = measurement?.aiAnalysis;
     const volumeField = side === "left" ? "leftVolumeMl" : "rightVolumeMl";
 
-    // Przetwarzanie jeśli capture istnieje ale nie ma jeszcze wyniku w aiAnalysis
+    // Przetwarzanie jeśli:
+    // 1. Capture istnieje i ma status PENDING (nie FAILED!)
+    // 2. Lub capture istnieje, nie jest FAILED i nie ma jeszcze wyniku w aiAnalysis
     return (
-      capture && capture.status === "PENDING" && !aiAnalysis?.[volumeField]
+      (capture && capture.status === "PENDING") ||
+      (capture && capture.status !== "FAILED" && !aiAnalysis?.[volumeField])
     );
   };
 
