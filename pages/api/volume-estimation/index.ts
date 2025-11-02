@@ -6,8 +6,31 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<VolumeEstimationResponse | { error: string }>
 ) {
+  // Obsługa CORS preflight (OPTIONS)
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return res.status(200).end();
+  }
+
+  // Logowanie dla diagnostyki
+  console.log('📥 [VOLUME ESTIMATION API] Received request:');
+  console.log('📥 [VOLUME ESTIMATION API] Method:', req.method);
+  console.log('📥 [VOLUME ESTIMATION API] URL:', req.url);
+  console.log('📥 [VOLUME ESTIMATION API] Headers:', {
+    'content-type': req.headers['content-type'],
+    'user-agent': req.headers['user-agent'],
+    'origin': req.headers['origin'],
+  });
+
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    console.error('❌ [VOLUME ESTIMATION API] Method not allowed:', req.method);
+    return res.status(405).json({
+      error: 'Method not allowed',
+      allowedMethods: ['POST', 'OPTIONS'],
+      receivedMethod: req.method
+    });
   }
 
   try {

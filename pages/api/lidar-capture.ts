@@ -52,8 +52,34 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  // Obsługa CORS preflight (OPTIONS)
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Cookie, Authorization"
+    );
+    return res.status(200).end();
+  }
+
+  // Logowanie dla diagnostyki
+  console.log("📥 [LIDAR CAPTURE API] Received request:");
+  console.log("📥 [LIDAR CAPTURE API] Method:", req.method);
+  console.log("📥 [LIDAR CAPTURE API] URL:", req.url);
+  console.log("📥 [LIDAR CAPTURE API] Headers:", {
+    "content-type": req.headers["content-type"],
+    "user-agent": req.headers["user-agent"],
+    origin: req.headers["origin"],
+  });
+
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    console.error("❌ [LIDAR CAPTURE API] Method not allowed:", req.method);
+    return res.status(405).json({
+      error: "Method not allowed",
+      allowedMethods: ["POST", "OPTIONS"],
+      receivedMethod: req.method,
+    });
   }
 
   try {
@@ -113,25 +139,37 @@ export default async function handler(
     };
 
     // Wyślij do backendu Python
-    const backendUrl = process.env.BACKEND_URL || 'https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net';
+    const backendUrl =
+      process.env.BACKEND_URL ||
+      "https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net";
 
     console.log("📤 Sending to Python backend:", backendUrl);
 
-    const pythonResponse = await fetch(`${backendUrl}/enqueue-volume-estimation`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(pythonPayload),
-    });
+    const pythonResponse = await fetch(
+      `${backendUrl}/enqueue-volume-estimation`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(pythonPayload),
+      }
+    );
 
-    console.log('📡 Python Response Status:', pythonResponse.status);
-    console.log('📡 Python Response Headers:', Object.fromEntries(pythonResponse.headers.entries()));
+    console.log("📡 Python Response Status:", pythonResponse.status);
+    console.log(
+      "📡 Python Response Headers:",
+      Object.fromEntries(pythonResponse.headers.entries())
+    );
 
     if (!pythonResponse.ok) {
       const errorText = await pythonResponse.text();
-      console.error('❌ Python Backend Error:', pythonResponse.status, errorText);
-      console.error('❌ Python Error Response Body:', errorText);
+      console.error(
+        "❌ Python Backend Error:",
+        pythonResponse.status,
+        errorText
+      );
+      console.error("❌ Python Error Response Body:", errorText);
 
       let pythonError;
       try {
@@ -144,14 +182,20 @@ export default async function handler(
         success: false,
         error: `Python Backend Error (${pythonResponse.status}): ${pythonResponse.statusText}`,
         details: pythonError,
-        source: 'Python Backend',
-        backendUrl: backendUrl
+        source: "Python Backend",
+        backendUrl: backendUrl,
       });
     }
 
     const pythonResult = await pythonResponse.json();
-    console.log("✅ Python Backend response:", JSON.stringify(pythonResult, null, 2));
-    console.log("✅ Python Backend response - request_id:", pythonResult.request_id);
+    console.log(
+      "✅ Python Backend response:",
+      JSON.stringify(pythonResult, null, 2)
+    );
+    console.log(
+      "✅ Python Backend response - request_id:",
+      pythonResult.request_id
+    );
     console.log("✅ Python Backend response - status:", pythonResult.status);
     console.log("✅ Python Backend response - message:", pythonResult.message);
 
@@ -159,7 +203,7 @@ export default async function handler(
     const captureRecord = await prisma.lidarCapture?.create({
       data: {
         measurementId: data.measurementId,
-        side: data.side.toUpperCase(),
+        side: data.side.toUpperCase() as "LEFT" | "RIGHT",
         requestId: pythonResult.request_id,
         status: "PENDING",
         metadata: {
@@ -192,11 +236,13 @@ export default async function handler(
     return res.status(200).json(response);
   } catch (error: any) {
     if (error instanceof z.ZodError) {
-      console.error("❌ Validation error:", error.errors);
-      const errorMessages = error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(', ');
+      console.error("❌ Validation error:", error.issues);
+      const errorMessages = error.issues
+        .map((e: any) => `${e.path.join(".")}: ${e.message}`)
+        .join(", ");
       return res.status(400).json({
         error: `Next.js Validation Error: ${errorMessages}`,
-        validationErrors: error.errors
+        validationErrors: error.issues,
       });
     }
 
@@ -204,7 +250,9 @@ export default async function handler(
 
     return res.status(500).json({
       success: false,
-      message: `Next.js Server Error: ${error?.message || "Failed to process LiDAR data"}`,
+      message: `Next.js Server Error: ${
+        error?.message || "Failed to process LiDAR data"
+      }`,
       side: "",
       measurementId: "",
       timestamp: new Date().toISOString(),

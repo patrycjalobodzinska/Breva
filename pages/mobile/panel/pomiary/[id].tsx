@@ -277,7 +277,7 @@ export default function MobileMeasurementDetailPage() {
       </MobilePanelLayout>
     );
   }
-
+  console.log(measurement);
   return (
     <MobilePanelLayout>
       <div className="space-y-4">
