@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,10 +14,33 @@ export default function MobileMeasurementsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading } = useGetMeasurements(currentPage, 10, {
+  const { data, isLoading, refetch } = useGetMeasurements(currentPage, 10, {
     search: searchTerm,
   });
   const measurements = data?.measurements || [];
+
+  // Odśwież dane po powrocie do widoku (np. po edycji)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("🔄 Odświeżanie listy pomiarów po powrocie do widoku");
+        refetch();
+      }
+    };
+
+    const handleFocus = () => {
+      console.log("🔄 Odświeżanie listy pomiarów po focus");
+      refetch();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refetch]);
   const pagination = data?.pagination || {
     page: 1,
     limit: 10,

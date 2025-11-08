@@ -79,6 +79,8 @@ export default function MobileMeasurementEditPage() {
 
       if (response.ok) {
         toast.success("Pomiar został zaktualizowany");
+        // Odśwież dane przed przekierowaniem
+        await fetchMeasurement(true);
         router.push(`/mobile/panel/pomiary/${id}`);
       } else {
         toast.error("Nie udało się zaktualizować pomiaru");

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useQueryClient } from "@tanstack/react-query";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ import { Loader } from "@/components/ui/loader";
 export default function MobileMeasurementDetailPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { id } = router.query;
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -46,6 +48,10 @@ export default function MobileMeasurementDetailPage() {
 
   useEffect(() => {
     if (id) {
+      // Invaliduj cache React Query dla tego pomiaru
+      queryClient.invalidateQueries({ queryKey: ["measurement", id] });
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+
       // Resetuj stan przed pobraniem nowych danych
       setMeasurement(null);
       setIsLoading(true);
@@ -53,7 +59,7 @@ export default function MobileMeasurementDetailPage() {
       fetchMeasurement(true);
       fetchStatuses();
     }
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [id, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Odśwież pomiar po powrocie do widoku (np. po zamknięciu deep linku Swift)
   useEffect(() => {
@@ -103,9 +109,16 @@ export default function MobileMeasurementDetailPage() {
       });
       if (response.ok) {
         const data = await response.json();
+        console.log(
+          "✅ [MEASUREMENT] Pobrano dane pomiaru:",
+          data.id,
+          "Data:",
+          data
+        );
+        // Ustaw dane SYNCHRONICZNIE aby uniknąć race condition
         setMeasurement(data);
-        console.log("✅ [MEASUREMENT] Pobrano dane pomiaru:", data.id);
       } else {
+        console.error("❌ [MEASUREMENT] Błąd odpowiedzi:", response.status);
         toast.error("Nie udało się pobrać pomiaru");
         router.push(measurementsListPath);
       }
@@ -114,6 +127,7 @@ export default function MobileMeasurementDetailPage() {
       toast.error("Wystąpił błąd podczas pobierania pomiaru");
       router.push(measurementsListPath);
     } finally {
+      // Ustaw isLoading na false TYLKO po ustawieniu measurement
       setIsLoading(false);
     }
   };
@@ -249,22 +263,18 @@ export default function MobileMeasurementDetailPage() {
     return { diff, percentage };
   };
 
-  const hasManualMeasurement = measurement?.manualAnalysis;
-  const aiAnalysis = measurement?.aiAnalysis;
-  const manualAnalysis = measurement?.manualAnalysis;
-
+  // Najpierw sprawdź isLoading - jeśli ładuje, pokaż loader
   if (isLoading) {
     return (
       <MobilePanelLayout>
-        <Loader
-          message="Ładowanie pomiaru..."
-          variant="spinner"
-          className="h-64"
-        />
+        <div className="flex items-center justify-center h-64">
+          <Loader message="Ładowanie pomiaru..." variant="spinner" />
+        </div>
       </MobilePanelLayout>
     );
   }
 
+  // Dopiero potem sprawdź czy measurement istnieje - jeśli nie ma i nie ładuje, to błąd
   if (!measurement) {
     return (
       <MobilePanelLayout>
@@ -289,7 +299,13 @@ export default function MobileMeasurementDetailPage() {
       </MobilePanelLayout>
     );
   }
-  console.log(measurement);
+
+  // Pobierz dane z measurement (po sprawdzeniu że istnieje)
+  const hasManualMeasurement = measurement?.manualAnalysis;
+  const aiAnalysis = measurement?.aiAnalysis;
+  const manualAnalysis = measurement?.manualAnalysis;
+
+  console.log("📊 [MEASUREMENT DETAIL] Renderowanie z danymi:", measurement.id);
   return (
     <MobilePanelLayout>
       <div className="space-y-4">
