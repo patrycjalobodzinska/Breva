@@ -42,13 +42,18 @@ export const useMeasurementDetail = (measurementId: string) => {
     // Przy odświeżaniu (polling) używamy isRefreshing
     if (isInitialLoad) {
       setIsLoading(true);
+      // Resetuj measurement przy pierwszym ładowaniu aby uniknąć pokazywania starych danych
+      setMeasurement(null);
     } else {
       setIsRefreshing(true);
     }
 
     try {
-      // Minimalne opóźnienie tylko przy pierwszym ładowaniu
-      const fetchPromise = fetch(`/api/measurements/${measurementId}`);
+      // Dodaj cache busting timestamp aby zawsze pobrać świeże dane
+      const timestamp = isInitialLoad ? `?t=${Date.now()}` : '';
+      const fetchPromise = fetch(`/api/measurements/${measurementId}${timestamp}`, {
+        cache: 'no-store', // Zawsze pobierz świeże dane
+      });
       const response = isInitialLoad
         ? await Promise.all([fetchPromise, new Promise(resolve => setTimeout(resolve, 300))]).then(([r]) => r)
         : await fetchPromise;
@@ -56,12 +61,14 @@ export const useMeasurementDetail = (measurementId: string) => {
       if (response.ok) {
         const data = await response.json();
         setMeasurement(data);
+        console.log("✅ [MEASUREMENT DETAIL] Pobrano dane pomiaru:", data.id);
       } else {
         if (isInitialLoad) {
           toast.error("Nie udało się pobrać pomiaru");
         }
       }
     } catch (error) {
+      console.error("❌ [MEASUREMENT DETAIL] Błąd pobierania:", error);
       if (isInitialLoad) {
         toast.error("Wystąpił błąd podczas pobierania pomiaru");
       }
@@ -226,9 +233,16 @@ export const useMeasurementDetail = (measurementId: string) => {
 
   useEffect(() => {
     if (measurementId) {
+      // Zawsze pobierz świeże dane przy pierwszym mountowaniu
+      // Resetuj measurement aby uniknąć pokazywania starych danych
+      setMeasurement(null);
       fetchMeasurement(true); // Pierwsze ładowanie
+    } else {
+      // Resetuj gdy nie ma measurementId
+      setMeasurement(null);
+      setIsLoading(false);
     }
-  }, [measurementId, fetchMeasurement]);
+  }, [measurementId]); // Usuń fetchMeasurement z dependencies aby uniknąć nieskończonych loopów
 
   const handleManualFormChange = (data: any) => {
     setManualForm(data);

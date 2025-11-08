@@ -117,10 +117,16 @@ export default function MobileUploadPage() {
     const hasProcessing =
       hasPendingCaptures && (!leftHasResult || !rightHasResult);
 
-    // Polling jest aktywny gdy:
-    // 1. Są PENDING capture'y bez wyników
-    // 2. Są FAILED capture'y (sprawdzamy czy może zostały poprawione przez ponowne przesłanie)
-    const shouldPoll = hasProcessing || hasFailedCaptures;
+    // Sprawdź czy wszystkie capture'y są zakończone (COMPLETED lub FAILED)
+    const allCapturesFinished = measurement.lidarCaptures?.every(
+      (c) => c.status === "COMPLETED" || c.status === "FAILED"
+    );
+
+    // Polling jest aktywny TYLKO gdy:
+    // 1. Są PENDING capture'y bez wyników (przetwarzanie w toku)
+    // 2. NIE są wszystkie zakończone
+    // NIE pollujemy dla FAILED - one już są zakończone!
+    const shouldPoll = hasProcessing && !allCapturesFinished;
 
     if (shouldPoll) {
       console.log(

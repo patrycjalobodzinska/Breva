@@ -88,8 +88,68 @@ export default async function handler(
       return res.status(401).json({ error: "Unauthorized" });
     }
 
+    // Konwersja snake_case → camelCase (dla kompatybilności z Swift)
+    const requestBody = req.body;
+
+    // Normalizuj side (usuń puste stringi, użyj "left" jako domyślnego)
+    let normalizedSide = requestBody.side;
+    if (!normalizedSide || normalizedSide === "") {
+      normalizedSide = "left"; // Domyślna wartość
+    }
+    normalizedSide = normalizedSide.toLowerCase();
+
+    // Normalizuj measurementId (pusty string = undefined)
+    const rawMeasurementId =
+      requestBody.measurementId || requestBody.measurement_id;
+    const normalizedMeasurementId =
+      rawMeasurementId && rawMeasurementId.trim() !== ""
+        ? rawMeasurementId
+        : undefined;
+
+    const normalizedBody: any = {
+      side: normalizedSide,
+      measurementId: normalizedMeasurementId,
+      background: requestBody.background,
+      object: requestBody.object,
+      cameraIntrinsics:
+        requestBody.cameraIntrinsics || requestBody.camera_intrinsics,
+      metadata: requestBody.metadata
+        ? {
+            deviceModel:
+              requestBody.metadata.deviceModel ||
+              requestBody.metadata.device_model,
+            iosVersion:
+              requestBody.metadata.iosVersion ||
+              requestBody.metadata.ios_version,
+            appVersion:
+              requestBody.metadata.appVersion ||
+              requestBody.metadata.app_version,
+          }
+        : undefined,
+    };
+
+    console.log(
+      "📥 [LIDAR CAPTURE API] Original body keys:",
+      Object.keys(requestBody)
+    );
+    console.log("📥 [LIDAR CAPTURE API] Normalized body:", {
+      side: normalizedBody.side,
+      hasMeasurementId: !!normalizedBody.measurementId,
+      measurementId: normalizedBody.measurementId,
+      hasCameraIntrinsics: !!normalizedBody.cameraIntrinsics,
+      cameraIntrinsics: normalizedBody.cameraIntrinsics
+        ? Object.keys(normalizedBody.cameraIntrinsics)
+        : null,
+      hasMetadata: !!normalizedBody.metadata,
+      metadata: normalizedBody.metadata
+        ? Object.keys(normalizedBody.metadata)
+        : null,
+      hasDeviceModel: !!normalizedBody.metadata?.deviceModel,
+      deviceModel: normalizedBody.metadata?.deviceModel,
+    });
+
     // Waliduj dane wejściowe
-    const data = lidarCaptureSchema.parse(req.body);
+    const data = lidarCaptureSchema.parse(normalizedBody);
 
     // Sprawdź czy pomiar należy do użytkownika
     const measurement = await prisma.measurement?.findFirst({
@@ -231,6 +291,11 @@ export default async function handler(
       measurementId: data.measurementId,
       status: pythonResult.status || "pending",
       timestamp: new Date().toISOString(),
+      // Dodatkowe informacje dla Swift
+      processingInfo: {
+        estimatedTime: "2-5 minutes", // Szacowany czas przetwarzania
+        statusUrl: `/api/lidar-capture/status?measurementId=${data.measurementId}&side=${data.side}`,
+      },
     };
 
     return res.status(200).json(response);
@@ -241,8 +306,13 @@ export default async function handler(
         .map((e: any) => `${e.path.join(".")}: ${e.message}`)
         .join(", ");
       return res.status(400).json({
+        success: false,
         error: `Next.js Validation Error: ${errorMessages}`,
         validationErrors: error.issues,
+        errorType: "VALIDATION_ERROR",
+        timestamp: new Date().toISOString(),
+        // Informacje dla Swift - błąd powinien być wyświetlany dłużej
+        displayDuration: 5000, // 5 sekund
       });
     }
 
@@ -253,9 +323,13 @@ export default async function handler(
       message: `Next.js Server Error: ${
         error?.message || "Failed to process LiDAR data"
       }`,
+      error: error?.message || "Internal server error",
+      errorType: "SERVER_ERROR",
       side: "",
       measurementId: "",
       timestamp: new Date().toISOString(),
+      // Informacje dla Swift - błąd powinien być wyświetlany dłużej
+      displayDuration: 5000, // 5 sekund
     });
   }
 }
@@ -266,50 +340,75 @@ async function pollVolumeEstimation(
   measurementId: string,
   side: string
 ) {
-  const pythonApiUrl = process.env.PYTHON_API_URL || "http://localhost:8000";
+  const pythonApiUrl =
+    process.env.BACKEND_URL ||
+    "https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net";
   const maxAttempts = 60; // 5 minut z interwałem 5 sekund
   let attempts = 0;
+
+  console.log(
+    `🔄 [POLLING] Start polling dla requestId=${requestId}, pythonApiUrl=${pythonApiUrl}`
+  );
 
   const pollInterval = setInterval(async () => {
     try {
       attempts++;
 
-      const statusResponse = await fetch(
-        `${pythonApiUrl}/volume-estimation/${requestId}`
+      const statusUrl = `${pythonApiUrl}/volume-estimation/${requestId}`;
+      console.log(
+        `🔍 [POLLING] Attempt ${attempts}/${maxAttempts}: Checking ${statusUrl}`
       );
 
+      const statusResponse = await fetch(statusUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
       if (!statusResponse.ok) {
-        console.error(`❌ Failed to fetch status for request ${requestId}`);
+        console.error(
+          `❌ [POLLING] Failed to fetch status for request ${requestId}: ${statusResponse.status} ${statusResponse.statusText}`
+        );
         if (attempts >= maxAttempts) {
+          console.error(
+            `❌ [POLLING] Max attempts reached for requestId=${requestId}, marking as FAILED`
+          );
           clearInterval(pollInterval);
           await updateCaptureStatus(requestId, "FAILED");
         }
         return;
       }
 
-      const statusData: VolumeEstimationStatus = await statusResponse.json();
+      const statusData: any = await statusResponse.json(); // Use any for snake_case compatibility
       console.log(
-        `🔍 Status check ${attempts}/${maxAttempts} for request ${requestId}:`,
-        statusData.status
+        `✅ [POLLING] Status response for requestId=${requestId} (attempt ${attempts}/${maxAttempts}):`,
+        {
+          status: statusData.status,
+          estimated_volume: statusData.estimated_volume,
+        }
       );
+
+      // Konwersja snake_case → uppercase dla Prisma enum
+      const normalizedStatus = statusData.status?.toUpperCase() || "PENDING";
+      const estimatedVolume =
+        statusData.estimated_volume || statusData.estimatedVolume;
 
       // Aktualizuj status w bazie danych
-      await updateCaptureStatus(
-        requestId,
-        statusData.status,
-        statusData.estimatedVolume
-      );
+      await updateCaptureStatus(requestId, normalizedStatus, estimatedVolume);
 
-      if (statusData.status === "COMPLETED" && statusData.estimatedVolume) {
+      if (normalizedStatus === "COMPLETED" && estimatedVolume) {
         // Zapisz wynik do analizy piersi
-        await saveVolumeResult(measurementId, side, statusData.estimatedVolume);
+        await saveVolumeResult(measurementId, side, estimatedVolume);
         clearInterval(pollInterval);
         console.log(
-          `✅ Volume estimation completed for ${side} breast: ${statusData.estimatedVolume}ml`
+          `✅ [POLLING] Volume estimation completed for ${side} breast: ${estimatedVolume}ml`
         );
-      } else if (statusData.status === "FAILED" || attempts >= maxAttempts) {
+      } else if (normalizedStatus === "FAILED" || attempts >= maxAttempts) {
         clearInterval(pollInterval);
-        console.log(`❌ Volume estimation failed for request ${requestId}`);
+        console.log(
+          `❌ [POLLING] Volume estimation failed for request ${requestId}, status=${normalizedStatus}`
+        );
       }
     } catch (error) {
       console.error(`❌ Error polling status for request ${requestId}:`, error);

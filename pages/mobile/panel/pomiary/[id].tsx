@@ -46,10 +46,14 @@ export default function MobileMeasurementDetailPage() {
 
   useEffect(() => {
     if (id) {
-      fetchMeasurement();
+      // Resetuj stan przed pobraniem nowych danych
+      setMeasurement(null);
+      setIsLoading(true);
+      // Zawsze pobierz świeże dane przy pierwszym wejściu
+      fetchMeasurement(true);
       fetchStatuses();
     }
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Odśwież pomiar po powrocie do widoku (np. po zamknięciu deep linku Swift)
   useEffect(() => {
@@ -58,14 +62,14 @@ export default function MobileMeasurementDetailPage() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
-        fetchMeasurement();
+        fetchMeasurement(true); // Force refresh
         fetchStatuses();
       }
     };
 
     const handleFocus = () => {
       console.log("🔄 Odświeżanie pomiaru po focus");
-      fetchMeasurement();
+      fetchMeasurement(true); // Force refresh
       fetchStatuses();
     };
 
@@ -87,18 +91,26 @@ export default function MobileMeasurementDetailPage() {
     return () => clearInterval(t);
   }, [isPolling]);
 
-  const fetchMeasurement = async () => {
+  const fetchMeasurement = async (forceRefresh = false) => {
+    if (!id) return;
+
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/measurements/${id}`);
+      // Dodaj cache busting timestamp aby zawsze pobrać świeże dane
+      const timestamp = forceRefresh ? `?t=${Date.now()}` : "";
+      const response = await fetch(`/api/measurements/${id}${timestamp}`, {
+        cache: "no-store", // Zawsze pobierz świeże dane
+      });
       if (response.ok) {
         const data = await response.json();
         setMeasurement(data);
+        console.log("✅ [MEASUREMENT] Pobrano dane pomiaru:", data.id);
       } else {
         toast.error("Nie udało się pobrać pomiaru");
         router.push(measurementsListPath);
       }
     } catch (error) {
+      console.error("❌ [MEASUREMENT] Błąd pobierania:", error);
       toast.error("Wystąpił błąd podczas pobierania pomiaru");
       router.push(measurementsListPath);
     } finally {
