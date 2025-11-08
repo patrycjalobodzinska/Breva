@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/router";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,6 +32,7 @@ import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 export default function MeasurementDetailPage() {
   const router = useRouter();
   const { data: session } = useSession();
+  const queryClient = useQueryClient();
   const {
     measurement,
     isLoading,
@@ -55,6 +58,15 @@ export default function MeasurementDetailPage() {
 
   const isAdmin = session?.user?.role === "ADMIN";
   const Layout = isAdmin ? AdminLayout : PanelLayout;
+
+  // Invaliduj cache React Query przy wejściu w widok
+  useEffect(() => {
+    const id = router.query.id as string;
+    if (id) {
+      queryClient.invalidateQueries({ queryKey: ["measurement", id] });
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+    }
+  }, [router.query.id, queryClient]);
 
   if (isLoading) {
     return (

@@ -54,7 +54,16 @@ export default function MobileMeasurementDetailPage() {
 
       // Resetuj stan przed pobraniem nowych danych
       setMeasurement(null);
+      setLeftStatus(null);
+      setRightStatus(null);
       setIsLoading(true);
+      setIsPolling(false);
+
+      console.log(
+        "🔄 [MEASUREMENT DETAIL] Rozpoczynam pobieranie danych dla ID:",
+        id
+      );
+
       // Zawsze pobierz świeże dane przy pierwszym wejściu
       fetchMeasurement(true);
       fetchStatuses();
@@ -89,46 +98,75 @@ export default function MobileMeasurementDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    if (!isPolling) return;
+    if (!isPolling || !id) return;
+    console.log("🔄 [POLLING] Rozpoczynam polling dla measurement:", id);
     const t = setInterval(() => {
+      console.log("🔄 [POLLING] Odświeżanie statusów i pomiaru");
       fetchStatuses();
-      fetchMeasurement();
+      fetchMeasurement(false); // Nie force refresh podczas pollingu
     }, 5000);
-    return () => clearInterval(t);
-  }, [isPolling]);
+    return () => {
+      console.log("🛑 [POLLING] Zatrzymuję polling");
+      clearInterval(t);
+    };
+  }, [isPolling, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchMeasurement = async (forceRefresh = false) => {
-    if (!id) return;
+    if (!id) {
+      console.warn("⚠️ [MEASUREMENT] Brak ID - pomijam fetch");
+      return;
+    }
 
     try {
       setIsLoading(true);
+      console.log("📥 [MEASUREMENT] Rozpoczynam pobieranie pomiaru:", id);
+
       // Dodaj cache busting timestamp aby zawsze pobrać świeże dane
       const timestamp = forceRefresh ? `?t=${Date.now()}` : "";
       const response = await fetch(`/api/measurements/${id}${timestamp}`, {
         cache: "no-store", // Zawsze pobierz świeże dane
       });
+
       if (response.ok) {
         const data = await response.json();
         console.log(
           "✅ [MEASUREMENT] Pobrano dane pomiaru:",
           data.id,
-          "Data:",
-          data
+          "Has AI Analysis:",
+          !!data.aiAnalysis,
+          "Has Lidar Captures:",
+          data.lidarCaptures?.length || 0
         );
         // Ustaw dane SYNCHRONICZNIE aby uniknąć race condition
         setMeasurement(data);
+        setIsLoading(false); // Ustaw false PO ustawieniu measurement
+
+        // Po pobraniu measurement, sprawdź statusy LiDAR
+        if (data.lidarCaptures && data.lidarCaptures.length > 0) {
+          console.log(
+            "🔄 [MEASUREMENT] Znaleziono LiDAR captures, sprawdzam statusy"
+          );
+          fetchStatuses();
+        } else {
+          console.log("ℹ️ [MEASUREMENT] Brak LiDAR captures");
+        }
       } else {
         console.error("❌ [MEASUREMENT] Błąd odpowiedzi:", response.status);
+        const errorText = await response.text();
+        console.error("❌ [MEASUREMENT] Error body:", errorText);
         toast.error("Nie udało się pobrać pomiaru");
-        router.push(measurementsListPath);
+        // Nie przekierowuj od razu - pozwól użytkownikowi zobaczyć błąd
+        setMeasurement(null);
+        setIsLoading(false); // Ustaw false aby pokazać komunikat błędu
       }
     } catch (error) {
       console.error("❌ [MEASUREMENT] Błąd pobierania:", error);
       toast.error("Wystąpił błąd podczas pobierania pomiaru");
-      router.push(measurementsListPath);
+      setMeasurement(null);
+      setIsLoading(false); // Ustaw false aby pokazać komunikat błędu
     } finally {
-      // Ustaw isLoading na false TYLKO po ustawieniu measurement
-      setIsLoading(false);
+      // NIE ustawiaj isLoading na false tutaj - zrób to tylko w catch/else
+      // aby uniknąć race condition gdzie isLoading jest false ale measurement jeszcze null
     }
   };
 
@@ -222,29 +260,54 @@ export default function MobileMeasurementDetailPage() {
   const fetchStatuses = async () => {
     const mid = Array.isArray(id) ? id[0] : (id as string);
     if (!mid) return;
+
+    let newLeftStatus: string | null = null;
+    let newRightStatus: string | null = null;
+
     try {
       const l = await fetch(
         `/api/lidar-capture/status?measurementId=${encodeURIComponent(
           mid
-        )}&side=left`
+        )}&side=left`,
+        { cache: "no-store" }
       );
       if (l.ok) {
         const d = await l.json();
+        newLeftStatus = d.status;
         setLeftStatus(d.status);
+        console.log("✅ [STATUS] Left status:", d.status);
       }
-    } catch {}
+    } catch (error) {
+      console.error("❌ [STATUS] Błąd pobierania statusu left:", error);
+    }
+
     try {
       const r = await fetch(
         `/api/lidar-capture/status?measurementId=${encodeURIComponent(
           mid
-        )}&side=right`
+        )}&side=right`,
+        { cache: "no-store" }
       );
       if (r.ok) {
         const d = await r.json();
+        newRightStatus = d.status;
         setRightStatus(d.status);
+        console.log("✅ [STATUS] Right status:", d.status);
       }
-    } catch {}
-    setIsPolling(leftStatus === "PENDING" || rightStatus === "PENDING");
+    } catch (error) {
+      console.error("❌ [STATUS] Błąd pobierania statusu right:", error);
+    }
+
+    // Użyj nowych wartości zamiast starych state'ów
+    const shouldPoll =
+      newLeftStatus === "PENDING" || newRightStatus === "PENDING";
+    setIsPolling(shouldPoll);
+
+    if (shouldPoll) {
+      console.log("🔄 [STATUS] Polling aktywny - statusy PENDING");
+    } else {
+      console.log("🛑 [STATUS] Polling zatrzymany - brak PENDING");
+    }
   };
 
   const formatDate = (dateString: string) => {
