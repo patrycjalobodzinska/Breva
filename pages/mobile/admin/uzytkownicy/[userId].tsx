@@ -21,6 +21,8 @@ import {
   Calendar,
   User,
   Target,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 import AdminLayout from "@/components/AdminLayout";
@@ -52,6 +54,7 @@ export default function UserDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (router.query.userId) {
@@ -267,16 +270,28 @@ export default function UserDetailPage() {
               <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div>
                   <Label htmlFor="newPassword">Nowe hasło</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Wprowadź nowe hasło"
-                    required
-                    minLength={6}
-                    className="rounded-2xl"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Wprowadź nowe hasło"
+                      required
+                      minLength={6}
+                      className="rounded-2xl pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-muted hover:text-text-primary">
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <Button
                   type="submit"

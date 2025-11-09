@@ -19,8 +19,11 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.log("❌ [AUTH] Brak email lub hasła");
           return null;
         }
+
+        console.log("🔐 [AUTH] Próba logowania:", credentials.email);
 
         const user = await prisma.user.findUnique({
           where: {
@@ -29,8 +32,15 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user) {
+          console.log("❌ [AUTH] Użytkownik nie znaleziony:", credentials.email);
           return null;
         }
+
+        console.log("✅ [AUTH] Użytkownik znaleziony:", {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+        });
 
         const isPasswordValid = await bcrypt.compare(
           credentials.password,
@@ -38,8 +48,11 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
+          console.log("❌ [AUTH] Nieprawidłowe hasło dla:", credentials.email);
           return null;
         }
+
+        console.log("✅ [AUTH] Logowanie pomyślne:", credentials.email);
 
         return {
           id: user.id,

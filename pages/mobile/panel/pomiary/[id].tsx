@@ -65,8 +65,8 @@ export default function MobileMeasurementDetailPage() {
       );
 
       // Zawsze pobierz świeże dane przy pierwszym wejściu
+      // fetchStatuses() zostanie wywołane PO zakończeniu fetchMeasurement
       fetchMeasurement(true);
-      fetchStatuses();
     }
   }, [id, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -77,15 +77,15 @@ export default function MobileMeasurementDetailPage() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
+        // fetchStatuses() zostanie wywołane w fetchMeasurement po pobraniu danych
         fetchMeasurement(true); // Force refresh
-        fetchStatuses();
       }
     };
 
     const handleFocus = () => {
       console.log("🔄 Odświeżanie pomiaru po focus");
+      // fetchStatuses() zostanie wywołane w fetchMeasurement po pobraniu danych
       fetchMeasurement(true); // Force refresh
-      fetchStatuses();
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -95,7 +95,7 @@ export default function MobileMeasurementDetailPage() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [id]);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!isPolling || !id) return;
@@ -139,17 +139,15 @@ export default function MobileMeasurementDetailPage() {
         );
         // Ustaw dane SYNCHRONICZNIE aby uniknąć race condition
         setMeasurement(data);
-        setIsLoading(false); // Ustaw false PO ustawieniu measurement
 
-        // Po pobraniu measurement, sprawdź statusy LiDAR
-        if (data.lidarCaptures && data.lidarCaptures.length > 0) {
-          console.log(
-            "🔄 [MEASUREMENT] Znaleziono LiDAR captures, sprawdzam statusy"
-          );
-          fetchStatuses();
-        } else {
-          console.log("ℹ️ [MEASUREMENT] Brak LiDAR captures");
-        }
+        // Po ustawieniu measurement, sprawdź statusy LiDAR (nawet jeśli nie ma captures)
+        // fetchStatuses() sprawdzi czy są captures i pobierze statusy
+        console.log(
+          "🔄 [MEASUREMENT] Sprawdzam statusy LiDAR po pobraniu pomiaru"
+        );
+        fetchStatuses();
+
+        setIsLoading(false); // Ustaw false PO ustawieniu measurement i statusów
       } else {
         console.error("❌ [MEASUREMENT] Błąd odpowiedzi:", response.status);
         const errorText = await response.text();
@@ -259,7 +257,12 @@ export default function MobileMeasurementDetailPage() {
 
   const fetchStatuses = async () => {
     const mid = Array.isArray(id) ? id[0] : (id as string);
-    if (!mid) return;
+    if (!mid) {
+      console.warn("⚠️ [STATUS] Brak measurementId - pomijam fetchStatuses");
+      return;
+    }
+
+    console.log("📡 [STATUS] Rozpoczynam pobieranie statusów dla:", mid);
 
     let newLeftStatus: string | null = null;
     let newRightStatus: string | null = null;
@@ -276,9 +279,15 @@ export default function MobileMeasurementDetailPage() {
         newLeftStatus = d.status;
         setLeftStatus(d.status);
         console.log("✅ [STATUS] Left status:", d.status);
+      } else if (l.status === 404) {
+        console.log("ℹ️ [STATUS] Left - brak capture (404)");
+        setLeftStatus(null);
+      } else {
+        console.warn("⚠️ [STATUS] Left - błąd odpowiedzi:", l.status);
       }
     } catch (error) {
       console.error("❌ [STATUS] Błąd pobierania statusu left:", error);
+      setLeftStatus(null);
     }
 
     try {
@@ -293,9 +302,15 @@ export default function MobileMeasurementDetailPage() {
         newRightStatus = d.status;
         setRightStatus(d.status);
         console.log("✅ [STATUS] Right status:", d.status);
+      } else if (r.status === 404) {
+        console.log("ℹ️ [STATUS] Right - brak capture (404)");
+        setRightStatus(null);
+      } else {
+        console.warn("⚠️ [STATUS] Right - błąd odpowiedzi:", r.status);
       }
     } catch (error) {
       console.error("❌ [STATUS] Błąd pobierania statusu right:", error);
+      setRightStatus(null);
     }
 
     // Użyj nowych wartości zamiast starych state'ów
