@@ -257,7 +257,7 @@ export default async function handler(
 
     // Dodaj reference_point jako JSON string (jak mask)
     if (data.referencePoint) {
-      pythonPayload.object.reference_point = data.referencePoint;
+      pythonPayload.object.reference_point = data.referencePoint ?? "kupa";
     }
 
     // Wyślij do backendu Python
