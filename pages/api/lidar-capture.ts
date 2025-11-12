@@ -13,6 +13,12 @@ export const config = {
 };
 
 // UWAGA: RGB zostało USUNIĘTE z API zgodnie z FRONTEND_RECOMMENDATIONS.md
+const vector3Schema = z.object({
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
+});
+
 const lidarCaptureSchema = z.object({
   side: z.enum(["left", "right"]),
   measurementId: z.string(),
@@ -38,6 +44,7 @@ const lidarCaptureSchema = z.object({
     iosVersion: z.string().optional(),
     appVersion: z.string().optional(),
   }),
+  referencePoint: vector3Schema.optional(),
 });
 
 interface VolumeEstimationStatus {
@@ -106,6 +113,30 @@ export default async function handler(
         ? rawMeasurementId
         : undefined;
 
+    const rawReferencePoint =
+      requestBody.referencePoint || requestBody.reference_point;
+
+    let normalizedReferencePoint;
+    if (
+      rawReferencePoint &&
+      typeof rawReferencePoint === "object" &&
+      ["x", "y", "z"].every((axis) => axis in rawReferencePoint)
+    ) {
+      const parsedReferencePoint = {
+        x: Number(rawReferencePoint.x),
+        y: Number(rawReferencePoint.y),
+        z: Number(rawReferencePoint.z),
+      };
+
+      if (
+        Object.values(parsedReferencePoint).every(
+          (value) => typeof value === "number" && !Number.isNaN(value)
+        )
+      ) {
+        normalizedReferencePoint = parsedReferencePoint;
+      }
+    }
+
     const normalizedBody: any = {
       side: normalizedSide,
       measurementId: normalizedMeasurementId,
@@ -126,6 +157,7 @@ export default async function handler(
               requestBody.metadata.app_version,
           }
         : undefined,
+      referencePoint: normalizedReferencePoint,
     };
 
     console.log(
@@ -146,6 +178,8 @@ export default async function handler(
         : null,
       hasDeviceModel: !!normalizedBody.metadata?.deviceModel,
       deviceModel: normalizedBody.metadata?.deviceModel,
+      hasReferencePoint: !!normalizedBody.referencePoint,
+      referencePoint: normalizedBody.referencePoint,
     });
 
     // Waliduj dane wejściowe
@@ -173,11 +207,14 @@ export default async function handler(
     console.log("📱 Object Timestamp:", data.object.timestamp);
     console.log("📱 Camera Intrinsics:", data.cameraIntrinsics);
     console.log("📱 Device:", data.metadata.deviceModel);
+    if (data.referencePoint) {
+      console.log("📍 Reference Point:", data.referencePoint);
+    }
 
     // Przygotuj dane dla Python API (konwersja do snake_case)
     const pythonPayload = {
       background: {
-        depth: data.background.depth,
+        depth: data.referencePoint ? "" : data.background.depth,
         timestamp: data.background.timestamp,
       },
       object: {
@@ -196,6 +233,13 @@ export default async function handler(
       metadata: {
         device_model: data.metadata.deviceModel,
       },
+      reference_point: data.referencePoint
+        ? {
+            x: data.referencePoint.x,
+            y: data.referencePoint.y,
+            z: data.referencePoint.z,
+          }
+        : undefined,
     };
 
     // Wyślij do backendu Python
