@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +125,13 @@ export default function RegisterPage() {
         <Card className="min-w-full md:min-w-md bg-white/90 max-w-md rounded-2xl shadow-lg">
           <CardHeader className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-4">
-              <Heart className="h-8 w-8 text-primary" />
+              <Image
+                src="/logo.png"
+                alt="BREVA Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+              />
               <span className="text-2xl font-bold text-text-primary">
                 BREVA
               </span>
@@ -146,7 +153,13 @@ export default function RegisterPage() {
       <Card className=" md:min-w-md min-w-full bg-white/90 border-none rounded-2xl shadow-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <Heart className="h-8 w-8 text-primary" />
+            <Image
+              src="/logo.png"
+              alt="BREVA Logo"
+              width={32}
+              height={32}
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-2xl font-bold text-text-primary">BREVA</span>
           </div>
           <CardTitle className="text-2xl">Zarejestruj się</CardTitle>

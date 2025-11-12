@@ -391,14 +391,18 @@ async function pollVolumeEstimation(
 
       // Konwersja snake_case → uppercase dla Prisma enum
       const normalizedStatus = statusData.status?.toUpperCase() || "PENDING";
-      const estimatedVolume =
+      // Python API zwraca objętość w mm³, konwertujemy na ml (dzielenie przez 1000)
+      const estimatedVolumeRaw =
         statusData.estimated_volume || statusData.estimatedVolume;
+      const estimatedVolume = estimatedVolumeRaw
+        ? estimatedVolumeRaw / 1000
+        : undefined;
 
-      // Aktualizuj status w bazie danych
+      // Aktualizuj status w bazie danych (estimatedVolume już w ml)
       await updateCaptureStatus(requestId, normalizedStatus, estimatedVolume);
 
       if (normalizedStatus === "COMPLETED" && estimatedVolume) {
-        // Zapisz wynik do analizy piersi
+        // Zapisz wynik do analizy piersi (estimatedVolume już w ml)
         await saveVolumeResult(measurementId, side, estimatedVolume);
         clearInterval(pollInterval);
         console.log(

@@ -20,10 +20,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Eye, Key, Calendar, Users, BarChart3 } from "lucide-react";
+import {
+  Search,
+  Eye,
+  Key,
+  Calendar,
+  Users,
+  BarChart3,
+  Trash2,
+} from "lucide-react";
 import AdminLayout from "@/components/AdminLayout";
 import { useRouter } from "next/router";
 import { Pagination } from "@/components/ui/pagination";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -50,7 +68,11 @@ export default function UsersPage() {
     hasNext: false,
     hasPrev: false,
   });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
   useEffect(() => {
     fetchUsers();
   }, [searchTerm]); // Odśwież gdy zmieni się searchTerm
@@ -95,6 +117,39 @@ export default function UsersPage() {
 
   const handlePageChange = (page: number) => {
     fetchUsers(page);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, user: User) => {
+    e.stopPropagation(); // Zapobiegaj przejściu do szczegółów użytkownika
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${userToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Użytkownik został usunięty pomyślnie");
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+        // Odśwież listę użytkowników
+        fetchUsers(currentPage);
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Wystąpił błąd podczas usuwania użytkownika");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Wystąpił błąd podczas usuwania użytkownika");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) {
@@ -164,6 +219,7 @@ export default function UsersPage() {
                   <TableHead>Rola</TableHead>
                   <TableHead>Pomiary</TableHead>
                   <TableHead>Data rejestracji</TableHead>
+                  <TableHead className="w-[100px]">Akcje</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -201,6 +257,17 @@ export default function UsersPage() {
                         {formatDate(user.createdAt)}
                       </div>
                     </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {session?.user?.id !== user.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleDeleteClick(e, user)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -218,6 +285,40 @@ export default function UsersPage() {
             />
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent className="rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">
+                Usuń użytkownika
+              </DialogTitle>
+              <DialogDescription>
+                Czy na pewno chcesz usunąć użytkownika{" "}
+                <strong>{userToDelete?.name || userToDelete?.email}</strong>? Ta
+                akcja jest nieodwracalna i spowoduje usunięcie wszystkich
+                powiązanych danych, w tym pomiarów.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setUserToDelete(null);
+                }}
+                disabled={isDeleting}>
+                Anuluj
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}>
+                {isDeleting ? "Usuwanie..." : "Usuń"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );

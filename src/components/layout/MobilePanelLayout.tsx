@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Heart, Upload, BarChart3, Settings, User } from "lucide-react";
 import { useEffect } from "react";
@@ -42,8 +43,13 @@ export default function MobilePanelLayout({
         <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-primary/20 sticky top-0 z-50">
           <div className="flex items-center justify-between px-4 py-3 pt-16">
             <div className="flex items-center space-x-3">
-              <Heart className="h-7 w-7 text-primary" />
-              <span className="text-xl font-bold text-text-primary">BREVA</span>
+              <Image
+                src="/logo.png"
+                alt="BREVA Logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+              />
             </div>
             <Link href="/mobile/panel" className="flex items-center space-x-3">
               <User />

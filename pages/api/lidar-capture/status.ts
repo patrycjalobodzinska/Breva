@@ -81,23 +81,26 @@ export default async function handler(
 
           // Zaktualizuj status w bazie jeśli się zmienił
           if (pythonData.status === "completed" && pythonData.estimated_volume) {
+            // Python API zwraca objętość w mm³, konwertujemy na ml (dzielenie przez 1000)
+            const estimatedVolumeMl = pythonData.estimated_volume / 1000;
+
             await prisma.lidarCapture?.update({
               where: { id: lidarCapture.id },
               data: {
                 status: "COMPLETED",
-                estimatedVolume: pythonData.estimated_volume,
+                estimatedVolume: estimatedVolumeMl,
                 updatedAt: new Date(),
               },
             });
 
-            // Zapisz wynik do analizy AI
+            // Zapisz wynik do analizy AI (estimatedVolumeMl już w ml)
             const sideKey = (side as string).toLowerCase();
             const aiAnalysis = await prisma.breastAnalysis?.findUnique({
               where: { aiMeasurementId: measurementId as string },
             });
 
             const updateData: any = {};
-            updateData[`${sideKey}VolumeMl`] = pythonData.estimated_volume;
+            updateData[`${sideKey}VolumeMl`] = estimatedVolumeMl;
             updateData[`${sideKey}Confidence`] = 0.95;
 
             if (aiAnalysis) {
@@ -107,7 +110,7 @@ export default async function handler(
               });
             } else {
               const createData: any = { aiMeasurementId: measurementId as string };
-              createData[`${sideKey}VolumeMl`] = pythonData.estimated_volume;
+              createData[`${sideKey}VolumeMl`] = estimatedVolumeMl;
               createData[`${sideKey}Confidence`] = 0.95;
 
               await prisma.breastAnalysis?.create({
@@ -115,12 +118,12 @@ export default async function handler(
               });
             }
 
-            console.log(`✅ Status zaktualizowany: COMPLETED, volume=${pythonData.estimated_volume}ml`);
+            console.log(`✅ Status zaktualizowany: COMPLETED, volume=${estimatedVolumeMl}ml`);
 
             return res.status(200).json({
               requestId: lidarCapture.requestId,
               status: "COMPLETED",
-              estimatedVolume: pythonData.estimated_volume,
+              estimatedVolume: estimatedVolumeMl,
               createdAt: lidarCapture.createdAt,
               updatedAt: new Date(),
             });

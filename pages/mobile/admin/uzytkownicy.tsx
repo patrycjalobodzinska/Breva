@@ -28,10 +28,21 @@ import {
   Users,
   BarChart3,
   ChevronRight,
+  Trash2,
 } from "lucide-react";
 import MobileAdminLayout from "@/components/layout/MobileAdminLayout";
 import { useRouter } from "next/router";
 import { Pagination } from "@/components/ui/pagination";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -58,7 +69,11 @@ export default function UsersPage() {
     hasNext: false,
     hasPrev: false,
   });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const { data: session } = useSession();
   useEffect(() => {
     fetchUsers();
   }, [searchTerm]); // Odśwież gdy zmieni się searchTerm
@@ -103,6 +118,39 @@ export default function UsersPage() {
 
   const handlePageChange = (page: number) => {
     fetchUsers(page);
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, user: User) => {
+    e.stopPropagation(); // Zapobiegaj przejściu do szczegółów użytkownika
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!userToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/admin/users/${userToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Użytkownik został usunięty pomyślnie");
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+        // Odśwież listę użytkowników
+        fetchUsers(currentPage);
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Wystąpił błąd podczas usuwania użytkownika");
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Wystąpił błąd podczas usuwania użytkownika");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (isLoading) {
@@ -157,17 +205,25 @@ export default function UsersPage() {
             {users.map((user) => (
               <Card
                 key={user.id}
-                onClick={() =>
-                  router.push(`/mobile/admin/uzytkownicy/${user.id}`)
-                }
-                className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
+                className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-shadow">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex-1">
+                    <div
+                      className="flex-1 cursor-pointer"
+                      onClick={() =>
+                        router.push(`/mobile/admin/uzytkownicy/${user.id}`)
+                      }>
                       <div className="flex items-center space-x-2 mb-1">
                         <p className="font-semibold text-text-primary">
                           {user.name || "Brak imienia"}
                         </p>
+                        <Badge
+                          variant={
+                            user.role === "ADMIN" ? "destructive" : "default"
+                          }
+                          className="rounded-full text-xs">
+                          {user.role === "ADMIN" ? "Admin" : "Użytkownik"}
+                        </Badge>
                       </div>
                       <p className="text-sm text-text-muted mb-2">
                         {user.email}
@@ -183,7 +239,18 @@ export default function UsersPage() {
                         </div>
                       </div>
                     </div>
-                    <ChevronRight className="h-5 w-5 text-text-muted flex-shrink-0" />
+                    <div className="flex items-center space-x-2 flex-shrink-0">
+                      {session?.user?.id !== user.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => handleDeleteClick(e, user)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                      <ChevronRight className="h-5 w-5 text-text-muted" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -215,6 +282,38 @@ export default function UsersPage() {
             </Button>
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent className="rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Usuń użytkownika</DialogTitle>
+              <DialogDescription>
+                Czy na pewno chcesz usunąć użytkownika{" "}
+                <strong>{userToDelete?.name || userToDelete?.email}</strong>?
+                Ta akcja jest nieodwracalna i spowoduje usunięcie wszystkich
+                powiązanych danych, w tym pomiarów.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  setUserToDelete(null);
+                }}
+                disabled={isDeleting}>
+                Anuluj
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}>
+                {isDeleting ? "Usuwanie..." : "Usuń"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MobileAdminLayout>
   );

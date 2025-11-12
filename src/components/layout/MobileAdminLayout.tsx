@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, BarChart3, Users, Shield, Settings, User } from "lucide-react";
 import { useEffect } from "react";
 
@@ -41,9 +42,13 @@ export default function MobileAdminLayout({
         <header className="bg-white/90 backdrop-blur-sm shadow-sm border-b border-primary/20 sticky top-0 z-50">
           <div className="flex items-center justify-between px-4 py-3 pt-16">
             <div className="flex items-center space-x-3">
-              <Heart className="h-7 w-7 text-primary" />
-              <span className="text-xl font-bold text-text-primary">BREVA</span>
-              <Shield className="h-5 w-5 text-amber-600" />
+              <Image
+                src="/logo.png"
+                alt="BREVA Logo"
+                width={28}
+                height={28}
+                className="h-7 w-7 object-contain"
+              />
             </div>
             <Link href="/mobile/admin" className="flex items-center space-x-3">
               <User className="h-6 w-6 text-primary" />

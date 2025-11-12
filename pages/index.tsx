@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,11 +16,16 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-accent-1 to-accent-2">
       {/* Header */}
-      <header className="w-full z-20 sticky top-0  bg-white/80 backdrop-blur-sm shadow-sm px-4 py-6">
+      <header className="w-full z-20 sticky top-0  bg-white/80 backdrop-blur-sm shadow-sm px-4 py-2">
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Heart className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-text-primary">BREVA</span>
+            <Image
+              src="/logo.png"
+              alt="BREVA Logo"
+              width={100}
+              height={100}
+              className="h-16 w-16 object-contain"
+            />
           </div>
           <div className="flex items-center space-x-4">
             <Link href="/logowanie">
@@ -199,8 +205,13 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Heart className="h-6 w-6" />
-              <span className="text-xl font-bold">BREVA</span>
+              <Image
+                src="/logo.png"
+                alt="BREVA Logo"
+                width={24}
+                height={24}
+                className="h-6 w-6 object-contain"
+              />
             </div>
             <p className="text-sm opacity-80">
               © {new Date().getFullYear()} BREVA. Wszystkie prawa zastrzeżone.

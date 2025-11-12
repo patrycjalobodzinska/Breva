@@ -3,6 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -69,10 +70,13 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/panel" className="flex items-center space-x-2">
-              <Heart className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-text-primary">
-                BREVA
-              </span>
+              <Image
+                src="/logo.png"
+                alt="BREVA Logo"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+              />
             </Link>
 
             {/* Desktop Navigation */}
