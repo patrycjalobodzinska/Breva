@@ -13,12 +13,6 @@ export const config = {
 };
 
 // UWAGA: RGB zostało USUNIĘTE z API zgodnie z FRONTEND_RECOMMENDATIONS.md
-const vector3Schema = z.object({
-  x: z.number(),
-  y: z.number(),
-  z: z.number(),
-});
-
 const lidarCaptureSchema = z.object({
   side: z.enum(["left", "right"]),
   measurementId: z.string(),
@@ -44,7 +38,7 @@ const lidarCaptureSchema = z.object({
     iosVersion: z.string().optional(),
     appVersion: z.string().optional(),
   }),
-  referencePoint: vector3Schema.optional(),
+  referencePoint: z.string().optional(), // JSON string with {"x": number, "y": number, "z": number}
 });
 
 interface VolumeEstimationStatus {
@@ -116,24 +110,44 @@ export default async function handler(
     const rawReferencePoint =
       requestBody.referencePoint || requestBody.reference_point;
 
-    let normalizedReferencePoint;
-    if (
-      rawReferencePoint &&
-      typeof rawReferencePoint === "object" &&
-      ["x", "y", "z"].every((axis) => axis in rawReferencePoint)
-    ) {
-      const parsedReferencePoint = {
-        x: Number(rawReferencePoint.x),
-        y: Number(rawReferencePoint.y),
-        z: Number(rawReferencePoint.z),
-      };
-
-      if (
-        Object.values(parsedReferencePoint).every(
-          (value) => typeof value === "number" && !Number.isNaN(value)
-        )
+    let normalizedReferencePoint: string | undefined;
+    if (rawReferencePoint) {
+      // Jeśli jest już stringiem (JSON), użyj go bezpośrednio
+      if (typeof rawReferencePoint === "string") {
+        // Waliduj czy to poprawny JSON
+        try {
+          const parsed = JSON.parse(rawReferencePoint);
+          if (
+            parsed &&
+            typeof parsed === "object" &&
+            "x" in parsed &&
+            "y" in parsed &&
+            "z" in parsed
+          ) {
+            normalizedReferencePoint = rawReferencePoint;
+          }
+        } catch {
+          // Niepoprawny JSON, zignoruj
+        }
+      }
+      // Jeśli jest obiektem, serializuj do JSON string
+      else if (
+        typeof rawReferencePoint === "object" &&
+        ["x", "y", "z"].every((axis) => axis in rawReferencePoint)
       ) {
-        normalizedReferencePoint = parsedReferencePoint;
+        const parsedReferencePoint = {
+          x: Number(rawReferencePoint.x),
+          y: Number(rawReferencePoint.y),
+          z: Number(rawReferencePoint.z),
+        };
+
+        if (
+          Object.values(parsedReferencePoint).every(
+            (value) => typeof value === "number" && !Number.isNaN(value)
+          )
+        ) {
+          normalizedReferencePoint = JSON.stringify(parsedReferencePoint);
+        }
       }
     }
 
@@ -208,22 +222,22 @@ export default async function handler(
     console.log("📱 Camera Intrinsics:", data.cameraIntrinsics);
     console.log("📱 Device:", data.metadata.deviceModel);
     if (data.referencePoint) {
-      console.log("📍 Reference Point:", data.referencePoint);
+      console.log("📍 Reference Point (JSON string):", data.referencePoint);
+      try {
+        const parsedRef = JSON.parse(data.referencePoint);
+        console.log("📍 Reference Point (parsed):", parsedRef);
+      } catch {
+        console.log("📍 Reference Point: invalid JSON");
+      }
     }
 
     // Przygotuj dane dla Python API (konwersja do snake_case)
-    const pythonPayload = {
+    const pythonPayload: any = {
       background: {
         depth: data.referencePoint ? "" : data.background.depth,
         timestamp: data.background.timestamp,
       },
       object: {
-        reference_point: data.referencePoint
-          ? {
-              x: data.referencePoint.x,
-              y: data.referencePoint.y,
-            }
-          : undefined,
         depth: data.object.depth,
         mask: data.object.mask,
         timestamp: data.object.timestamp,
@@ -240,6 +254,11 @@ export default async function handler(
         device_model: data.metadata.deviceModel,
       },
     };
+
+    // Dodaj reference_point jako JSON string (jak mask)
+    if (data.referencePoint) {
+      pythonPayload.object.reference_point = data.referencePoint;
+    }
 
     // Wyślij do backendu Python
     const backendUrl =
