@@ -18,7 +18,6 @@ export default function AdminPage() {
     }
   }, [session, status, router]);
 
-  // Layout handles session loading
   if (status === "loading" || !session || session.user?.role !== "ADMIN") {
     return null;
   }
