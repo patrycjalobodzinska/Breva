@@ -11,16 +11,19 @@ export default function LidarCaptureTestPage() {
   const [response, setResponse] = useState<any>(null);
   const [responseTime, setResponseTime] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sentRequest, setSentRequest] = useState<any>(null);
 
   const exampleData = {
     side: "left",
     measurementId: "test-measurement-id",
     background: {
-      depth: "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/",
+      depth:
+        "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/",
       timestamp: new Date().toISOString(),
     },
     object: {
-      depth: "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/",
+      depth:
+        "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyAhIiMkJSYnKCkqKywtLi8wMTIzNDU2Nzg5Ojs8PT4/QEFCQ0RFRkdISUpLTE1OT1BRUlNUVVZXWFlaW1xdXl9gYWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXp7fH1+f4CBgoOEhYaHiImKi4yNjo+QkZKTlJWWl5iZmpucnZ6foKGio6SlpqeoqaqrrK2ur7CxsrO0tba3uLm6u7y9vr/AwcLDxMXGx8jJysvMzc7P0NHS09TV1tfY2drb3N3e3+Dh4uPk5ebn6Onq6+zt7u/w8fLz9PX29/j5+vv8/f7/",
       mask: '[{"x":188.0,"y":75.0},{"x":224.0,"y":58.0},{"x":250.0,"y":100.0}]',
       timestamp: new Date().toISOString(),
     },
@@ -56,11 +59,13 @@ export default function LidarCaptureTestPage() {
     setResponse(null);
     setError(null);
     setResponseTime(null);
+    setSentRequest(null);
 
     const startTime = performance.now();
 
     try {
       const data = JSON.parse(jsonInput);
+      setSentRequest(data); // Zapisz request, który został wysłany
 
       const response = await fetch("/api/lidar-capture", {
         method: "POST",
@@ -81,7 +86,9 @@ export default function LidarCaptureTestPage() {
         toast.success(`✅ Sukces! Czas odpowiedzi: ${duration.toFixed(2)}ms`);
       } else {
         setError(JSON.stringify(result, null, 2));
-        toast.error(`❌ Błąd ${response.status}: ${result.error || result.message}`);
+        toast.error(
+          `❌ Błąd ${response.status}: ${result.error || result.message}`
+        );
       }
     } catch (err: any) {
       const endTime = performance.now();
@@ -100,6 +107,7 @@ export default function LidarCaptureTestPage() {
     setResponse(null);
     setError(null);
     setResponseTime(null);
+    setSentRequest(null);
   };
 
   return (
@@ -110,7 +118,8 @@ export default function LidarCaptureTestPage() {
             🧪 Test Endpointu /api/lidar-capture
           </CardTitle>
           <p className="text-sm text-text-muted mt-2">
-            Wklej dane JSON (jak w Swaggerze) aby przetestować szybkość działania
+            Wklej dane JSON (jak w Swaggerze) aby przetestować szybkość
+            działania
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -119,7 +128,9 @@ export default function LidarCaptureTestPage() {
             <Button onClick={handleLoadExample} variant="outline">
               📋 Załaduj przykładowe dane
             </Button>
-            <Button onClick={handleTest} disabled={isLoading || !jsonInput.trim()}>
+            <Button
+              onClick={handleTest}
+              disabled={isLoading || !jsonInput.trim()}>
               {isLoading ? (
                 <>
                   <Loader variant="default" size="sm" className="mr-2" />
@@ -151,17 +162,34 @@ export default function LidarCaptureTestPage() {
           {responseTime !== null && (
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <p className="text-sm font-medium text-blue-900">
-                ⏱️ Czas odpowiedzi: <span className="font-bold">{responseTime.toFixed(2)}ms</span>
+                ⏱️ Czas odpowiedzi:{" "}
+                <span className="font-bold">{responseTime.toFixed(2)}ms</span>
               </p>
               {responseTime < 1000 && (
-                <p className="text-xs text-blue-700 mt-1">✅ Szybka odpowiedź!</p>
+                <p className="text-xs text-blue-700 mt-1">
+                  ✅ Szybka odpowiedź!
+                </p>
               )}
               {responseTime >= 1000 && responseTime < 3000 && (
-                <p className="text-xs text-blue-700 mt-1">⚠️ Średnia odpowiedź</p>
+                <p className="text-xs text-blue-700 mt-1">
+                  ⚠️ Średnia odpowiedź
+                </p>
               )}
               {responseTime >= 3000 && (
                 <p className="text-xs text-red-700 mt-1">❌ Wolna odpowiedź</p>
               )}
+            </div>
+          )}
+
+          {/* Request */}
+          {sentRequest && (
+            <div>
+              <label className="block text-sm font-medium mb-2 text-blue-700">
+                📤 Request (Wysłany):
+              </label>
+              <pre className="bg-blue-50 border border-blue-200 rounded-lg p-4 overflow-auto max-h-[400px] text-sm font-mono">
+                {JSON.stringify(sentRequest, null, 2)}
+              </pre>
             </div>
           )}
 
@@ -194,12 +222,20 @@ export default function LidarCaptureTestPage() {
             <h3 className="font-semibold mb-2">ℹ️ Informacje:</h3>
             <ul className="text-sm text-text-muted space-y-1 list-disc list-inside">
               <li>
-                Endpoint: <code className="bg-gray-200 px-1 rounded">POST /api/lidar-capture</code>
+                Endpoint:{" "}
+                <code className="bg-gray-200 px-1 rounded">
+                  POST /api/lidar-capture
+                </code>
               </li>
               <li>Wymagana autoryzacja (session token)</li>
               <li>Maksymalny rozmiar body: 50MB</li>
               <li>Akceptuje zarówno camelCase jak i snake_case</li>
-              <li>URL: <code className="bg-gray-200 px-1 rounded">/test/lidar-capture</code></li>
+              <li>
+                URL:{" "}
+                <code className="bg-gray-200 px-1 rounded">
+                  /test/lidar-capture
+                </code>
+              </li>
             </ul>
           </div>
         </CardContent>

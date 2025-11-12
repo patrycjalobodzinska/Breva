@@ -24,7 +24,7 @@ const lidarCaptureSchema = z.object({
     depth: z.string(), // Base64 encoded depth map (uint16 array)
     mask: z.string(), // JSON string with points array [{"x": number, "y": number}, ...]
     timestamp: z.string(), // ISO 8601 format
-    referencePoint: z.string().optional(), // JSON string with {"x": number, "y": number, "z": number}
+    reference_point: z.string().optional(), // JSON string with {"x": number, "y": number, "z": number}
   }),
   cameraIntrinsics: z.object({
     fx: z.number(),
@@ -110,9 +110,9 @@ export default async function handler(
     // Normalizuj reference_point z object
     const rawObject = requestBody.object || {};
     const rawReferencePoint =
-      rawObject.referencePoint ||
       rawObject.reference_point ||
-      requestBody.referencePoint ||
+      rawObject.reference_point ||
+      requestBody.reference_point ||
       requestBody.reference_point; // Fallback dla kompatybilności wstecznej
 
     let normalizedReferencePoint: string | undefined;
@@ -162,7 +162,7 @@ export default async function handler(
       background: requestBody.background,
       object: {
         ...rawObject,
-        referencePoint: normalizedReferencePoint,
+        reference_point: normalizedReferencePoint,
       },
       cameraIntrinsics:
         requestBody.cameraIntrinsics || requestBody.camera_intrinsics,
@@ -199,8 +199,8 @@ export default async function handler(
         : null,
       hasDeviceModel: !!normalizedBody.metadata?.deviceModel,
       deviceModel: normalizedBody.metadata?.deviceModel,
-      hasReferencePoint: !!normalizedBody.referencePoint,
-      referencePoint: normalizedBody.referencePoint,
+      hasReferencePoint: !!normalizedBody.reference_point,
+      reference_point: normalizedBody.reference_point,
     });
 
     // Waliduj dane wejściowe
@@ -228,13 +228,13 @@ export default async function handler(
     console.log("📱 Object Timestamp:", data.object.timestamp);
     console.log("📱 Camera Intrinsics:", data.cameraIntrinsics);
     console.log("📱 Device:", data.metadata.deviceModel);
-    if (data.object.referencePoint) {
+    if (data.object.reference_point) {
       console.log(
         "📍 Reference Point (JSON string):",
-        data.object.referencePoint
+        data.object.reference_point
       );
       try {
-        const parsedRef = JSON.parse(data.object.referencePoint);
+        const parsedRef = JSON.parse(data.object.reference_point);
         console.log("📍 Reference Point (parsed):", parsedRef);
       } catch {
         console.log("📍 Reference Point: invalid JSON");
@@ -244,14 +244,14 @@ export default async function handler(
     // Przygotuj dane dla Python API (konwersja do snake_case)
     const pythonPayload: any = {
       background: {
-        depth: data.object.referencePoint ? "" : data.background.depth,
+        depth: data.object.reference_point ? "" : data.background.depth,
         timestamp: data.background.timestamp,
       },
       object: {
         depth: data.object.depth,
         mask: data.object.mask,
         timestamp: data.object.timestamp,
-        reference_point: data.object.referencePoint || "",
+        reference_point: data.object.reference_point || "",
       },
       camera_intrinsics: {
         fx: data.cameraIntrinsics.fx,
@@ -272,6 +272,15 @@ export default async function handler(
       "https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net";
 
     console.log("📤 Sending to Python backend:", backendUrl);
+    console.log("📤 Python Payload structure:", {
+      hasBackground: !!pythonPayload.background,
+      hasObject: !!pythonPayload.object,
+      objectKeys: pythonPayload.object ? Object.keys(pythonPayload.object) : [],
+      hasReferencePoint: !!pythonPayload.object?.reference_point,
+      reference_pointValue: pythonPayload.object?.reference_point
+        ? "present"
+        : "empty",
+    });
 
     const pythonResponse = await fetch(
       `${backendUrl}/enqueue-volume-estimation`,
@@ -359,6 +368,8 @@ export default async function handler(
       measurementId: data.measurementId,
       status: pythonResult.status || "pending",
       timestamp: new Date().toISOString(),
+      // Request wysłany do Pythona
+      pythonRequest: pythonPayload,
       // Dodatkowe informacje dla Swift
       processingInfo: {
         estimatedTime: "2-5 minutes", // Szacowany czas przetwarzania
