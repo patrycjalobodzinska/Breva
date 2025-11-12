@@ -24,6 +24,7 @@ const lidarCaptureSchema = z.object({
     depth: z.string(), // Base64 encoded depth map (uint16 array)
     mask: z.string(), // JSON string with points array [{"x": number, "y": number}, ...]
     timestamp: z.string(), // ISO 8601 format
+    referencePoint: z.string().optional(), // JSON string with {"x": number, "y": number, "z": number}
   }),
   cameraIntrinsics: z.object({
     fx: z.number(),
@@ -38,7 +39,6 @@ const lidarCaptureSchema = z.object({
     iosVersion: z.string().optional(),
     appVersion: z.string().optional(),
   }),
-  referencePoint: z.string().optional(), // JSON string with {"x": number, "y": number, "z": number}
 });
 
 interface VolumeEstimationStatus {
@@ -107,8 +107,13 @@ export default async function handler(
         ? rawMeasurementId
         : undefined;
 
+    // Normalizuj reference_point z object
+    const rawObject = requestBody.object || {};
     const rawReferencePoint =
-      requestBody.referencePoint || requestBody.reference_point;
+      rawObject.referencePoint ||
+      rawObject.reference_point ||
+      requestBody.referencePoint ||
+      requestBody.reference_point; // Fallback dla kompatybilności wstecznej
 
     let normalizedReferencePoint: string | undefined;
     if (rawReferencePoint) {
@@ -155,7 +160,10 @@ export default async function handler(
       side: normalizedSide,
       measurementId: normalizedMeasurementId,
       background: requestBody.background,
-      object: requestBody.object,
+      object: {
+        ...rawObject,
+        referencePoint: normalizedReferencePoint,
+      },
       cameraIntrinsics:
         requestBody.cameraIntrinsics || requestBody.camera_intrinsics,
       metadata: requestBody.metadata
@@ -171,7 +179,6 @@ export default async function handler(
               requestBody.metadata.app_version,
           }
         : undefined,
-      referencePoint: normalizedReferencePoint,
     };
 
     console.log(
@@ -221,10 +228,13 @@ export default async function handler(
     console.log("📱 Object Timestamp:", data.object.timestamp);
     console.log("📱 Camera Intrinsics:", data.cameraIntrinsics);
     console.log("📱 Device:", data.metadata.deviceModel);
-    if (data.referencePoint) {
-      console.log("📍 Reference Point (JSON string):", data.referencePoint);
+    if (data.object.referencePoint) {
+      console.log(
+        "📍 Reference Point (JSON string):",
+        data.object.referencePoint
+      );
       try {
-        const parsedRef = JSON.parse(data.referencePoint);
+        const parsedRef = JSON.parse(data.object.referencePoint);
         console.log("📍 Reference Point (parsed):", parsedRef);
       } catch {
         console.log("📍 Reference Point: invalid JSON");
@@ -234,7 +244,7 @@ export default async function handler(
     // Przygotuj dane dla Python API (konwersja do snake_case)
     const pythonPayload: any = {
       background: {
-        depth: data.referencePoint ? "" : data.background.depth,
+        depth: data.object.referencePoint ? "" : data.background.depth,
         timestamp: data.background.timestamp,
       },
       object: {
@@ -256,8 +266,8 @@ export default async function handler(
     };
 
     // Dodaj reference_point jako JSON string (jak mask)
-    if (data.referencePoint) {
-      pythonPayload.object.reference_point = data.referencePoint ?? "kupa";
+    if (data.object.referencePoint) {
+      pythonPayload.object.reference_point = data.object.referencePoint;
     }
 
     // Wyślij do backendu Python
