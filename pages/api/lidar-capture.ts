@@ -218,6 +218,12 @@ export default async function handler(
         timestamp: data.background.timestamp,
       },
       object: {
+        reference_point: data.referencePoint
+          ? {
+              x: data.referencePoint.x,
+              y: data.referencePoint.y,
+            }
+          : undefined,
         depth: data.object.depth,
         mask: data.object.mask,
         timestamp: data.object.timestamp,
@@ -233,13 +239,6 @@ export default async function handler(
       metadata: {
         device_model: data.metadata.deviceModel,
       },
-      reference_point: data.referencePoint
-        ? {
-            x: data.referencePoint.x,
-            y: data.referencePoint.y,
-            z: data.referencePoint.z,
-          }
-        : undefined,
     };
 
     // Wyślij do backendu Python
