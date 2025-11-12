@@ -110,9 +110,9 @@ export default async function handler(
     // Normalizuj reference_point z object
     const rawObject = requestBody.object || {};
     const rawReferencePoint =
+      rawObject.referencePoint ||
       rawObject.reference_point ||
-      rawObject.reference_point ||
-      requestBody.reference_point ||
+      requestBody.referencePoint ||
       requestBody.reference_point; // Fallback dla kompatybilności wstecznej
 
     let normalizedReferencePoint: string | undefined;
@@ -126,9 +126,9 @@ export default async function handler(
             parsed &&
             typeof parsed === "object" &&
             "x" in parsed &&
-            "y" in parsed &&
-            "z" in parsed
+            "y" in parsed
           ) {
+            // Akceptuj zarówno {x, y} jak i {x, y, z}
             normalizedReferencePoint = rawReferencePoint;
           }
         } catch {
@@ -138,13 +138,18 @@ export default async function handler(
       // Jeśli jest obiektem, serializuj do JSON string
       else if (
         typeof rawReferencePoint === "object" &&
-        ["x", "y", "z"].every((axis) => axis in rawReferencePoint)
+        "x" in rawReferencePoint &&
+        "y" in rawReferencePoint
       ) {
-        const parsedReferencePoint = {
+        const parsedReferencePoint: any = {
           x: Number(rawReferencePoint.x),
           y: Number(rawReferencePoint.y),
-          z: Number(rawReferencePoint.z),
         };
+
+        // Dodaj z tylko jeśli jest podane
+        if ("z" in rawReferencePoint) {
+          parsedReferencePoint.z = Number(rawReferencePoint.z);
+        }
 
         if (
           Object.values(parsedReferencePoint).every(
