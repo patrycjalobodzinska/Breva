@@ -251,6 +251,7 @@ export default async function handler(
         depth: data.object.depth,
         mask: data.object.mask,
         timestamp: data.object.timestamp,
+        reference_point: data.object.referencePoint || "",
       },
       camera_intrinsics: {
         fx: data.cameraIntrinsics.fx,
@@ -264,11 +265,6 @@ export default async function handler(
         device_model: data.metadata.deviceModel,
       },
     };
-
-    // Dodaj reference_point jako JSON string (jak mask)
-    if (data.object.referencePoint) {
-      pythonPayload.object.reference_point = data.object.referencePoint;
-    }
 
     // Wyślij do backendu Python
     const backendUrl =
