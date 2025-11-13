@@ -40,9 +40,7 @@ export default function MobileMeasurementEditPage() {
   const leftMeasurement = useMeasurementValue(measurementId, "left");
   const rightMeasurement = useMeasurementValue(measurementId, "right");
 
-  const renderMeasurementValue = (
-    info: MeasurementValueResult
-  ): ReactNode => {
+  const renderMeasurementValue = (info: MeasurementValueResult): ReactNode => {
     switch (info.state) {
       case "value":
         return (
@@ -219,7 +217,10 @@ export default function MobileMeasurementEditPage() {
       );
       if (l.ok) {
         const d = await l.json();
-        newLeftStatus = { status: d.status, estimatedVolume: d.estimatedVolume };
+        newLeftStatus = {
+          status: d.status,
+          estimatedVolume: d.estimatedVolume,
+        };
         setLeftStatus(newLeftStatus);
 
         // Sprawdź czy status zmienił się na COMPLETED
@@ -251,12 +252,15 @@ export default function MobileMeasurementEditPage() {
     } catch {}
 
     const pending =
-      newLeftStatus?.status === "PENDING" || newRightStatus?.status === "PENDING";
+      newLeftStatus?.status === "PENDING" ||
+      newRightStatus?.status === "PENDING";
     setIsPolling(pending);
 
     // Jeśli którykolwiek status zmienił się na COMPLETED, odśwież dane pomiaru
     if (leftCompleted || rightCompleted) {
-      console.log("🔄 [STATUS] Odświeżanie danych pomiaru po zakończeniu przetwarzania");
+      console.log(
+        "🔄 [STATUS] Odświeżanie danych pomiaru po zakończeniu przetwarzania"
+      );
       await fetchMeasurement(true);
       if (leftCompleted) {
         leftMeasurement.refresh();
@@ -310,22 +314,6 @@ export default function MobileMeasurementEditPage() {
             className="rounded-xl">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Wróć
-          </Button>
-          <Button
-            onClick={handleSaveEdit}
-            disabled={isSaving}
-            className="rounded-xl">
-            {isSaving ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                Zapisywanie...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Zapisz
-              </>
-            )}
           </Button>
         </div>
 

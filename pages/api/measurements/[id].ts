@@ -95,10 +95,6 @@ export default async function handler(
         return res.status(404).json({ error: "Pomiar nie został znaleziony" });
       }
 
-      await prisma.measurement.deleteMany({
-        where: { id: id as string },
-      });
-
       await prisma.measurement.delete({
         where: { id: id as string },
       });

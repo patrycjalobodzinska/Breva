@@ -1,10 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 export default async function handler(
   req: NextApiRequest,
@@ -46,13 +44,25 @@ export default async function handler(
 
     // Usuń wszystkie powiązane dane użytkownika
     await prisma.$transaction(async (tx) => {
-      // Usuń wszystkie pomiary użytkownika
-      await tx.measurement?.deleteMany({
-        where: { userId: user.id },
+      // Usuń analizy powiązane z pomiarami użytkownika
+      await tx.breastAnalysis.deleteMany({
+        where: {
+          OR: [
+            { aiMeasurement: { userId: user.id } },
+            { manualMeasurement: { userId: user.id } },
+          ],
+        },
       });
 
-      // Usuń wszystkie pliki użytkownika
-      await tx.upload.deleteMany({
+      // Usuń rekordy LiDAR powiązane z pomiarami użytkownika
+      await tx.lidarCapture.deleteMany({
+        where: {
+          measurement: { userId: user.id },
+        },
+      });
+
+      // Usuń pomiary użytkownika
+      await tx.measurement.deleteMany({
         where: { userId: user.id },
       });
 
@@ -72,7 +82,5 @@ export default async function handler(
       error: "Internal server error",
       success: false,
     });
-  } finally {
-    await prisma.$disconnect();
   }
 }

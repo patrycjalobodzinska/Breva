@@ -130,6 +130,10 @@ export function useMeasurementValue(
       }
 
       const statusData = await statusResponse.json();
+      console.log(
+        "📡 [useMeasurementValue] Odpowiedź statusu z backendu:",
+        statusData
+      );
       const status = (statusData.status || "").toUpperCase();
       setLastStatus(status || null);
 
