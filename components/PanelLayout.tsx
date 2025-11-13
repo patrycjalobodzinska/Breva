@@ -6,15 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Heart,
-  Upload,
-  BarChart3,
-  Settings,
-  LogOut,
-  User,
-  Menu,
-} from "lucide-react";
+import { Orbitron } from "next/font/google";
+import { Upload, BarChart3, Settings, LogOut, User, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Sheet,
@@ -23,6 +16,11 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["600"],
+});
 
 const navigation = [
   { name: "Pomiary", href: "/panel/pomiary", icon: BarChart3 },
@@ -73,10 +71,15 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
               <Image
                 src="/logo.png"
                 alt="BREVA Logo"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
+                width={40}
+                height={40}
+                className="h-10 w-10 object-contain"
               />
+              <span
+                className={`${orbitron.className} hidden lg:inline-block text-lg text-text-primary tracking-[0.3em] uppercase`}
+              >
+                BREVA
+              </span>
             </Link>
 
             {/* Desktop Navigation */}

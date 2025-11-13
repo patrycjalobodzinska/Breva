@@ -154,34 +154,65 @@ export default function MobileMeasurementEditPage() {
   const fetchStatuses = async () => {
     const mid = Array.isArray(id) ? id[0] : (id as string);
     if (!mid) return;
+
+    // Zapisz poprzednie statusy aby wykryć zmiany
+    const previousLeftStatus = leftStatus?.status;
+    const previousRightStatus = rightStatus?.status;
+
+    let newLeftStatus: LidarStatus | null = null;
+    let newRightStatus: LidarStatus | null = null;
+    let leftCompleted = false;
+    let rightCompleted = false;
+
     try {
       const l = await fetch(
         `/api/lidar-capture/status?measurementId=${encodeURIComponent(
           mid
-        )}&side=left`
+        )}&side=left`,
+        { cache: "no-store" }
       );
       if (l.ok) {
         const d = await l.json();
-        setLeftStatus({ status: d.status, estimatedVolume: d.estimatedVolume });
+        newLeftStatus = { status: d.status, estimatedVolume: d.estimatedVolume };
+        setLeftStatus(newLeftStatus);
+
+        // Sprawdź czy status zmienił się na COMPLETED
+        if (d.status === "COMPLETED" && previousLeftStatus !== "COMPLETED") {
+          leftCompleted = true;
+        }
       }
     } catch {}
     try {
       const r = await fetch(
         `/api/lidar-capture/status?measurementId=${encodeURIComponent(
           mid
-        )}&side=right`
+        )}&side=right`,
+        { cache: "no-store" }
       );
       if (r.ok) {
         const d = await r.json();
-        setRightStatus({
+        newRightStatus = {
           status: d.status,
           estimatedVolume: d.estimatedVolume,
-        });
+        };
+        setRightStatus(newRightStatus);
+
+        // Sprawdź czy status zmienił się na COMPLETED
+        if (d.status === "COMPLETED" && previousRightStatus !== "COMPLETED") {
+          rightCompleted = true;
+        }
       }
     } catch {}
+
     const pending =
-      leftStatus?.status === "PENDING" || rightStatus?.status === "PENDING";
+      newLeftStatus?.status === "PENDING" || newRightStatus?.status === "PENDING";
     setIsPolling(pending);
+
+    // Jeśli którykolwiek status zmienił się na COMPLETED, odśwież dane pomiaru
+    if (leftCompleted || rightCompleted) {
+      console.log("🔄 [STATUS] Odświeżanie danych pomiaru po zakończeniu przetwarzania");
+      await fetchMeasurement(true);
+    }
   };
   console.log(measurement);
   if (isLoading) {

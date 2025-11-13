@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -6,8 +6,8 @@ import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import {
-  Heart,
   Calendar,
   TrendingUp,
   BarChart3,
@@ -28,6 +28,10 @@ import {
 } from "@/utils/measurements";
 import { Measurement } from "@/types";
 import { Loader } from "@/components/ui/loader";
+import {
+  useMeasurementValue,
+  MeasurementValueResult,
+} from "@/hooks/useMeasurementValue";
 
 export default function MobileMeasurementDetailPage() {
   const { data: session } = useSession();
@@ -37,9 +41,56 @@ export default function MobileMeasurementDetailPage() {
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [leftStatus, setLeftStatus] = useState<string | null>(null);
-  const [rightStatus, setRightStatus] = useState<string | null>(null);
-  const [isPolling, setIsPolling] = useState(false);
+  const measurementId =
+    typeof id === "string" ? id : Array.isArray(id) ? id[0] : undefined;
+
+  const leftMeasurement = useMeasurementValue(measurementId, "left");
+  const rightMeasurement = useMeasurementValue(measurementId, "right");
+
+  const renderMeasurementValue = (info: MeasurementValueResult): ReactNode => {
+    switch (info.state) {
+      case "value":
+        return (
+          <div className="text-3xl font-bold text-text-primary">
+            {info.value?.toFixed(1)}{" "}
+            <span className="text-lg font-semibold">ml</span>
+          </div>
+        );
+      case "pending":
+      case "loading":
+        return (
+          <div className="flex flex-col items-center gap-2">
+            <Loader variant="spinner" size="sm" message="Przetwarzanie..." />
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="text-sm text-center text-red-600">
+            Przetwarzanie nie powiodło się
+          </div>
+        );
+      case "empty":
+        return (
+          <div className="text-sm text-center text-text-muted">Brak danych</div>
+        );
+      case "error":
+      default:
+        return (
+          <div className="text-sm text-center text-red-600">
+            {info.error || "Wystąpił problem z pobieraniem danych"}
+          </div>
+        );
+    }
+  };
+
+  const leftVolumeValue =
+    typeof measurement?.aiAnalysis?.leftVolumeMl === "number"
+      ? measurement.aiAnalysis.leftVolumeMl
+      : null;
+  const rightVolumeValue =
+    typeof measurement?.aiAnalysis?.rightVolumeMl === "number"
+      ? measurement.aiAnalysis.rightVolumeMl
+      : null;
 
   const isAdmin = session?.user?.role === "ADMIN";
   const measurementsListPath = isAdmin
@@ -54,10 +105,7 @@ export default function MobileMeasurementDetailPage() {
 
       // Resetuj stan przed pobraniem nowych danych
       setMeasurement(null);
-      setLeftStatus(null);
-      setRightStatus(null);
       setIsLoading(true);
-      setIsPolling(false);
 
       console.log(
         "🔄 [MEASUREMENT DETAIL] Rozpoczynam pobieranie danych dla ID:",
@@ -65,7 +113,6 @@ export default function MobileMeasurementDetailPage() {
       );
 
       // Zawsze pobierz świeże dane przy pierwszym wejściu
-      // fetchStatuses() zostanie wywołane PO zakończeniu fetchMeasurement
       fetchMeasurement(true);
     }
   }, [id, queryClient]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -77,14 +124,12 @@ export default function MobileMeasurementDetailPage() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         console.log("🔄 Odświeżanie pomiaru po powrocie do widoku");
-        // fetchStatuses() zostanie wywołane w fetchMeasurement po pobraniu danych
         fetchMeasurement(true); // Force refresh
       }
     };
 
     const handleFocus = () => {
       console.log("🔄 Odświeżanie pomiaru po focus");
-      // fetchStatuses() zostanie wywołane w fetchMeasurement po pobraniu danych
       fetchMeasurement(true); // Force refresh
     };
 
@@ -96,20 +141,6 @@ export default function MobileMeasurementDetailPage() {
       window.removeEventListener("focus", handleFocus);
     };
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!isPolling || !id) return;
-    console.log("🔄 [POLLING] Rozpoczynam polling dla measurement:", id);
-    const t = setInterval(() => {
-      console.log("🔄 [POLLING] Odświeżanie statusów i pomiaru");
-      fetchStatuses();
-      fetchMeasurement(false); // Nie force refresh podczas pollingu
-    }, 5000);
-    return () => {
-      console.log("🛑 [POLLING] Zatrzymuję polling");
-      clearInterval(t);
-    };
-  }, [isPolling, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchMeasurement = async (forceRefresh = false) => {
     if (!id) {
@@ -145,7 +176,6 @@ export default function MobileMeasurementDetailPage() {
         console.log(
           "🔄 [MEASUREMENT] Sprawdzam statusy LiDAR po pobraniu pomiaru"
         );
-        fetchStatuses();
 
         setIsLoading(false); // Ustaw false PO ustawieniu measurement i statusów
       } else {
@@ -224,14 +254,24 @@ export default function MobileMeasurementDetailPage() {
     if (!measurement) return;
 
     const aiAnalysis = measurement?.aiAnalysis;
-    const leftVolume = aiAnalysis?.leftVolumeMl || 0;
-    const rightVolume = aiAnalysis?.rightVolumeMl || 0;
+    const leftVolume =
+      leftMeasurement.value ??
+      (typeof aiAnalysis?.leftVolumeMl === "number"
+        ? aiAnalysis.leftVolumeMl
+        : null);
+    const rightVolume =
+      rightMeasurement.value ??
+      (typeof aiAnalysis?.rightVolumeMl === "number"
+        ? aiAnalysis.rightVolumeMl
+        : null);
 
     const shareData = {
       title: `Pomiar: ${measurement?.name}`,
-      text: `Pomiar piersi - Lewa: ${leftVolume.toFixed(
-        1
-      )}ml, Prawa: ${rightVolume.toFixed(1)}ml`,
+      text: `Pomiar piersi - Lewa: ${
+        leftVolume !== null ? `${leftVolume.toFixed(1)} ml` : "brak danych"
+      }, Prawa: ${
+        rightVolume !== null ? `${rightVolume.toFixed(1)} ml` : "brak danych"
+      }`,
       url: window.location.href,
     };
 
@@ -255,76 +295,6 @@ export default function MobileMeasurementDetailPage() {
     }
   };
 
-  const fetchStatuses = async () => {
-    const mid = Array.isArray(id) ? id[0] : (id as string);
-    if (!mid) {
-      console.warn("⚠️ [STATUS] Brak measurementId - pomijam fetchStatuses");
-      return;
-    }
-
-    console.log("📡 [STATUS] Rozpoczynam pobieranie statusów dla:", mid);
-
-    let newLeftStatus: string | null = null;
-    let newRightStatus: string | null = null;
-
-    try {
-      const l = await fetch(
-        `/api/lidar-capture/status?measurementId=${encodeURIComponent(
-          mid
-        )}&side=left`,
-        { cache: "no-store" }
-      );
-      if (l.ok) {
-        const d = await l.json();
-        newLeftStatus = d.status;
-        setLeftStatus(d.status);
-        console.log("✅ [STATUS] Left status:", d.status);
-      } else if (l.status === 404) {
-        console.log("ℹ️ [STATUS] Left - brak capture (404)");
-        setLeftStatus(null);
-      } else {
-        console.warn("⚠️ [STATUS] Left - błąd odpowiedzi:", l.status);
-      }
-    } catch (error) {
-      console.error("❌ [STATUS] Błąd pobierania statusu left:", error);
-      setLeftStatus(null);
-    }
-
-    try {
-      const r = await fetch(
-        `/api/lidar-capture/status?measurementId=${encodeURIComponent(
-          mid
-        )}&side=right`,
-        { cache: "no-store" }
-      );
-      if (r.ok) {
-        const d = await r.json();
-        newRightStatus = d.status;
-        setRightStatus(d.status);
-        console.log("✅ [STATUS] Right status:", d.status);
-      } else if (r.status === 404) {
-        console.log("ℹ️ [STATUS] Right - brak capture (404)");
-        setRightStatus(null);
-      } else {
-        console.warn("⚠️ [STATUS] Right - błąd odpowiedzi:", r.status);
-      }
-    } catch (error) {
-      console.error("❌ [STATUS] Błąd pobierania statusu right:", error);
-      setRightStatus(null);
-    }
-
-    // Użyj nowych wartości zamiast starych state'ów
-    const shouldPoll =
-      newLeftStatus === "PENDING" || newRightStatus === "PENDING";
-    setIsPolling(shouldPoll);
-
-    if (shouldPoll) {
-      console.log("🔄 [STATUS] Polling aktywny - statusy PENDING");
-    } else {
-      console.log("🛑 [STATUS] Polling zatrzymany - brak PENDING");
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("pl-PL", {
       day: "2-digit",
@@ -333,12 +303,6 @@ export default function MobileMeasurementDetailPage() {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getVolumeDifference = (left: number, right: number) => {
-    const diff = Math.abs(left - right);
-    const percentage = ((diff / Math.max(left, right)) * 100).toFixed(1);
-    return { diff, percentage };
   };
 
   // Najpierw sprawdź isLoading - jeśli ładuje, pokaż loader
@@ -359,7 +323,13 @@ export default function MobileMeasurementDetailPage() {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Heart className="h-8 w-8 text-red-600" />
+              <Image
+                src="/logo.png"
+                alt="BREVA"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain"
+              />
             </div>
             <h3 className="text-lg font-semibold text-text-primary mb-2">
               Pomiar nie został znaleziony
@@ -432,38 +402,15 @@ export default function MobileMeasurementDetailPage() {
                   <Target className="h-4 w-4 text-primary" />
                   <span>Lewa pierś (AI)</span>
                 </div>
-                {leftStatus === "FAILED" && (
+                {leftMeasurement.lastStatus === "FAILED" && (
                   <Badge variant="destructive" className="text-xs">
                     Błąd
                   </Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {leftStatus === "PENDING" && !aiAnalysis?.leftVolumeMl ? (
-                <div className="flex items-center">
-                  <Loader
-                    variant="default"
-                    size="sm"
-                    message=""
-                    className="mr-2"
-                  />
-                  <span>Przetwarzanie...</span>
-                </div>
-              ) : leftStatus === "FAILED" ? (
-                <div className="text-sm text-red-600">
-                  <p className="font-medium">Przetwarzanie nie powiodło się</p>
-                  <p className="text-xs text-text-muted mt-1">
-                    Wyślij skan ponownie
-                  </p>
-                </div>
-              ) : (
-                <p className="text-2xl font-bold text-text-primary">
-                  {aiAnalysis?.leftVolumeMl
-                    ? aiAnalysis?.leftVolumeMl?.toFixed(1) + " ml"
-                    : "Brak danych"}
-                </p>
-              )}
+            <CardContent className="min-h-[96px] flex items-center justify-center">
+              {renderMeasurementValue(leftMeasurement)}
             </CardContent>
           </Card>
           <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
@@ -473,38 +420,15 @@ export default function MobileMeasurementDetailPage() {
                   <Target className="h-4 w-4 text-primary" />
                   <span>Prawa pierś (AI)</span>
                 </div>
-                {rightStatus === "FAILED" && (
+                {rightMeasurement.lastStatus === "FAILED" && (
                   <Badge variant="destructive" className="text-xs">
                     Błąd
                   </Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              {rightStatus === "PENDING" && !aiAnalysis?.rightVolumeMl ? (
-                <div className="flex items-center">
-                  <Loader
-                    variant="default"
-                    size="sm"
-                    message=""
-                    className="mr-2"
-                  />
-                  <span>Przetwarzanie...</span>
-                </div>
-              ) : rightStatus === "FAILED" ? (
-                <div className="text-sm text-red-600">
-                  <p className="font-medium">Przetwarzanie nie powiodło się</p>
-                  <p className="text-xs text-text-muted mt-1">
-                    Wyślij skan ponownie
-                  </p>
-                </div>
-              ) : (
-                <p className="text-2xl font-bold text-text-primary">
-                  {aiAnalysis?.rightVolumeMl
-                    ? aiAnalysis?.rightVolumeMl?.toFixed(1) + " ml"
-                    : "Brak danych"}
-                </p>
-              )}
+            <CardContent className="min-h-[96px] flex items-center justify-center">
+              {renderMeasurementValue(rightMeasurement)}
             </CardContent>
           </Card>
         </div>

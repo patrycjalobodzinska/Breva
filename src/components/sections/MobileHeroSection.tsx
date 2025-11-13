@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, ArrowRight, Sparkles, Download } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Sparkles, Download } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { MobileLoginForm } from "@/components/mobile/MobileLoginForm";
@@ -57,7 +58,13 @@ export const MobileHeroSection = () => {
             <div className="flex z-10 flex-col ">
               <div className="text-center mt-10">
                 <div className="flex mt-6 items-center justify-center mb-1">
-                  <Heart className="h-20 w-20 text-primary" />
+                  <Image
+                    src="/logo.png"
+                    alt="BREVA"
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 object-contain"
+                  />
                 </div>
                 <h1 className="text-4xl font-bold text-text-primary  mb-4 w-full text-center">
                   Witaj w<span className=" text-primary"> Breva!</span>

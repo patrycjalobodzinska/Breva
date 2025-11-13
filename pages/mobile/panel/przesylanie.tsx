@@ -11,12 +11,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { useMeasurementDetail } from "@/hooks/useMeasurementDetail";
 import { Measurement } from "@/types";
 
+import Image from "next/image";
 import {
   AlertCircle,
   CheckCircle,
   Camera,
   Upload,
-  Heart,
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -255,7 +255,13 @@ export default function MobileUploadPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
-                  <Heart className="h-5 w-5 text-pink-600" />
+                  <Image
+                    src="/logo.png"
+                    alt="BREVA"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 object-contain"
+                  />
                 </div>
                 <div>
                   <h3 className="font-semibold text-text-primary">
@@ -340,7 +346,13 @@ export default function MobileUploadPage() {
             <CardContent className="p-4">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Heart className="h-5 w-5 text-blue-600" />
+                  <Image
+                    src="/logo.png"
+                    alt="BREVA"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 object-contain"
+                  />
                 </div>
                 <div>
                   <h3 className="font-semibold text-text-primary">

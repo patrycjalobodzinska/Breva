@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Orbitron } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,8 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, Upload, BarChart3, Shield, Users, Zap } from "lucide-react";
+import { Upload, BarChart3, Shield, Users, Zap } from "lucide-react";
 import { HeroSection } from "@/components/sections/HeroSection";
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["600"],
+});
 
 export default function Home() {
   return (
@@ -26,8 +32,12 @@ export default function Home() {
               height={100}
               className="h-16 w-16 object-contain"
             />
+            <span
+              className={`${orbitron.className} inline-block text-3xl lg:text-4xl text-text-primary tracking-[0.04em]`}>
+              BREVA
+            </span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-4">
             <Link href="/logowanie">
               <Button variant="outline" className="rounded-2xl">
                 Zaloguj się

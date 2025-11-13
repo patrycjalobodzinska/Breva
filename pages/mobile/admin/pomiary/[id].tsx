@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -54,10 +54,71 @@ export default function MeasurementDetailPage() {
     handleSaveEditManual,
     handleAddManual,
     handleDelete,
+    fetchMeasurement,
   } = useMeasurementDetail(router.query.id as string);
 
   const isAdmin = session?.user?.role === "ADMIN";
   const Layout = isAdmin ? AdminLayout : PanelLayout;
+
+  const [leftStatus, setLeftStatus] = useState<string | null>(null);
+  const [rightStatus, setRightStatus] = useState<string | null>(null);
+  const [isPolling, setIsPolling] = useState(false);
+
+  const fetchStatuses = useCallback(async () => {
+    const mid = router.query.id as string;
+    if (!mid) return;
+
+    const previousLeftStatus = leftStatus;
+    const previousRightStatus = rightStatus;
+
+    let newLeftStatus: string | null = null;
+    let newRightStatus: string | null = null;
+    let leftCompleted = false;
+    let rightCompleted = false;
+
+    try {
+      const l = await fetch(
+        `/api/lidar-capture/status?measurementId=${encodeURIComponent(mid)}&side=left`,
+        { cache: "no-store" }
+      );
+      if (l.ok) {
+        const d = await l.json();
+        newLeftStatus = d.status;
+        setLeftStatus(d.status);
+        if (d.status === "COMPLETED" && previousLeftStatus !== "COMPLETED") {
+          leftCompleted = true;
+        }
+      } else if (l.status === 404) {
+        setLeftStatus(null);
+      }
+    } catch {}
+
+    try {
+      const r = await fetch(
+        `/api/lidar-capture/status?measurementId=${encodeURIComponent(mid)}&side=right`,
+        { cache: "no-store" }
+      );
+      if (r.ok) {
+        const d = await r.json();
+        newRightStatus = d.status;
+        setRightStatus(d.status);
+        if (d.status === "COMPLETED" && previousRightStatus !== "COMPLETED") {
+          rightCompleted = true;
+        }
+      } else if (r.status === 404) {
+        setRightStatus(null);
+      }
+    } catch {}
+
+    const shouldPoll = newLeftStatus === "PENDING" || newRightStatus === "PENDING";
+    setIsPolling(shouldPoll);
+
+    if (leftCompleted || rightCompleted) {
+      queryClient.invalidateQueries({ queryKey: ["measurement", mid] });
+      queryClient.invalidateQueries({ queryKey: ["measurements"] });
+      await fetchMeasurement(true);
+    }
+  }, [leftStatus, rightStatus, router.query.id, queryClient, fetchMeasurement]);
 
   // Invaliduj cache React Query przy wejściu w widok
   useEffect(() => {
@@ -65,8 +126,17 @@ export default function MeasurementDetailPage() {
     if (id) {
       queryClient.invalidateQueries({ queryKey: ["measurement", id] });
       queryClient.invalidateQueries({ queryKey: ["measurements"] });
+      fetchStatuses();
     }
-  }, [router.query.id, queryClient]);
+  }, [router.query.id, queryClient, fetchStatuses]);
+
+  useEffect(() => {
+    if (!isPolling || !router.query.id) return;
+    const t = setInterval(() => {
+      fetchStatuses();
+    }, 5000);
+    return () => clearInterval(t);
+  }, [isPolling, router.query.id, fetchStatuses]);
 
   if (isLoading) {
     return (

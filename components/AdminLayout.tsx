@@ -7,14 +7,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  Heart,
-  Users,
-  BarChart3,
-  Settings,
-  LogOut,
-  Shield,
-} from "lucide-react";
+import { Users, BarChart3, Settings, LogOut, Shield } from "lucide-react";
 import { useEffect } from "react";
 
 const navigation = [
@@ -50,15 +43,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <div className="flex items-center justify-between">
             <Link href="/admin" className="flex items-center space-x-2">
               <Image
-                src="/logo.png"
+                src="/logoFull.png"
                 alt="BREVA Logo"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain"
+                width={160}
+                height={50}
+                className="h-10 w-auto object-contain"
               />
-              <span className="text-2xl font-bold text-text-primary">
-                BREVA
-              </span>
+
               <Badge variant="destructive" className="ml-2">
                 Admin
               </Badge>

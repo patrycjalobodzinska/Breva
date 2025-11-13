@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Heart, Upload, BarChart3, Settings, User } from "lucide-react";
+import { Upload, BarChart3, Settings, User } from "lucide-react";
 import { useEffect } from "react";
 // import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 

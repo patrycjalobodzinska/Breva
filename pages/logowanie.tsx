@@ -5,6 +5,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
+import { Orbitron } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,9 +15,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Heart, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { loginSchema, type LoginFormData } from "@/lib/validations";
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["600"],
+});
 
 export default function LoginPage() {
   const [formData, setFormData] = useState<LoginFormData>({
@@ -94,7 +100,10 @@ export default function LoginPage() {
               height={32}
               className="h-8 w-8 object-contain"
             />
-            <span className="text-2xl font-bold text-text-primary">BREVA</span>
+            <span
+              className={`${orbitron.className} text-2xl text-text-primary tracking-[0.2em] uppercase lg:text-3xl`}>
+              BREVA
+            </span>
           </div>
           <CardTitle className="text-2xl">Zaloguj się</CardTitle>
           <CardDescription>

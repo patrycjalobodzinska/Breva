@@ -1,4 +1,5 @@
-import { Heart, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
 
 interface LoaderProps {
   message?: string;
@@ -25,9 +26,15 @@ export function Loader({
     <div className={`flex items-center justify-center ${className}`}>
       <div className="text-center">
         {variant === "heart" ? (
-          <Heart
-            className={`${iconSize} text-primary mx-auto mb-4 animate-pulse`}
-          />
+          <div className={`${iconSize} mx-auto mb-4 animate-pulse`}>
+            <Image
+              src="/logo.png"
+              alt="BREVA"
+              width={size === "sm" ? 24 : size === "md" ? 48 : 64}
+              height={size === "sm" ? 24 : size === "md" ? 48 : 64}
+              className="w-full h-full object-contain"
+            />
+          </div>
         ) : variant === "spinner" ? (
           <Loader2
             className={`${iconSize} text-primary mx-auto mb-4 animate-spin`}

@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, BarChart3, Users, Shield, Settings, User } from "lucide-react";
+import { BarChart3, Users, Shield, Settings, User } from "lucide-react";
 import { useEffect } from "react";
 
 const navigation = [

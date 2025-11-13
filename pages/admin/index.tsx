@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 import Link from "next/link";
 import { Loader } from "@/components/ui/loader";
 
