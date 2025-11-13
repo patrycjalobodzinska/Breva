@@ -4,10 +4,16 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
+import { Orbitron } from "next/font/google";
 import { Button } from "@/components/ui/button";
 import { Upload, BarChart3, Settings, User } from "lucide-react";
 import { useEffect } from "react";
 // import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  weight: ["600"],
+});
 
 const navigation = [
   { name: "Pomiary", href: "/mobile/panel/pomiary", icon: BarChart3 },
@@ -50,6 +56,11 @@ export default function MobilePanelLayout({
                 height={28}
                 className="h-7 w-7 object-contain"
               />
+              <span
+                className={`${orbitron.className} text-2xl text-text-primary tracking-[0.2em] uppercase`}
+              >
+                BREVA
+              </span>
             </div>
             <Link href="/mobile/panel" className="flex items-center space-x-3">
               <User />

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 interface UseGetMeasurementsOptions {
   search?: string;
+  enabled?: boolean;
 }
 
 // Hook do pobierania listy pomiarów z paginacją
@@ -26,12 +27,15 @@ export function useGetMeasurements(
       }
       return response.data;
     },
-    enabled: true,
+    enabled: options?.enabled ?? true,
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
+    staleTime: 0,
   });
 }
 
 // Hook do pobierania pojedynczego pomiaru
-export function useGetMeasurement(id: string | undefined) {
+export function useGetMeasurement(id: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ["measurement", id],
     queryFn: async () => {
@@ -48,7 +52,10 @@ export function useGetMeasurement(id: string | undefined) {
       }
       return response.data;
     },
-    enabled: !!id,
+    enabled: enabled && !!id,
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
+    staleTime: 0,
   });
 }
 

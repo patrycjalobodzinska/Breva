@@ -254,7 +254,7 @@ export default function MobileUploadPage() {
           <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full border border-pink-500 flex items-center justify-center bg-white">
                   <Image
                     src="/logo.png"
                     alt="BREVA"
@@ -345,7 +345,7 @@ export default function MobileUploadPage() {
           <Card className="rounded-2xl bg-white/90 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-4">
               <div className="flex items-center space-x-3 mb-4">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <div className="w-10 h-10 rounded-full border border-blue-500 flex items-center justify-center bg-white">
                   <Image
                     src="/logo.png"
                     alt="BREVA"

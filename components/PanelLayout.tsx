@@ -76,8 +76,7 @@ export default function PanelLayout({ children }: PanelLayoutProps) {
                 className="h-10 w-10 object-contain"
               />
               <span
-                className={`${orbitron.className} hidden lg:inline-block text-lg text-text-primary tracking-[0.3em] uppercase`}
-              >
+                className={`${orbitron.className} hidden lg:inline-block text-lg text-text-primary tracking-[0.3em] uppercase`}>
                 BREVA
               </span>
             </Link>

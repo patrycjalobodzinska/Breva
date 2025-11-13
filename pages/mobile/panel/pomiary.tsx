@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,12 +12,15 @@ import { Loader } from "@/components/ui/loader";
 
 export default function MobileMeasurementsPage() {
   const router = useRouter();
+  const { status } = useSession();
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, refetch } = useGetMeasurements(currentPage, 10, {
     search: searchTerm,
+    enabled: status === "authenticated",
   });
+  console.log(data, isLoading);
   const measurements = data?.measurements || [];
 
   // Odśwież dane po powrocie do widoku (np. po edycji)

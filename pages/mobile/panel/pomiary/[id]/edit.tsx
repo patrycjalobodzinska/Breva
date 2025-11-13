@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
@@ -11,6 +11,11 @@ import { ArrowLeft, Save, X, Edit3 } from "lucide-react";
 import { toast } from "sonner";
 import { useMeasurementDetail } from "@/hooks/useMeasurementDetail";
 import { Measurement } from "@/types";
+import { Loader } from "@/components/ui/loader";
+import {
+  useMeasurementValue,
+  MeasurementValueResult,
+} from "@/hooks/useMeasurementValue";
 
 interface LidarStatus {
   status: "PENDING" | "COMPLETED" | "FAILED";
@@ -29,6 +34,47 @@ export default function MobileMeasurementEditPage() {
   const [leftStatus, setLeftStatus] = useState<LidarStatus | null>(null);
   const [rightStatus, setRightStatus] = useState<LidarStatus | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const measurementId =
+    typeof id === "string" ? id : Array.isArray(id) ? id[0] : undefined;
+
+  const leftMeasurement = useMeasurementValue(measurementId, "left");
+  const rightMeasurement = useMeasurementValue(measurementId, "right");
+
+  const renderMeasurementValue = (
+    info: MeasurementValueResult
+  ): ReactNode => {
+    switch (info.state) {
+      case "value":
+        return (
+          <div className="text-lg font-bold text-text-primary">
+            {info.value?.toFixed(1)} ml
+          </div>
+        );
+      case "pending":
+      case "loading":
+        return (
+          <div className="flex flex-col items-center gap-1">
+            <Loader variant="spinner" size="sm" message="" />
+            <span className="text-xs text-text-muted">Przetwarzanie...</span>
+          </div>
+        );
+      case "failed":
+        return (
+          <div className="text-sm text-red-600 font-medium">
+            Przetwarzanie nie powiodło się
+          </div>
+        );
+      case "empty":
+        return <div className="text-sm text-text-muted">Brak danych</div>;
+      case "error":
+      default:
+        return (
+          <div className="text-sm text-red-600">
+            {info.error || "Błąd pobierania danych"}
+          </div>
+        );
+    }
+  };
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -212,6 +258,12 @@ export default function MobileMeasurementEditPage() {
     if (leftCompleted || rightCompleted) {
       console.log("🔄 [STATUS] Odświeżanie danych pomiaru po zakończeniu przetwarzania");
       await fetchMeasurement(true);
+      if (leftCompleted) {
+        leftMeasurement.refresh();
+      }
+      if (rightCompleted) {
+        rightMeasurement.refresh();
+      }
     }
   };
   console.log(measurement);
@@ -313,17 +365,12 @@ export default function MobileMeasurementEditPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center">
-                <div className="text-lg font-bold text-text-primary">
-                  {measurement?.aiAnalysis?.leftVolumeMl?.toFixed(1) ?? "0.0"}ml
-                </div>
+              <div className="text-center flex flex-col items-center gap-1">
+                {renderMeasurementValue(leftMeasurement)}
                 <div className="text-sm text-text-muted">Lewa pierś</div>
               </div>
-              <div className="text-center">
-                <div className="text-lg font-bold text-text-primary">
-                  {measurement?.aiAnalysis?.rightVolumeMl?.toFixed(1) ?? "0.0"}
-                  ml
-                </div>
+              <div className="text-center flex flex-col items-center gap-1">
+                {renderMeasurementValue(rightMeasurement)}
                 <div className="text-sm text-text-muted">Prawa pierś</div>
               </div>
             </div>
