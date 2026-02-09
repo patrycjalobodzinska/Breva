@@ -198,8 +198,15 @@ export default function MobileMeasurementDetailPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!measurement) return;
+  const handleDelete = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    if (e) {
+      e.stopPropagation();
+    }
+
+    if (!measurement || !id) {
+      toast.error("Brak danych pomiaru do usunięcia");
+      return;
+    }
 
     if (!confirm("Czy na pewno chcesz usunąć ten pomiar?")) {
       return;
@@ -215,9 +222,11 @@ export default function MobileMeasurementDetailPage() {
         toast.success("Pomiar został usunięty");
         router.push(measurementsListPath);
       } else {
-        toast.error("Nie udało się usunąć pomiaru");
+        const errorData = await response.json().catch(() => ({}));
+        toast.error(errorData.error || "Nie udało się usunąć pomiaru");
       }
     } catch (error) {
+      console.error("Error deleting measurement:", error);
       toast.error("Wystąpił błąd podczas usuwania pomiaru");
     } finally {
       setIsDeleting(false);
@@ -493,9 +502,10 @@ export default function MobileMeasurementDetailPage() {
             Edytuj
           </Button>
           <Button
+            type="button"
             variant="outline"
             onClick={handleDelete}
-            disabled={isDeleting}
+            disabled={isDeleting || !measurement || !id}
             className="flex-1 rounded-xl text-red-600 border-red-200 hover:bg-red-50">
             {isDeleting ? (
               <>

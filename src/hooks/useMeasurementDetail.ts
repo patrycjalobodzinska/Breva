@@ -203,7 +203,10 @@ export const useMeasurementDetail = (measurementId: string) => {
   };
 
   const handleDelete = async () => {
-    if (!measurement) return;
+    if (!measurement || !measurement.id) {
+      toast.error("Brak danych pomiaru do usunięcia");
+      return;
+    }
 
     if (
       !confirm(
@@ -214,7 +217,7 @@ export const useMeasurementDetail = (measurementId: string) => {
     }
 
     try {
-      const response = await fetch(`/api/measurements/${measurement?.id}`, {
+      const response = await fetch(`/api/measurements/${measurement.id}`, {
         method: "DELETE",
       });
 
@@ -223,10 +226,11 @@ export const useMeasurementDetail = (measurementId: string) => {
         const isAdmin = session?.user?.role === "ADMIN";
         router.push(isAdmin ? "/admin/pomiary" : "/panel/pomiary");
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Wystąpił błąd podczas usuwania pomiaru");
+        const errorData = await response.json().catch(() => ({}));
+        toast.error(errorData.error || "Nie udało się usunąć pomiaru");
       }
     } catch (error) {
+      console.error("Error deleting measurement:", error);
       toast.error("Wystąpił błąd podczas usuwania pomiaru");
     }
   };
