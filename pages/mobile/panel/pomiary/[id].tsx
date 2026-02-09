@@ -6,6 +6,14 @@ import MobilePanelLayout from "@/components/layout/MobilePanelLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import {
   Calendar,
@@ -41,6 +49,7 @@ export default function MobileMeasurementDetailPage() {
   const [measurement, setMeasurement] = useState<Measurement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const measurementId =
     typeof id === "string" ? id : Array.isArray(id) ? id[0] : undefined;
 
@@ -198,7 +207,7 @@ export default function MobileMeasurementDetailPage() {
     }
   };
 
-  const handleDelete = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDeleteClick = (e?: React.MouseEvent<HTMLButtonElement>) => {
     if (e) {
       e.stopPropagation();
     }
@@ -208,7 +217,11 @@ export default function MobileMeasurementDetailPage() {
       return;
     }
 
-    if (!confirm("Czy na pewno chcesz usunąć ten pomiar?")) {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!measurement || !id) {
       return;
     }
 
@@ -220,6 +233,7 @@ export default function MobileMeasurementDetailPage() {
 
       if (response.ok) {
         toast.success("Pomiar został usunięty");
+        setDeleteDialogOpen(false);
         router.push(measurementsListPath);
       } else {
         const errorData = await response.json().catch(() => ({}));
@@ -503,7 +517,7 @@ export default function MobileMeasurementDetailPage() {
           </Button>
           <Button
             variant="outline"
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={isDeleting}
             className="flex-1 rounded-xl text-red-600 border-red-200 hover:bg-red-50">
             {isDeleting ? (
@@ -524,6 +538,36 @@ export default function MobileMeasurementDetailPage() {
             )}
           </Button>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent className="rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Usuń pomiar</DialogTitle>
+              <DialogDescription>
+                Czy na pewno chcesz usunąć pomiar{" "}
+                <strong>{measurement?.name}</strong>? Ta akcja jest nieodwracalna
+                i spowoduje usunięcie wszystkich powiązanych danych.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+                disabled={isDeleting}
+                className="rounded-xl">
+                Anuluj
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                className="rounded-xl">
+                {isDeleting ? "Usuwanie..." : "Usuń"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </MobilePanelLayout>
   );

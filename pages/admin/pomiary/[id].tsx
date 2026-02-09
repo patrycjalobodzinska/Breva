@@ -12,6 +12,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ArrowLeft, BarChart3, Target, TrendingUp } from "lucide-react";
 import PanelLayout from "@/components/PanelLayout";
 import AdminLayout from "@/components/AdminLayout";
@@ -62,6 +70,7 @@ export default function MeasurementDetailPage() {
   const [leftStatus, setLeftStatus] = useState<string | null>(null);
   const [rightStatus, setRightStatus] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const fetchStatuses = useCallback(async () => {
     const mid = router.query.id as string;
@@ -313,6 +322,37 @@ export default function MeasurementDetailPage() {
             </Card>
           </div>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <DialogContent className="rounded-2xl">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Usuń pomiar</DialogTitle>
+              <DialogDescription>
+                Czy na pewno chcesz usunąć pomiar{" "}
+                <strong>{measurement?.name}</strong>? Ta akcja jest nieodwracalna
+                i spowoduje usunięcie wszystkich powiązanych danych.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setDeleteDialogOpen(false)}
+                className="rounded-2xl">
+                Anuluj
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  setDeleteDialogOpen(false);
+                  handleDelete();
+                }}
+                className="rounded-2xl">
+                Usuń
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

@@ -208,14 +208,6 @@ export const useMeasurementDetail = (measurementId: string) => {
       return;
     }
 
-    if (
-      !confirm(
-        "Czy na pewno chcesz usunąć ten pomiar? Ta operacja jest nieodwracalna."
-      )
-    ) {
-      return;
-    }
-
     try {
       const response = await fetch(`/api/measurements/${measurement.id}`, {
         method: "DELETE",
