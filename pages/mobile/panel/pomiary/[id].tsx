@@ -502,7 +502,6 @@ export default function MobileMeasurementDetailPage() {
             Edytuj
           </Button>
           <Button
-            type="button"
             variant="outline"
             onClick={handleDelete}
             disabled={isDeleting}
