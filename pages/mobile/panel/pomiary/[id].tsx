@@ -505,7 +505,7 @@ export default function MobileMeasurementDetailPage() {
             type="button"
             variant="outline"
             onClick={handleDelete}
-            disabled={isDeleting || !measurement || !id}
+            disabled={isDeleting}
             className="flex-1 rounded-xl text-red-600 border-red-200 hover:bg-red-50">
             {isDeleting ? (
               <>
