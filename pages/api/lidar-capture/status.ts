@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -55,32 +55,50 @@ export default async function handler(
     // Jeśli status jest PENDING, sprawdź aktualny status w Python API
     if (lidarCapture.status === "PENDING") {
       try {
-        const backendUrl = process.env.BACKEND_URL || 'https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net';
+        const backendUrl =
+          process.env.BACKEND_URL || "https://breavabackend.reliefy.doctor";
 
-        console.log(`📡 Sprawdzanie statusu w Python API: requestId=${lidarCapture.requestId}`);
+        console.log(
+          `📡 Sprawdzanie statusu w Python API: requestId=${lidarCapture.requestId}`,
+        );
 
         const pythonResponse = await fetch(
           `${backendUrl}/volume-estimation/${lidarCapture.requestId}`,
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Content-Type': 'application/json',
-            }
-          }
+              "Content-Type": "application/json",
+            },
+          },
         );
 
         console.log(`📡 Python Status Response Status:`, pythonResponse.status);
-        console.log(`📡 Python Status Response Headers:`, Object.fromEntries(pythonResponse.headers.entries()));
+        console.log(
+          `📡 Python Status Response Headers:`,
+          Object.fromEntries(pythonResponse.headers.entries()),
+        );
 
         if (pythonResponse.ok) {
           const pythonData = await pythonResponse.json();
-          console.log(`✅ Python API response:`, JSON.stringify(pythonData, null, 2));
-          console.log(`✅ Python API response - request_id:`, pythonData.request_id);
+          console.log(
+            `✅ Python API response:`,
+            JSON.stringify(pythonData, null, 2),
+          );
+          console.log(
+            `✅ Python API response - request_id:`,
+            pythonData.request_id,
+          );
           console.log(`✅ Python API response - status:`, pythonData.status);
-          console.log(`✅ Python API response - estimated_volume:`, pythonData.estimated_volume);
+          console.log(
+            `✅ Python API response - estimated_volume:`,
+            pythonData.estimated_volume,
+          );
 
           // Zaktualizuj status w bazie jeśli się zmienił
-          if (pythonData.status === "completed" && pythonData.estimated_volume) {
+          if (
+            pythonData.status === "completed" &&
+            pythonData.estimated_volume
+          ) {
             // Python API zwraca objętość w mm³, konwertujemy na ml (dzielenie przez 1000)
             const estimatedVolumeMl = pythonData.estimated_volume / 1000;
 
@@ -109,7 +127,9 @@ export default async function handler(
                 data: updateData,
               });
             } else {
-              const createData: any = { aiMeasurementId: measurementId as string };
+              const createData: any = {
+                aiMeasurementId: measurementId as string,
+              };
               createData[`${sideKey}VolumeMl`] = estimatedVolumeMl;
               createData[`${sideKey}Confidence`] = 0.95;
 
@@ -118,7 +138,9 @@ export default async function handler(
               });
             }
 
-            console.log(`✅ Status zaktualizowany: COMPLETED, volume=${estimatedVolumeMl}ml`);
+            console.log(
+              `✅ Status zaktualizowany: COMPLETED, volume=${estimatedVolumeMl}ml`,
+            );
 
             return res.status(200).json({
               requestId: lidarCapture.requestId,

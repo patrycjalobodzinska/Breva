@@ -9,21 +9,21 @@ Backend Python oczekuje następującej struktury JSON:
 ```typescript
 interface VolumeEstimationRequest {
   background: {
-    depth: string;        // Base64 encoded depth map (uint16 array)
-    timestamp: string;   // ISO 8601 timestamp
+    depth: string; // Base64 encoded depth map (uint16 array)
+    timestamp: string; // ISO 8601 timestamp
   };
   object: {
-    depth: string;        // Base64 encoded depth map (uint16 array)
-    mask: string;         // JSON string z tablicą punktów [{"x": number, "y": number}, ...]
-    timestamp: string;    // ISO 8601 timestamp
+    depth: string; // Base64 encoded depth map (uint16 array)
+    mask: string; // JSON string z tablicą punktów [{"x": number, "y": number}, ...]
+    timestamp: string; // ISO 8601 timestamp
   };
   camera_intrinsics: {
-    fx: number;          // Horizontal focal length
-    fy: number;          // Vertical focal length
-    cx: number;          // Principal point x
-    cy: number;          // Principal point y
-    width: number;       // Image width in pixels
-    height: number;      // Image height in pixels
+    fx: number; // Horizontal focal length
+    fy: number; // Vertical focal length
+    cx: number; // Principal point x
+    cy: number; // Principal point y
+    width: number; // Image width in pixels
+    height: number; // Image height in pixels
   };
   metadata: {
     device_model: string; // Np. "Intel RealSense D435i"
@@ -269,7 +269,7 @@ service.sendVolumeEstimation(
 Utwórz plik `pages/api/volume-estimation/index.ts` (lub `app/api/volume-estimation/route.ts` dla App Router):
 
 ```typescript
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from "next";
 
 interface VolumeEstimationRequest {
   background: {
@@ -302,10 +302,10 @@ interface VolumeEstimationResponse {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<VolumeEstimationResponse | { error: string }>
+  res: NextApiResponse<VolumeEstimationResponse | { error: string }>,
 ) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
 
   try {
@@ -314,52 +314,54 @@ export default async function handler(
 
     // Sprawdź wymagane pola
     if (!data.background?.depth || !data.background?.timestamp) {
-      return res.status(400).json({ error: 'Missing background data' });
+      return res.status(400).json({ error: "Missing background data" });
     }
 
     if (!data.object?.depth || !data.object?.mask || !data.object?.timestamp) {
-      return res.status(400).json({ error: 'Missing object data' });
+      return res.status(400).json({ error: "Missing object data" });
     }
 
     if (!data.camera_intrinsics || !data.metadata) {
-      return res.status(400).json({ error: 'Missing camera intrinsics or metadata' });
+      return res
+        .status(400)
+        .json({ error: "Missing camera intrinsics or metadata" });
     }
 
     // Walidacja mask - sprawdź czy to poprawny JSON
     try {
       const maskPoints = JSON.parse(data.object.mask);
       if (!Array.isArray(maskPoints) || maskPoints.length === 0) {
-        return res.status(400).json({ error: 'Invalid mask format' });
+        return res.status(400).json({ error: "Invalid mask format" });
       }
     } catch {
-      return res.status(400).json({ error: 'Invalid mask JSON format' });
+      return res.status(400).json({ error: "Invalid mask JSON format" });
     }
 
     // Wyślij do backendu Python
-    const backendUrl = process.env.BACKEND_URL || 'https://your-backend-url.com';
+    const backendUrl =
+      process.env.BACKEND_URL || "https://your-backend-url.com";
     const response = await fetch(`${backendUrl}/enqueue-volume-estimation`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Backend error:', errorText);
+      console.error("Backend error:", errorText);
       return res.status(response.status).json({
-        error: `Backend error: ${response.statusText}`
+        error: `Backend error: ${response.statusText}`,
       });
     }
 
     const result: VolumeEstimationResponse = await response.json();
     return res.status(200).json(result);
-
   } catch (error) {
-    console.error('Error processing request:', error);
+    console.error("Error processing request:", error);
     return res.status(500).json({
-      error: 'Internal server error'
+      error: "Internal server error",
     });
   }
 }
@@ -370,7 +372,7 @@ export default async function handler(
 Jeśli używasz App Router, utwórz `app/api/volume-estimation/route.ts`:
 
 ```typescript
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
@@ -379,15 +381,15 @@ export async function POST(request: NextRequest) {
     // Walidacja danych (tak jak powyżej)
     if (!data.background?.depth || !data.background?.timestamp) {
       return NextResponse.json(
-        { error: 'Missing background data' },
-        { status: 400 }
+        { error: "Missing background data" },
+        { status: 400 },
       );
     }
 
     if (!data.object?.depth || !data.object?.mask || !data.object?.timestamp) {
       return NextResponse.json(
-        { error: 'Missing object data' },
-        { status: 400 }
+        { error: "Missing object data" },
+        { status: 400 },
       );
     }
 
@@ -396,23 +398,24 @@ export async function POST(request: NextRequest) {
       const maskPoints = JSON.parse(data.object.mask);
       if (!Array.isArray(maskPoints) || maskPoints.length === 0) {
         return NextResponse.json(
-          { error: 'Invalid mask format' },
-          { status: 400 }
+          { error: "Invalid mask format" },
+          { status: 400 },
         );
       }
     } catch {
       return NextResponse.json(
-        { error: 'Invalid mask JSON format' },
-        { status: 400 }
+        { error: "Invalid mask JSON format" },
+        { status: 400 },
       );
     }
 
     // Wyślij do backendu Python
-    const backendUrl = process.env.BACKEND_URL || 'https://your-backend-url.com';
+    const backendUrl =
+      process.env.BACKEND_URL || "https://your-backend-url.com";
     const response = await fetch(`${backendUrl}/enqueue-volume-estimation`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
@@ -421,18 +424,17 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text();
       return NextResponse.json(
         { error: `Backend error: ${response.statusText}` },
-        { status: response.status }
+        { status: response.status },
       );
     }
 
     const result = await response.json();
     return NextResponse.json(result);
-
   } catch (error) {
-    console.error('Error processing request:', error);
+    console.error("Error processing request:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+      { error: "Internal server error" },
+      { status: 500 },
     );
   }
 }
@@ -483,13 +485,13 @@ export interface MaskPoint {
 Utwórz `utils/validation.ts`:
 
 ```typescript
-import { VolumeEstimationRequest, MaskPoint } from '@/types/volume-estimation';
+import { VolumeEstimationRequest, MaskPoint } from "@/types/volume-estimation";
 
 export function validateVolumeEstimationRequest(
-  data: any
+  data: any,
 ): data is VolumeEstimationRequest {
   // Sprawdź strukturę
-  if (!data || typeof data !== 'object') {
+  if (!data || typeof data !== "object") {
     return false;
   }
 
@@ -505,18 +507,23 @@ export function validateVolumeEstimationRequest(
 
   // Camera intrinsics
   const ci = data.camera_intrinsics;
-  if (!ci ||
-      typeof ci.fx !== 'number' ||
-      typeof ci.fy !== 'number' ||
-      typeof ci.cx !== 'number' ||
-      typeof ci.cy !== 'number' ||
-      typeof ci.width !== 'number' ||
-      typeof ci.height !== 'number') {
+  if (
+    !ci ||
+    typeof ci.fx !== "number" ||
+    typeof ci.fy !== "number" ||
+    typeof ci.cx !== "number" ||
+    typeof ci.cy !== "number" ||
+    typeof ci.width !== "number" ||
+    typeof ci.height !== "number"
+  ) {
     return false;
   }
 
   // Metadata
-  if (!data.metadata?.device_model || typeof data.metadata.device_model !== 'string') {
+  if (
+    !data.metadata?.device_model ||
+    typeof data.metadata.device_model !== "string"
+  ) {
     return false;
   }
 
@@ -529,7 +536,7 @@ export function validateVolumeEstimationRequest(
 
     // Sprawdź strukturę punktów
     for (const point of maskPoints) {
-      if (typeof point.x !== 'number' || typeof point.y !== 'number') {
+      if (typeof point.x !== "number" || typeof point.y !== "number") {
         return false;
       }
     }
@@ -546,16 +553,16 @@ export function validateVolumeEstimationRequest(
 Dodaj do `.env.local`:
 
 ```env
-BACKEND_URL=https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net
+BACKEND_URL=https://breavabackend.reliefy.doctor
 ```
 
 ### 6. Przykład użycia z frontendu Next.js
 
 ```typescript
 // components/VolumeEstimationForm.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useState } from "react";
 
 export default function VolumeEstimationForm() {
   const [loading, setLoading] = useState(false);
@@ -564,22 +571,22 @@ export default function VolumeEstimationForm() {
   const handleSubmit = async (data: VolumeEstimationRequest) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/volume-estimation', {
-        method: 'POST',
+      const response = await fetch("/api/volume-estimation", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send request');
+        throw new Error("Failed to send request");
       }
 
       const result = await response.json();
       setResult(result);
     } catch (error) {
-      console.error('Error:', error);
+      console.error("Error:", error);
     } finally {
       setLoading(false);
     }
@@ -635,17 +642,17 @@ print("Mask JSON: \(maskJSON)")
 
 ```typescript
 // W API route, przed wysłaniem do backendu:
-console.log('Received data:', {
+console.log("Received data:", {
   background: {
     depthLength: data.background.depth.length,
-    timestamp: data.background.timestamp
+    timestamp: data.background.timestamp,
   },
   object: {
     depthLength: data.object.depth.length,
     maskLength: data.object.mask.length,
-    timestamp: data.object.timestamp
+    timestamp: data.object.timestamp,
   },
   cameraIntrinsics: data.camera_intrinsics,
-  metadata: data.metadata
+  metadata: data.metadata,
 });
 ```

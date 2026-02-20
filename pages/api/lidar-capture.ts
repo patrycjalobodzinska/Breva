@@ -51,7 +51,7 @@ interface VolumeEstimationStatus {
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
 ) {
   // Obsługa CORS preflight (OPTIONS)
   if (req.method === "OPTIONS") {
@@ -59,7 +59,7 @@ export default async function handler(
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Cookie, Authorization"
+      "Content-Type, Cookie, Authorization",
     );
     return res.status(200).end();
   }
@@ -153,7 +153,7 @@ export default async function handler(
 
         if (
           Object.values(parsedReferencePoint).every(
-            (value) => typeof value === "number" && !Number.isNaN(value)
+            (value) => typeof value === "number" && !Number.isNaN(value),
           )
         ) {
           normalizedReferencePoint = JSON.stringify(parsedReferencePoint);
@@ -188,7 +188,7 @@ export default async function handler(
 
     console.log(
       "📥 [LIDAR CAPTURE API] Original body keys:",
-      Object.keys(requestBody)
+      Object.keys(requestBody),
     );
     console.log("📥 [LIDAR CAPTURE API] Normalized body:", {
       side: normalizedBody.side,
@@ -236,7 +236,7 @@ export default async function handler(
     if (data.object.reference_point) {
       console.log(
         "📍 Reference Point (JSON string):",
-        data.object.reference_point
+        data.object.reference_point,
       );
       try {
         const parsedRef = JSON.parse(data.object.reference_point);
@@ -273,8 +273,7 @@ export default async function handler(
 
     // Wyślij do backendu Python
     const backendUrl =
-      process.env.BACKEND_URL ||
-      "https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net";
+      process.env.BACKEND_URL || "https://breavabackend.reliefy.doctor";
 
     console.log("📤 Sending to Python backend:", backendUrl);
     console.log("📤 Python Payload structure:", {
@@ -295,13 +294,13 @@ export default async function handler(
           "Content-Type": "application/json",
         },
         body: JSON.stringify(pythonPayload),
-      }
+      },
     );
 
     console.log("📡 Python Response Status:", pythonResponse.status);
     console.log(
       "📡 Python Response Headers:",
-      Object.fromEntries(pythonResponse.headers.entries())
+      Object.fromEntries(pythonResponse.headers.entries()),
     );
 
     if (!pythonResponse.ok) {
@@ -309,7 +308,7 @@ export default async function handler(
       console.error(
         "❌ Python Backend Error:",
         pythonResponse.status,
-        errorText
+        errorText,
       );
       console.error("❌ Python Error Response Body:", errorText);
 
@@ -332,11 +331,11 @@ export default async function handler(
     const pythonResult = await pythonResponse.json();
     console.log(
       "✅ Python Backend response:",
-      JSON.stringify(pythonResult, null, 2)
+      JSON.stringify(pythonResult, null, 2),
     );
     console.log(
       "✅ Python Backend response - request_id:",
-      pythonResult.request_id
+      pythonResult.request_id,
     );
     console.log("✅ Python Backend response - status:", pythonResult.status);
     console.log("✅ Python Backend response - message:", pythonResult.message);
@@ -361,7 +360,7 @@ export default async function handler(
     pollVolumeEstimation(
       pythonResult.request_id,
       data.measurementId,
-      data.side
+      data.side,
     );
 
     const response = {
@@ -422,16 +421,15 @@ export default async function handler(
 async function pollVolumeEstimation(
   requestId: number,
   measurementId: string,
-  side: string
+  side: string,
 ) {
   const pythonApiUrl =
-    process.env.BACKEND_URL ||
-    "https://breva-ai-dvf4dcgrcag9fvff.polandcentral-01.azurewebsites.net";
+    process.env.BACKEND_URL || "https://breavabackend.reliefy.doctor";
   const maxAttempts = 60; // 5 minut z interwałem 5 sekund
   let attempts = 0;
 
   console.log(
-    `🔄 [POLLING] Start polling dla requestId=${requestId}, pythonApiUrl=${pythonApiUrl}`
+    `🔄 [POLLING] Start polling dla requestId=${requestId}, pythonApiUrl=${pythonApiUrl}`,
   );
 
   const pollInterval = setInterval(async () => {
@@ -440,7 +438,7 @@ async function pollVolumeEstimation(
 
       const statusUrl = `${pythonApiUrl}/volume-estimation/${requestId}`;
       console.log(
-        `🔍 [POLLING] Attempt ${attempts}/${maxAttempts}: Checking ${statusUrl}`
+        `🔍 [POLLING] Attempt ${attempts}/${maxAttempts}: Checking ${statusUrl}`,
       );
 
       const statusResponse = await fetch(statusUrl, {
@@ -452,11 +450,11 @@ async function pollVolumeEstimation(
 
       if (!statusResponse.ok) {
         console.error(
-          `❌ [POLLING] Failed to fetch status for request ${requestId}: ${statusResponse.status} ${statusResponse.statusText}`
+          `❌ [POLLING] Failed to fetch status for request ${requestId}: ${statusResponse.status} ${statusResponse.statusText}`,
         );
         if (attempts >= maxAttempts) {
           console.error(
-            `❌ [POLLING] Max attempts reached for requestId=${requestId}, marking as FAILED`
+            `❌ [POLLING] Max attempts reached for requestId=${requestId}, marking as FAILED`,
           );
           clearInterval(pollInterval);
           await updateCaptureStatus(requestId, "FAILED");
@@ -470,7 +468,7 @@ async function pollVolumeEstimation(
         {
           status: statusData.status,
           estimated_volume: statusData.estimated_volume,
-        }
+        },
       );
 
       // Konwersja snake_case → uppercase dla Prisma enum
@@ -490,12 +488,12 @@ async function pollVolumeEstimation(
         await saveVolumeResult(measurementId, side, estimatedVolume);
         clearInterval(pollInterval);
         console.log(
-          `✅ [POLLING] Volume estimation completed for ${side} breast: ${estimatedVolume}ml`
+          `✅ [POLLING] Volume estimation completed for ${side} breast: ${estimatedVolume}ml`,
         );
       } else if (normalizedStatus === "FAILED" || attempts >= maxAttempts) {
         clearInterval(pollInterval);
         console.log(
-          `❌ [POLLING] Volume estimation failed for request ${requestId}, status=${normalizedStatus}`
+          `❌ [POLLING] Volume estimation failed for request ${requestId}, status=${normalizedStatus}`,
         );
       }
     } catch (error) {
@@ -512,7 +510,7 @@ async function pollVolumeEstimation(
 async function updateCaptureStatus(
   requestId: number,
   status: string,
-  estimatedVolume?: number
+  estimatedVolume?: number,
 ) {
   try {
     await prisma.lidarCapture?.updateMany({
@@ -532,7 +530,7 @@ async function updateCaptureStatus(
 async function saveVolumeResult(
   measurementId: string,
   side: string,
-  volume: number
+  volume: number,
 ) {
   try {
     // Upewnij się że side jest lowercase dla kluczy bazy danych
